@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <cassert>
 #include <map>
 
 static int num_search = 0;
@@ -41,6 +42,24 @@ CSP make_csp(const std::string& s, const std::vector<Domain>& d, const std::vect
     csp.constraints = c;
     csp.degrees = std::vector<int>(csp.domains.size(), 0);
     return csp;
+}
+
+bool satisfies(const CSP& csp, const Assignment& assignment) {
+    for(auto& kv : assignment) {
+        int variable = kv.first;
+        int value = kv.second;
+       
+        assert(contains(csp.domains[variable], value));
+
+        for(int i=0; i<csp.constraints.size(); i++) {
+            auto constraint = csp.constraints[i];
+            if(not constraint.eval(assignment)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 void add_contstraint(CSP& csp, const Constraint& c) {
@@ -100,39 +119,18 @@ Constraint equal(int v0, int v1, const std::string& name = "") {
     return c;
 }
 
-Constraint equal_constant(int v0, int val) {
-    Constraint c;
-    c.variables = {v0};
-    c.eval = [v0, val](const Assignment& asg) {
-        if(asg.count(v0) and asg.at(v0) != val)
-            return false;
+// Constraint equal_constant(int v0, int val) {
+//     Constraint c;
+//     c.variables = {v0};
+//     c.eval = [v0, val](const Assignment& asg) {
+//         if(asg.count(v0) and asg.at(v0) != val)
+//             return false;
 
-        return true;
-    };
-    return c;
-}
+//         return true;
+//     };
+//     return c;
+// }
 
-
-
-
-bool satisfies(const CSP& csp, const Assignment& assignment) {
-    for(auto& kv : assignment) {
-        int variable = kv.first;
-        int value = kv.second;
-       
-        if(not contains(csp.domains[variable], value))
-            return false;
-
-        for(int i=0; i<csp.constraints.size(); i++) {
-            auto constraint = csp.constraints[i];
-            if(not constraint.eval(assignment)) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
 
 bool remove_values(CSP& csp, int v, const Constraint& c) {
     bool removed = false;
@@ -248,57 +246,57 @@ int choose_variable(const CSP& csp, const Assignment& asg) {
 
 void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
 
-bool search(CSP csp, Assignment& asg, int backtrack) {
+bool search(const CSP& csp, Assignment& A, const std::vector<Domain>& D, int depth) {
     #ifdef PRINT_SEARCH
-    print(asg, backtrack);
+    print(A, depth);
+    // printf("A size %d\n", A.size());
     #endif
     num_search += 1;
 
-    printf("asg size %d\n", asg.size());
 
     // If assignment is complete, return.
-    if(asg.size() == csp.domains.size()) {
+    if(A.size() == csp.domains.size()) {
         return true;
     }
 
-    int variable = choose_variable(csp, asg); // Minimum Remaining Value, then Max Degree (fail first)
+    int variable = choose_variable(csp, A); // Minimum Remaining Value, then Max Degree (fail first)
+    assert(D[variable].size() > 0);
 
-    for(int val : csp.domains[variable]) {
-        asg[variable] = val;
+    for(int val : D[variable]) {
+        A[variable] = val;
 
         // If new assignment does not satisfies constraints, continue.
-        if(not satisfies(csp, asg)) {
-            asg.erase(variable);
+        if(not satisfies(csp, A)) {
+            A.erase(variable);
             continue;
         }
 
-        /*if(not gac3(csp, asg)) {
-            asg.erase(variable);
+        /*if(not gac3(csp, A)) {
+            A.erase(variable);
             continue;
         }*/
        
-        Assignment asg_copy = asg;
-        if(not search(csp, asg_copy, backtrack+1)) {
-            asg.erase(variable);
+        Assignment A_copy = A;
+        if(not search(csp, A_copy, D, depth+1)) {
+            A.erase(variable);
             #ifdef PRINT_SEARCH 
             printf("^\n");
             #endif
         }
         else {
-            asg = asg_copy;
+            A = A_copy;
             return true;
         }
     }
 
-    if(backtrack == 0)
-    printf("\n***** Failure! (%d) *****\n", backtrack);
+    if(depth == 0)
+    printf("\n***** Failure! (%d) *****\n", depth);
     return false;
 }
 
 
-Assignment search(const CSP& csp) {
-    Assignment asg;
-    search(csp, asg, 0);
+Assignment search(const CSP& csp, Assignment asg = {}) {
+    search(csp, asg, csp.domains, 0);
     return asg;
 }
 
