@@ -1,17 +1,18 @@
 #include <string>
 #include <vector>
 #include <cassert>
-#include <map>
+#include <unordered_map>
+#define vector std::vector
 
 static int num_search = 0;
 
 template <typename Type>
-inline bool contains(const std::vector<Type>& v, const Type& x){
+inline bool contains(const vector<Type>& v, const Type& x){
     return std::find(v.begin(), v.end(), x) != v.end();
 }
 
 template <typename Type>
-inline Type min(const std::vector<Type>& v){
+inline Type min(const vector<Type>& v){
     Type m = v[0];
     for (int i = 1; i < v.size(); ++i)
         if(v[i] < m) m = v[i];
@@ -19,28 +20,28 @@ inline Type min(const std::vector<Type>& v){
     return m;
 }
 
-using Domain = std::vector<int>;
-using Assignment = std::map<int, int>;
+using Domain = vector<int>;
+using Assignment = std::unordered_map<int, int>;
 
 struct Constraint {
     std::string name;
-    std::vector<int> variables;
+    vector<int> variables;
     std::function<bool(const Assignment&)> eval;
 };
 
 struct CSP {
     std::string name;
-    std::vector<Domain> domains;
-    std::vector<Constraint> constraints;
-    std::vector<int> degrees;
+    vector<Domain> domains;
+    vector<Constraint> constraints;
+    vector<int> degrees;
 };
 
-CSP make_csp(const std::string& s, const std::vector<Domain>& d, const std::vector<Constraint>& c = {}) {
+CSP make_csp(const std::string& s, const vector<Domain>& d, const vector<Constraint>& c = {}) {
     CSP csp;
     csp.name = s;
     csp.domains = d;
     csp.constraints = c;
-    csp.degrees = std::vector<int>(csp.domains.size(), 0);
+    csp.degrees = vector<int>(csp.domains.size(), 0);
     return csp;
 }
 
@@ -72,7 +73,7 @@ void add_contstraint(CSP& csp, const Constraint& c) {
 void print(const CSP& csp);
 void print(const Assignment& asg, int);
 
-Constraint all_different(const std::vector<int>& vars, const std::string& name = "") {
+Constraint all_different(const vector<int>& vars, const std::string& name = "") {
     Constraint c;
     c.variables = vars;
     c.name = name;
@@ -175,8 +176,8 @@ bool remove_values(CSP& csp, int v, const Constraint& c) {
 }
 
 bool gac3(CSP& csp, const Assignment& asg) {
-    std::vector<int> var_queue;
-    std::vector<Constraint> const_queue;
+    vector<int> var_queue;
+    vector<Constraint> const_queue;
     for(auto c : csp.constraints) {
         for(int v : c.variables) {
             if(asg.count(v)) continue;
@@ -215,14 +216,14 @@ bool gac3(CSP& csp, const Assignment& asg) {
 
 int choose_variable(const CSP& csp, const Assignment& asg) {
     // Try to choose following minimun remaining values heuristic.
-    std::vector<int> remaining_values (csp.domains.size(), 9999);
+    vector<int> remaining_values (csp.domains.size(), 9999);
     for (int i = 0; i < csp.domains.size(); ++i) {
         if(asg.count(i) != 0) continue;
         remaining_values[i] = csp.domains[i].size();
     }
 
     int min_val = min(remaining_values);
-    std::vector<int> candidates;
+    vector<int> candidates;
     candidates.reserve(csp.domains.size());
     for (int i = 0; i < remaining_values.size(); ++i) {
         if(remaining_values[i] == min_val)
@@ -246,7 +247,7 @@ int choose_variable(const CSP& csp, const Assignment& asg) {
 
 void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
 
-bool search(const CSP& csp, Assignment& A, const std::vector<Domain>& D, int depth) {
+bool search(const CSP& csp, Assignment& A, const vector<Domain>& D, int depth) {
     #ifdef PRINT_SEARCH
     print(A, depth);
     // printf("A size %d\n", A.size());
