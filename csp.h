@@ -2,7 +2,10 @@
 #include <vector>
 #include <cassert>
 #include <unordered_map>
+#include <map>
 #define vector std::vector
+using Domain = vector<int>;
+using Assignment = std::unordered_map<int, int>;
 
 static int num_search = 0;
 
@@ -20,9 +23,6 @@ inline Type min(const vector<Type>& v){
     return m;
 }
 
-using Domain = vector<int>;
-using Assignment = std::unordered_map<int, int>;
-
 struct Constraint {
     std::string name;
     vector<int> variables;
@@ -35,6 +35,8 @@ struct CSP {
     vector<Constraint> constraints;
     vector<int> degrees;
 };
+
+bool search(const CSP& csp, Assignment& A, const vector<Domain>& D, int depth, bool ac3);
 
 CSP make_csp(const std::string& s, const vector<Domain>& d, const vector<Constraint>& c = {}) {
     CSP csp;
@@ -133,87 +135,6 @@ Constraint equal(int v0, int v1, const std::string& name = "") {
 // }
 
 
-bool remove_values(CSP& csp, int v, const Constraint& c) {
-    bool removed = false;
-    Assignment asg;
-
-    for(int vidx=0; vidx < csp.domains[v].size(); vidx++) {
-        int value = csp.domains[v][vidx];
-        asg[v] = value;
-
-        int possible_assignments = 1;
-        for(int w : c.variables) {
-            if(w == v) continue;
-            possible_assignments *= csp.domains[w].size();
-        }
-        
-        bool exist_assignment = false;
-        for (int i = 0; i<possible_assignments; ++i) {
-            for(int w : c.variables) {
-                if(w == v) continue;
-                asg[w] = i / csp.domains[w].size();
-            }
-            
-            if(satisfies(csp, asg)) {
-                exist_assignment = true;
-                break;
-            }
-
-            for(int w : c.variables) {
-                if(w == v) continue;
-                asg.erase(w);
-            }
-        }
-
-        if(not exist_assignment) {
-            csp.domains[v].erase(csp.domains[v].begin() + vidx);
-            vidx -= 1;
-            removed = true;
-        }
-    }
-
-    return removed;
-}
-
-bool gac3(CSP& csp, const Assignment& asg) {
-    vector<int> var_queue;
-    vector<Constraint> const_queue;
-    for(auto c : csp.constraints) {
-        for(int v : c.variables) {
-            if(asg.count(v)) continue;
-            var_queue.push_back(v);
-            const_queue.push_back(c);
-        }
-    }
-
-    while(var_queue.size()>0) {
-        int v = var_queue.back();
-        auto c = const_queue.back();
-        var_queue.pop_back();
-        const_queue.pop_back();
-
-        if(remove_values(csp, v, c)) {
-            if(csp.domains[v].size() == 0) {
-                return false;
-            }
-
-            for(auto& cc : csp.constraints) {
-                if(not contains(cc.variables, v))
-                    continue;
-
-                for(int w : cc.variables) {
-                    if(w == v) continue;
-                    var_queue.push_back(w);
-                    const_queue.push_back(cc);
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
-
 int choose_variable(const CSP& csp, const Assignment& asg) {
     // Try to choose following minimun remaining values heuristic.
     vector<int> remaining_values (csp.domains.size(), 9999);
@@ -247,19 +168,21 @@ int choose_variable(const CSP& csp, const Assignment& asg) {
 
 void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
 
-bool search(const CSP& csp, Assignment& A, const vector<Domain>& D, int depth) {
+
+bool search(const CSP& csp, Assignment& A, const vector<Domain>& D_, int depth, bool ac3) {
     #ifdef PRINT_SEARCH
     print(A, depth);
     // printf("A size %d\n", A.size());
     #endif
-    num_search += 1;
+    if(ac3) num_search += 1;
 
 
     // If assignment is complete, return.
     if(A.size() == csp.domains.size()) {
         return true;
     }
-
+    auto D = D_;
+    
     int variable = choose_variable(csp, A); // Minimum Remaining Value, then Max Degree (fail first)
     assert(D[variable].size() > 0);
 
@@ -272,13 +195,16 @@ bool search(const CSP& csp, Assignment& A, const vector<Domain>& D, int depth) {
             continue;
         }
 
-        /*if(not gac3(csp, A)) {
-            A.erase(variable);
-            continue;
-        }*/
+        // if(ac3) {
+        //     if(not gac3(csp, A, D)) {
+        //         A.erase(variable);
+        //         continue;
+        //     }
+        // }
        
         Assignment A_copy = A;
-        if(not search(csp, A_copy, D, depth+1)) {
+        vector<Domain> D_copy = D;
+        if(not search(csp, A_copy, D_copy, depth+1, ac3)) {
             A.erase(variable);
             #ifdef PRINT_SEARCH 
             printf("^\n");
@@ -297,7 +223,8 @@ bool search(const CSP& csp, Assignment& A, const vector<Domain>& D, int depth) {
 
 
 Assignment search(const CSP& csp, Assignment asg = {}) {
-    search(csp, asg, csp.domains, 0);
+    auto D = csp.domains;
+    search(csp, asg, D, 0, true);
     return asg;
 }
 

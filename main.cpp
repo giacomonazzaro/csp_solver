@@ -97,7 +97,7 @@ int main(int argc, char const *argv[])
     Assignment init = sudoku_easy();
     print_sudoku(init);
 
-    auto solution = search(csp, init);
+    auto solution = search(csp, {});
     printf("\nnum_search: %d\n", num_search);
     printf("solution\n");
 
