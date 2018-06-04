@@ -35,7 +35,7 @@ struct CSP {
     std::vector<int> degrees;
 };
 
-CSP make_csp(const std::string& s, const std::vector<Domain>& d, const std::vector<Constraint>& c) {
+CSP make_csp(const std::string& s, const std::vector<Domain>& d, const std::vector<Constraint>& c = {}) {
     CSP csp;
     csp.name = s;
     csp.domains = d;

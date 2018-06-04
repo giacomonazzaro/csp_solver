@@ -3,8 +3,7 @@
 
 CSP make_sudoku() {
     auto domains = std::vector<Domain>(81, {1,2,3,4,5,6,7,8,9});
-    auto constraints = std::vector<Constraint>();
-    CSP sudoku = make_csp("Sudoku", domains, constraints);
+    CSP sudoku = make_csp("Sudoku", domains);
 
     for (int k = 0; k < 9; ++k) {
         std::vector<int> row (9);
