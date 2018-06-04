@@ -2,7 +2,7 @@
 #include "csp.h"
 
 CSP make_sudoku() {
-    auto domains = std::vector<Domain>(81, {1,2,3,4,5,6,7,8,9}); // Small sudoku, just one block.
+    auto domains = std::vector<Domain>(81, {1,2,3,4,5,6,7,8,9});
     auto constraints = std::vector<Constraint>();
     CSP sudoku = make_csp("Sudoku", domains, constraints);
 
