@@ -1,7 +1,4 @@
-// #define PRINT_SEARCH
-// #define PRINT_SEARCH_GAC
-#define GAC3
-#include "csp_solve.h"
+#include "csp.h"
 
 CSP make_sudoku() {
     auto domains = vector<Domain>(81, {1,2,3,4,5,6,7,8,9});

@@ -1,4 +1,10 @@
-#pragma once
+#ifndef _CSP_H_
+#define _CSP_H_
+
+#define GAC3
+// #define PRINT_SEARCH
+// #define PRINT_SEARCH_GAC
+
 #include <string>
 #include <vector>
 #include <cassert>
@@ -23,8 +29,24 @@ struct CSP {
     vector<Constraint> constraints;
 };
 
+// Check if assignment satisfies the constraints.
+bool satisfies(const Assignment& assignment, const vector<Constraint>& C);
 
-CSP make_csp(const std::string& s, const vector<Domain>& d, const vector<Constraint>& c = {}) {
+// Search satisfying assignment.
+Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, int depth);
+Assignment search(const CSP& csp, Assignment A);
+
+// Choose next vatiable. MRV & MaxDegree heuristics.
+int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector<Constraint>& C);
+
+// Make infernces afeter assignment. Genrealized Arc Consistency.
+vector<Domain> gac3(const vector<Constraint> C, const Assignment& asg, vector<Domain> D);
+bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, Assignment A);
+bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth);
+
+
+// Build CSP functions.
+inline CSP make_csp(const std::string& s, const vector<Domain>& d, const vector<Constraint>& c = {}) {
     CSP csp;
     csp.name = s;
     csp.domains = d;
@@ -33,28 +55,12 @@ CSP make_csp(const std::string& s, const vector<Domain>& d, const vector<Constra
 }
 
 
-bool satisfies(const Assignment& assignment, const vector<Constraint>& C) {
-    for(auto& kv : assignment) {
-        int variable = kv.first;
-        int value = kv.second;
-       
-        for(auto& constraint : C) {
-            if(not constraint.eval(assignment)) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-
-void add_contstraint(CSP& csp, const Constraint& c) {
+inline void add_contstraint(CSP& csp, const Constraint& c) {
     csp.constraints.push_back(c);
 }
 
 
-Constraint all_different(const vector<int>& vars, const std::string& name = "") {
+static Constraint all_different(const vector<int>& vars, const std::string& name = "") {
     Constraint c;
     c.variables = vars;
     c.name = name;
@@ -74,7 +80,7 @@ Constraint all_different(const vector<int>& vars, const std::string& name = "") 
 }
 
 
-Constraint binary(int i, int k, const std::function<bool(int, int)>& rel, const std::string& name = "") {
+static Constraint binary(int i, int k, const std::function<bool(int, int)>& rel, const std::string& name = "") {
     Constraint c;
     c.variables = {i, k};
     c.name = name;
@@ -89,7 +95,7 @@ Constraint binary(int i, int k, const std::function<bool(int, int)>& rel, const 
 }
 
 
-Constraint equal(int v0, int v1, const std::string& name = "") {
+static Constraint equal(int v0, int v1, const std::string& name = "") {
     Constraint c;
     c.name = name;
     c.variables = {v0, v1};
@@ -104,7 +110,12 @@ Constraint equal(int v0, int v1, const std::string& name = "") {
 }
 
 
-// Utilies functions.
+
+
+
+
+
+// Utilities functions.
 template <typename Type>
 inline bool contains(const vector<Type>& v, const Type& x){
     return std::find(v.begin(), v.end(), x) != v.end();
@@ -121,13 +132,13 @@ inline Type min(const vector<Type>& v){
 
 
 // Printing functions.
-void print_domain(const Domain& d) {
+inline void print_domain(const Domain& d) {
     printf("{ ");
     for(int val : d) printf("%d ", val);
     printf("}\n");
 }
 
-void print_domains(const vector<Domain>& D) {
+inline void print_domains(const vector<Domain>& D) {
     printf("domains:\n");
     for (int i = 0; i < D.size(); ++i) {
         printf("    %d: ", i);
@@ -135,20 +146,9 @@ void print_domains(const vector<Domain>& D) {
     }
 }
 
-void print(const CSP& csp) {
-    printf("csp %s\n", csp.name.c_str());
-    printf("  vars deg   domain\n");
-    for (int i = 0; i < csp.domains.size(); ++i) {
-        printf("    %d: ", i);
-        // printf(" %d  { ", csp.degrees[i]);
-        for(int val : csp.domains[i]) printf("%d ", val);
-        printf("}\n");
-    }
-}
+inline void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
 
-void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
-
-void print(const Assignment& asg, int b = 0) {
+inline void print(const Assignment& asg, int b = 0) {
     print_times("-", b);
     printf("assignment:\n");
     for (auto kv : asg) {
@@ -157,7 +157,7 @@ void print(const Assignment& asg, int b = 0) {
     }
 }
 
-void print_state(const Assignment& A, const vector<Domain>& D, int depth = 0) {
+inline void print_state(const Assignment& A, const vector<Domain>& D, int depth = 0) {
     for (int i = 0; i < D.size(); ++i) {
         print_times("-", depth);
         printf(" %d := ", i);
@@ -170,4 +170,5 @@ void print_state(const Assignment& A, const vector<Domain>& D, int depth = 0) {
 }
 
 
+#endif
 
