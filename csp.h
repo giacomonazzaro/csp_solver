@@ -157,5 +157,17 @@ void print(const Assignment& asg, int b = 0) {
     }
 }
 
+void print_state(const Assignment& A, const vector<Domain>& D, int depth = 0) {
+    for (int i = 0; i < D.size(); ++i) {
+        print_times("-", depth);
+        printf(" %d := ", i);
+        if(A.count(i) > 0) {
+            printf("%d\n", A.at(i));
+        }
+        else
+            print_domain(D[i]);
+    }
+}
+
 
 
