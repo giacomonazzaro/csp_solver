@@ -1,5 +1,7 @@
 // #define PRINT_SEARCH
-#include "csp.h"
+// #define PRINT_SEARCH_GAC
+#define GAC3
+#include "csp_solve.h"
 
 CSP make_sudoku() {
     auto domains = vector<Domain>(81, {1,2,3,4,5,6,7,8,9});
@@ -41,8 +43,9 @@ CSP make_nqueens(int N = 8) {
     
     for (int i = 0; i < 8-1; ++i) {
         for (int j = i+1; j < 8; ++j) {
-            add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != j - i; }, "+diag"));
-            add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != i - j; }, "-diag"));
+            std::string name = "diag("+ std::to_string(i) + ", " + std::to_string(j) +")";
+            add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != j - i; }, "+"+name));
+            add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != i - j; }, "-"+name));
         }
     }
 
@@ -53,7 +56,7 @@ void print_nqueens(const Assignment& asg) {
     for(int i = 0; i<8; i++) {
         for(int k = 0; k<8; k++) {
             if(asg.at(i)-1 == k)
-                printf(" 1");
+                printf(" X");
             else
             printf(" •");
         }
@@ -93,14 +96,17 @@ Assignment sudoku_easy() {
 int main(int argc, char const *argv[])
 {
     // CSP csp = make_nqueens();
+    // Assignment init = {};
+    
     CSP csp = make_sudoku();
-    Assignment init = sudoku_easy();
+    Assignment init = sudoku_hard();
     print_sudoku(init);
 
-    auto solution = search(csp, {});
+    auto solution = search(csp, init);
     printf("\nnum_search: %d\n", num_search);
     printf("solution\n");
 
-    // print_nqueens(solution);
-    print_sudoku(solution);
+    if(solution.size())
+        // print_nqueens(solution);
+        print_sudoku(solution);
 }
