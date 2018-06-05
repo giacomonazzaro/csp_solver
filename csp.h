@@ -1,10 +1,6 @@
 #ifndef _CSP_H_
 #define _CSP_H_
 
-#define GAC3
-// #define PRINT_SEARCH
-// #define PRINT_SEARCH_GAC
-
 #include <string>
 #include <vector>
 #include <cassert>
@@ -36,16 +32,16 @@ bool satisfies(const Assignment& assignment, const vector<Constraint>& C);
 Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, int depth);
 Assignment search(const CSP& csp, Assignment A);
 
-// Choose next vatiable. MRV & MaxDegree heuristics.
+// Choose next variable (MRV & MaxDegree heuristics).
 int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector<Constraint>& C);
 
-// Make infernces afeter assignment. Genrealized Arc Consistency.
-vector<Domain> gac3(const vector<Constraint> C, const Assignment& asg, vector<Domain> D);
+// Make inferences afeter assignment (Genrealized Arc Consistency).
+vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<Domain> D);
 bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, Assignment A);
 bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth);
 
 
-// Build CSP functions.
+// Csp intialization functions.
 inline CSP make_csp(const std::string& s, const vector<Domain>& d, const vector<Constraint>& c = {}) {
     CSP csp;
     csp.name = s;

@@ -1,5 +1,9 @@
 #include "csp.h"
 
+#define GAC3
+// #define PRINT_SEARCH
+// #define PRINT_SEARCH_GAC
+
 bool satisfies(const Assignment& assignment, const vector<Constraint>& C) {
     for(auto& kv : assignment) {
         int variable = kv.first;
@@ -19,19 +23,13 @@ bool satisfies(const Assignment& assignment, const vector<Constraint>& C) {
 Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, int depth) {
     #ifdef PRINT_SEARCH
     print_state(A, D, depth);
-    // print_domains(D);
-    // print(A, depth);
-    // // printf("A size %d\n", A.size());
     #endif
     num_search += 1;
-
 
     // If assignment is complete, return.
     if(A.size() == D.size()) {
         return A;
     }
-
-    for(int i=0; i<D.size(); i++) assert(D[i].size() > 0);
 
     int variable = choose_variable(D, A, C); // Minimum Remaining Value, then Max Degree (fail first)
     assert(variable<D.size());
@@ -48,8 +46,6 @@ Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, i
             continue;
         }
 
-        for(int i=0; i<D.size(); i++) assert(D[i].size() > 0);
-
         #ifdef GAC3
             vector<Domain> D_new;
             D_new = gac3(C, A, D);
@@ -61,19 +57,13 @@ Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, i
         #else
             vector<Domain>& D_new = D;
         #endif
-
-        for(int i=0; i<D.size(); i++) assert(D[i].size() > 0);
        
         Assignment A_new = search(C, D_new, A, depth+1);
         if(A_new.size() == 0) {
             A.erase(variable);
             #ifdef PRINT_SEARCH 
-            printf("^\n");
-            printf("\n BACKTRACK \n\n");
+            printf("BACKTRACK\n");
             print_state(A, D, depth);
-            // print_domains(D);
-            // print(A, depth);
-            // printf("A size %d\n", A.size());
             #endif
         }
         else {
@@ -81,19 +71,13 @@ Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, i
         }
     }
 
-    if(depth == 0)
-    printf("\n***** Failure! (%d) *****\n", depth);
-    
-    // Return incomplete assignment.
+    // Return empty assignment.
     return {};
 }
 
 
 Assignment search(const CSP& csp, Assignment A = {}) {
-    auto C = csp.constraints;
-    auto D = csp.domains;
-    
-    return search(C, D, A, 0);
+    return search(csp.constraints, csp.domains, A, 0);
 }
 
 
@@ -105,6 +89,7 @@ int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector
         remaining_values[i] = D[i].size();
     }
 
+    // Choose as candidates all varibale which have minimum remaining values.
     int min_val = min(remaining_values);
     vector<int> candidates;
     candidates.reserve(D.size());
@@ -113,15 +98,19 @@ int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector
             candidates.push_back(i);
     }
 
+    // If no tie, return the variable.
     if(candidates.size() == 1)
         return candidates[0];
 
+
+    // If there's a tie, use Max Degree heuristic.
+    // Start with computing degrees. We can cache that, but it
+    // is probably unexpensive to compute on the fly (@Profile it).
     vector<int> degrees (D.size(), 0);
     for(auto& c : C)
         for(int v : c.variables) 
             degrees[v] += 1;
 
-    // Max degree heuristic.
     int max_degree_idx = candidates[0];
     int max_degree = degrees[max_degree_idx];
     for (int i = 1; i < candidates.size(); ++i) {
@@ -136,7 +125,100 @@ int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector
 }
 
 
+bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, Assignment A) {
+    bool removed_value = false;
+    int i = 0;
+    while(true) {
+        int val = D[variable][i];
+        A[variable] = val;
+        bool exist = search_small(constraint, D, A, 0);
+
+        if(exist == false) {
+            D[variable].erase(D[variable].begin() + i);
+            removed_value = true;
+        }
+        else {
+            i += 1;
+        }
+
+        A.erase(variable);
+
+        if(i >= D[variable].size())
+            return removed_value;
+    }
+}
+
+
+vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<Domain> D) {
+    vector<int> var_queue;
+    vector<int> const_queue;
+
+    // For each constraint c, for each variable v in the scope of c,
+    // add the pair (v, c) to the queue.
+    for (int i = 0; i < C.size(); ++i) {
+        const Constraint& c = C[i];
+        for(int v : c.variables) {
+            if(asg.count(v)) continue;
+            assert(D[v].size() > 0);
+            var_queue.push_back(v);
+            const_queue.push_back(i);
+        }
+    }
+
+    // Consume the queue until it is empty.
+    // For each pair (v, c), look it there exist a possible assignment
+    // of the other varibles in the scope of c.
+    while(var_queue.size() > 0) {
+        int v = var_queue.back();
+        int c = const_queue.back();
+        var_queue.pop_back();
+        const_queue.pop_back();
+
+        bool removed_value_from_domain = remove_values(v, C.at(c), D, asg);
+        if(removed_value_from_domain) {
+            // If the domain was left empty, this assignment cannot
+            // be made complete. search() will read {} as failure.
+            if(D[v].size() == 0) {
+                return {};
+            }
+
+            // If we shrinked its domain, we add to the queue all
+            // the variables that are neighbors of v through other constraints.
+            for (int i = 0; i < C.size(); ++i) {
+                if(i == c) continue;
+
+                if(not contains(C[i].variables, v))
+                    continue;
+
+                for(int w : C[i].variables) {
+                    if(w == v) continue;
+                    
+                    // Check if it is already in queue.
+                    bool already_in_queue = false;
+                    for(int k = 0; k < var_queue.size(); k++) {
+                        if(var_queue[k] == w and const_queue[k] == i) {
+                            already_in_queue = true;
+                            break;
+                        }
+                    }
+                    
+                    if(not already_in_queue) {
+                        var_queue.push_back(w);
+                        const_queue.push_back(i);
+                    }
+                }
+            }
+        }
+    }
+
+    // Return the updated domain.
+    return D;
+}
+
+
 bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth) {  
+    // Naive search that just check if there's a possible assignment that
+    // satisfy only ONE constraint. Used by remove_values()
     #ifdef PRINT_SEARCH_GAC
     print(A, depth);
     #endif
@@ -176,9 +258,6 @@ bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth
         auto ass = search_small(c, D, A, depth+1);
         if(not ass) {
             A.erase(variable);
-            #ifdef PRINT_SEARCH_GAC
-            printf("^\n");
-            #endif
         }
         else {
             return true;
@@ -188,84 +267,3 @@ bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth
     return false;
 }
 
-
-bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, Assignment A) {
-    bool removed_value = false;
-    int i = 0;
-    while(true) {
-        int val = D[variable][i];
-        A[variable] = val;
-        bool exist = search_small(constraint, D, A, 0);
-
-        if(exist == false) {
-            D[variable].erase(D[variable].begin() + i);
-            removed_value = true;
-        }
-        else {
-            i += 1;
-        }
-
-        A.erase(variable);
-
-        if(i >= D[variable].size())
-            return removed_value;
-    }
-}
-
-
-vector<Domain> gac3(const vector<Constraint> C, const Assignment& asg, vector<Domain> D) {
-    vector<int> var_queue;
-    vector<int> const_queue;
-    for (int i = 0; i < C.size(); ++i) {
-        const Constraint& c = C[i];
-        for(int v : c.variables) {
-            if(asg.count(v)) continue;
-            assert(D[v].size() > 0);
-            var_queue.push_back(v);
-            const_queue.push_back(i);
-        }
-     }
-
-    while(var_queue.size() > 0) {
-        int v = var_queue.back();
-        int c = const_queue.back();
-        var_queue.pop_back();
-        const_queue.pop_back();
-
-        if(remove_values(v, C.at(c), D, asg)) {
-            // printf("(%s) smaller %d: ", C[c].name.c_str(), v);
-            // print_domain(D[v]);
-
-            if(D[v].size() == 0) {
-                return {};
-            }
-
-            for (int i = 0; i < C.size(); ++i) {
-                if(i == c) continue;
-
-                if(not contains(C[i].variables, v))
-                    continue;
-
-                for(int w : C[i].variables) {
-                    if(w == v) continue;
-                    
-                    // Check if it is already in queue
-                    bool already_in_queue = false;
-                    for(int k = 0; k < var_queue.size(); k++) {
-                        if(var_queue[k] == w and const_queue[k] == i) {
-                            already_in_queue = true;
-                            break;
-                        }
-                    }
-                    
-                    if(not already_in_queue) {
-                        var_queue.push_back(w);
-                        const_queue.push_back(i);
-                    }
-                }
-            }
-        }
-    }
-
-    return D;
-}
