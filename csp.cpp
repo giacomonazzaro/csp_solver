@@ -31,17 +31,15 @@ Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, i
         return A;
     }
 
-    int variable = choose_variable(D, A, C); // Minimum Remaining Value, then Max Degree (fail first)
+    int variable = choose_variable(D, A, C);
     assert(variable<D.size());
     assert(D[variable].size() > 0);
 
     for(int val : D[variable]) {
         A[variable] = val;
-        // printf("new_assign %d := %d\n", variable, val);
 
         // If new assignment does not satisfies constraints, continue.
         if(not satisfies(A, C)) {
-            // printf("not satisfy!\n");
             A.erase(variable);
             continue;
         }
@@ -50,7 +48,6 @@ Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, i
             vector<Domain> D_new;
             D_new = gac3(C, A, D);
             if(D_new.size() == 0) {
-                // printf("GAC fail!\n");    
                 A.erase(variable);
                 continue;
             }
@@ -166,7 +163,7 @@ vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<D
     }
 
     // Consume the queue until it is empty.
-    // For each pair (v, c), look it there exist a possible assignment
+    // For each pair (v, c), look if there exist a possible assignment
     // of the other varibles in the scope of c.
     while(var_queue.size() > 0) {
         int v = var_queue.back();
