@@ -1,13 +1,13 @@
 #include "csp.h"
 
 CSP make_sudoku() {
-    auto domains = vector<Domain>(81, {1,2,3,4,5,6,7,8,9});
+    auto domains = array<Domain>(81, {1,2,3,4,5,6,7,8,9});
     CSP sudoku = make_csp("Sudoku", domains);
 
     for (int k = 0; k < 9; ++k) {
-        vector<int> row (9);
-        vector<int> col (9);
-        vector<int> block (9);
+        array<int> row (9);
+        array<int> col (9);
+        array<int> block (9);
         int block_start = (k/3) * 27 + (k%3)*3;
         for (int i = 0; i < 9; ++i) {
             row[i] = k * 9 + i;
@@ -24,8 +24,8 @@ CSP make_sudoku() {
 
 
 CSP make_nqueens(int N = 8) {
-    const vector<int> range = make_range<int>(N);
-    auto domains = vector<Domain>(N, range);
+    const array<int> range = make_range<int>(N);
+    auto domains = array<Domain>(N, range);
     CSP csp = make_csp("N-Queens", domains);
     add_contstraint(csp, all_different(range, "alldiff"));
     

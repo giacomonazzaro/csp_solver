@@ -11,7 +11,7 @@ void comment(const std::string& c) {
 }
 
 
-bool satisfies(const vector<Constraint>& C, const vector<Domain>& D) {
+bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for(auto& constraint : C) {
         if(not constraint.eval(D)) {
             return false;
@@ -20,14 +20,14 @@ bool satisfies(const vector<Constraint>& C, const vector<Domain>& D) {
     return true;
 }
 
-bool is_assignment_complete(const vector<Domain>& D) {
+bool is_assignment_complete(const array<Domain>& D) {
     for (int i = 0; i < D.size(); ++i)
         if(D[i].size() != 1) return false;
 
     return true;
 }
 
-bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
+bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
     #ifdef PRINT_SEARCH
     print_state(D, depth);
     #endif
@@ -46,7 +46,7 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
             printf(" %d := %d\n", variable, val);
         #endif
         
-        vector<Domain> D_attempt = D; // copying the domains.
+        array<Domain> D_attempt = D; // copying the domains.
         D_attempt[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
@@ -105,9 +105,9 @@ Assignment search(const CSP& csp, Assignment A = {}) {
 }
 
 
-int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
+int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // Choose following minimun remaining values heuristic.
-    vector<int> remaining_values (D.size(), 9999); //@Hack: 9999???
+    array<int> remaining_values (D.size(), 9999); //@Hack: 9999???
     for (int i = 0; i < D.size(); ++i) {
         if(D[i].size() <= 1) continue;
         remaining_values[i] = D[i].size();
@@ -115,7 +115,7 @@ int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
 
     // Choose as candidates all varibale which have minimum remaining values.
     int min_val = min(remaining_values);
-    vector<int> candidates;
+    array<int> candidates;
     candidates.reserve(D.size());
     for (int i = 0; i < remaining_values.size(); ++i) {
         if(remaining_values[i] == min_val)
@@ -130,7 +130,7 @@ int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
     // If there's a tie, use Max Degree heuristic.
     // Start with computing degrees. We can cache that, but it
     // is probably unexpensive to compute on the fly (@Profile it).
-    vector<int> degrees (D.size(), 0);
+    array<int> degrees (D.size(), 0);
     for(auto& c : C)
         for(int v : c.variables) 
             degrees[v] += 1;
@@ -150,7 +150,7 @@ int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
 }
 
 
-bool constraint_propagation(const vector<Constraint>& C, vector<Domain>& D) {
+bool constraint_propagation(const array<Constraint>& C, array<Domain>& D) {
     for(auto& c : C) {
         if(c.type == ALL_DIFFERENT) {
             for(int v : c.variables) {
@@ -184,14 +184,14 @@ bool constraint_propagation(const vector<Constraint>& C, vector<Domain>& D) {
 }
 
 
-bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D) {
+bool remove_values(int variable, const Constraint& constraint, array<Domain>& D) {
     bool removed_value = false;
     int i = 0;
     Domain domain_tmp = D[variable]; // copying the domain.
     
     while(true) {
         // Make a fake copy of the domain. Will set the just interesting variables.
-        vector<Domain> Dfake = vector<Domain>(D.size(), {-1});
+        array<Domain> Dfake = array<Domain>(D.size(), {-1});
         Dfake[variable] = {domain_tmp[i]};
         for(auto v : constraint.variables)
             if(v != variable) Dfake[v] = D[v]; // copying the domains.
@@ -217,10 +217,10 @@ bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D
 }
 
 
-bool gac3(const vector<Constraint>& C, vector<Domain>& D_result) {
-    vector<Domain> D = D_result; // copying the domains.
-    vector<int> var_queue;
-    vector<int> const_queue;
+bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
+    array<Domain> D = D_result; // copying the domains.
+    array<int> var_queue;
+    array<int> const_queue;
 
     // For each constraint c, for each variable v in the scope of c,
     // add the pair (v, c) to the queue.
@@ -286,7 +286,7 @@ bool gac3(const vector<Constraint>& C, vector<Domain>& D_result) {
 }
 
 
-bool search_small(const Constraint& c, vector<Domain> D, int depth) {  
+bool search_small(const Constraint& c, array<Domain> D, int depth) {  
     // Naive search that just check if there's a possible assignment that
     // satisfy only ONE constraint. Used by remove_values()
     #ifdef PRINT_SEARCH_GAC
@@ -294,7 +294,7 @@ bool search_small(const Constraint& c, vector<Domain> D, int depth) {
     #endif
 
     // If assignment is complete, return true.
-    const vector<int>& vars = c.variables;
+    const array<int>& vars = c.variables;
     bool complete = true;
     for(int v : vars) {
         if(D[v].size() != 1) {
@@ -316,7 +316,7 @@ bool search_small(const Constraint& c, vector<Domain> D, int depth) {
         if(not c.eval(D)) continue;
         
         // @Speed: We should propagate also in search_small, but copying D seems to slow down.
-        // vector<Domain> D_new = D;
+        // array<Domain> D_new = D;
         // if(not constraint_propagation({c}, D_new)) continue;
 
         if(search_small(c, D, depth+1)) {

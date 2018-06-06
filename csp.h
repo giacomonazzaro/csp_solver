@@ -7,8 +7,11 @@
 #include <unordered_map>
 #include <map>
 #include <set>
-#define vector std::vector
-using Domain = vector<int>;
+
+// @Warining: std::array is a different thing! (It's a statically sized array)
+//            But 'vector' is a really bad name...
+#define array std::vector
+using Domain = array<int>;
 using Assignment = std::unordered_map<int, int>;
 
 static int num_search;
@@ -19,37 +22,37 @@ enum constraint_type {
 
 struct Constraint {
     std::string name;
-    vector<int> variables;
-    std::function<bool(const vector<Domain>&)> eval;
+    array<int> variables;
+    std::function<bool(const array<Domain>&)> eval;
     constraint_type type = CUSTOM;
 };
 
 
 struct CSP {
     std::string name;
-    vector<Domain> domains;
-    vector<Constraint> constraints;
+    array<Domain> domains;
+    array<Constraint> constraints;
 };
 
 // Check if assignment satisfies the constraints.
-bool satisfies(const vector<Domain>& assignment, const vector<Constraint>& C);
+bool satisfies(const array<Domain>& assignment, const array<Constraint>& C);
 
 // Search satisfying assignment.
-bool search(const vector<Constraint>& C, vector<Domain>& D, int depth);
+bool search(const array<Constraint>& C, array<Domain>& D, int depth);
 Assignment search(const CSP& csp, Assignment A);
 
 // Choose next variable (MRV & MaxDegree heuristics).
-int choose_variable(const vector<Domain>& D, const vector<Constraint>& C);
+int choose_variable(const array<Domain>& D, const array<Constraint>& C);
 
 // Make inferences after assignment (Genrealized Arc Consistency).
-bool constraint_propagation(const vector<Constraint>& C, vector<Domain>& D);
-bool gac3(const vector<Constraint>& C, vector<Domain>& D);
-bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, vector<Domain> A);
-bool search_small(const Constraint& c, vector<Domain> D, int depth);
+bool constraint_propagation(const array<Constraint>& C, array<Domain>& D);
+bool gac3(const array<Constraint>& C, array<Domain>& D);
+bool remove_values(int variable, const Constraint& constraint, array<Domain>& D, array<Domain> A);
+bool search_small(const Constraint& c, array<Domain> D, int depth);
 
 
 // Csp intialization functions.
-inline CSP make_csp(const std::string& s, const vector<Domain>& d, const vector<Constraint>& c = {}) {
+inline CSP make_csp(const std::string& s, const array<Domain>& d, const array<Constraint>& c = {}) {
     CSP csp;
     csp.name = s;
     csp.domains = d;
@@ -63,12 +66,12 @@ inline void add_contstraint(CSP& csp, const Constraint& c) {
 }
 
 
-static Constraint all_different(const vector<int>& vars, const std::string& name = "") {
+static Constraint all_different(const array<int>& vars, const std::string& name = "") {
     Constraint c;
     c.variables = vars;
     c.name = name;
     c.type = ALL_DIFFERENT;
-    c.eval = [vars](const vector<Domain>& D) {
+    c.eval = [vars](const array<Domain>& D) {
         // std::set<int> buckets; // Piccioni
         // for (int i : vars)
         //     for (int val : D[i])
@@ -111,7 +114,7 @@ static Constraint binary(int i, int k, const std::function<bool(int, int)>& rel,
     Constraint c;
     c.variables = {i, k};
     c.name = name;
-    c.eval = [=](const vector<Domain>& D) {
+    c.eval = [=](const array<Domain>& D) {
         if(D[i].size() == 1 and D[k].size() == 1) {
             if(not rel(D[i][0], D[k][0])) return false;
         }
@@ -126,7 +129,7 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
     Constraint c;
     c.name = name;
     c.variables = {v0, v1};
-    c.eval = [v0, v1](const vector<Domain>& D) {
+    c.eval = [v0, v1](const array<Domain>& D) {
         if(D[v0].size() == 1 and D[v1].size() == 1)
             if(D[v0][0] != D[v1][0])
                 return false;
@@ -143,12 +146,12 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
 #define remove(v, i) v.erase(v.begin() + i)
 
 template <typename Type>
-inline bool contains(const vector<Type>& v, const Type& x){
+inline bool contains(const array<Type>& v, const Type& x){
     return std::find(v.begin(), v.end(), x) != v.end();
 }
 
 template <typename Type>
-inline Type min(const vector<Type>& v){
+inline Type min(const array<Type>& v){
     Type m = v[0];
     for (int i = 1; i < v.size(); ++i)
         if(v[i] < m) m = v[i];
@@ -157,14 +160,14 @@ inline Type min(const vector<Type>& v){
 }
 
 template <typename Type>
-inline vector<Type> make_range(int from, int to) {
-    vector<Type> result (to - from);
+inline array<Type> make_range(int from, int to) {
+    array<Type> result (to - from);
     for(int i = 0; i < to-from; i++) result[i] = from + i;
     return result;
 }
 
 template <typename Type>
-inline vector<Type> make_range(int to) { return make_range<Type>(0, to); }
+inline array<Type> make_range(int to) { return make_range<Type>(0, to); }
 
 
 
@@ -177,7 +180,7 @@ inline void print_domain(const Domain& d) {
     printf("}\n");
 }
 
-inline void print_domains(const vector<Domain>& D) {
+inline void print_domains(const array<Domain>& D) {
     printf("domains:\n");
     for (int i = 0; i < D.size(); ++i) {
         printf("    %d: ", i);
@@ -187,7 +190,7 @@ inline void print_domains(const vector<Domain>& D) {
 
 inline void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
 
-inline void print_state(const vector<Domain>& D, int depth = 0) {
+inline void print_state(const array<Domain>& D, int depth = 0) {
     for (int i = 0; i < D.size(); ++i) {
         print_times("-", depth);
         printf(" %d = ", i);
@@ -200,7 +203,7 @@ inline void print_state(const vector<Domain>& D, int depth = 0) {
 }
 
 
-inline Assignment make_assignment(const vector<Domain>& D) {
+inline Assignment make_assignment(const array<Domain>& D) {
     Assignment A = {};
     for(int i=0; i<D.size(); i++) {
         if(D[i].size() == 1)
@@ -221,7 +224,7 @@ inline void print_sudoku(const Assignment& A) {
     printf("\n");
 }
 
-inline void print_sudoku(const vector<Domain>& D) {
+inline void print_sudoku(const array<Domain>& D) {
     print_sudoku(make_assignment(D));
 }
 
