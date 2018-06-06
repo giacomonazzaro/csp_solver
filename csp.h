@@ -144,20 +144,8 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
 
 // Utilities functions.
 #define remove(v, i) v.erase(v.begin() + i)
-
-template <typename Type>
-inline bool contains(const array<Type>& v, const Type& x){
-    return std::find(v.begin(), v.end(), x) != v.end();
-}
-
-template <typename Type>
-inline Type min(const array<Type>& v){
-    Type m = v[0];
-    for (int i = 1; i < v.size(); ++i)
-        if(v[i] < m) m = v[i];
-
-    return m;
-}
+#define contains(v, x) (std::find(v.begin(),v.end(),x) !=v.end())
+#define min(v) *std::min_element(v.begin(),v.end());
 
 template <typename Type>
 inline array<Type> make_range(int from, int to) {
@@ -180,28 +168,15 @@ inline void print_domain(const Domain& d) {
     printf("}\n");
 }
 
-inline void print_domains(const array<Domain>& D) {
-    printf("domains:\n");
-    for (int i = 0; i < D.size(); ++i) {
-        printf("    %d: ", i);
-        print_domain(D[i]);
-    }
-}
-
 inline void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
 
 inline void print_state(const array<Domain>& D, int depth = 0) {
     for (int i = 0; i < D.size(); ++i) {
         print_times("-", depth);
         printf(" %d = ", i);
-        //if(A.count(i) > 0) {
-        //    printf("%d\n", A.at(i));
-        //}
-        //else
-            print_domain(D[i]);
+        print_domain(D[i]);
     }
 }
-
 
 inline Assignment make_assignment(const array<Domain>& D) {
     Assignment A = {};
