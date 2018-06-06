@@ -40,20 +40,6 @@ CSP make_nqueens(int N = 8) {
     return csp;
 }
 
-void print_nqueens(const Assignment& D) {
-    int N = D.size();
-    for(int i = 0; i<N; i++) {
-        for(int k = 0; k<N; k++) {
-            if(D.at(i) == k)
-                printf(" Q");
-            else
-                printf(" •");
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
 Assignment sudoku_hard() {
     return {
         {1,4}, {4,3}, {6,2}, {7,5},
@@ -127,12 +113,19 @@ void do_nqueens(int N) {
     printf("\nnum_search: %d\n", num_search);
     printf("solution\n");
 
-    if(solution.size())
-        print_nqueens(solution);
+    // if(solution.size())
+        // print_nqueens(solution);
+}
+
+Assignment make_assignment(array<int> D) {
+    Assignment A;
+    for(int i=0; i<D.size(); i++)
+        A[i] = D[i]-1;
+    return A;
 }
 
 int main(int argc, char const *argv[])
 {
     // do_sudoku();
-    do_nqueens(18);
+    do_nqueens(15);
 }

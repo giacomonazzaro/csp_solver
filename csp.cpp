@@ -32,6 +32,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
     print_state(D, depth);
     #endif
 
+    // print_nqueens(D);
+
     // If assignment is complete, return.
     if(is_assignment_complete(D)) {
         return true;
@@ -70,6 +72,7 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
         bool success = search(C, D_attempt, depth+1);
         if(not success) {
             num_search += 1;
+            printf("%d \n", num_search);
             #ifdef PRINT_SEARCH 
             printf("BACKTRACK\n");
             print_state(D, depth);
