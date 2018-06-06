@@ -1,4 +1,4 @@
-#include "csp.h"
+#include "../csp.h"
 
 CSP make_sudoku(int N) {
     auto range = make_range<int>(1, N*N+1);
@@ -15,31 +15,14 @@ CSP make_sudoku(int N) {
             col[i] = i * N*N + k;
             block[i] = block_start + (i/N) * N*N + i%N;
         }
-        add_contstraint(sudoku, all_different(row, "row_diff") );
-        add_contstraint(sudoku, all_different(col, "col_diff") );
-        add_contstraint(sudoku, all_different(block, "block_diff") );
+        add(sudoku.constraints, all_different(row, "row_diff") );
+        add(sudoku.constraints, all_different(col, "col_diff") );
+        add(sudoku.constraints, all_different(block, "block_diff") );
     }
 
     return sudoku;
 }
 
-
-CSP make_nqueens(int N = 8) {
-    const array<int> range = make_range<int>(N);
-    auto domains = array<Domain>(N, range);
-    CSP csp = make_csp("N-Queens", domains);
-    add_contstraint(csp, all_different(range, "alldiff"));
-    
-    for (int i = 0; i < N-1; ++i) {
-        for (int j = i+1; j < N; ++j) {
-            std::string name = "diag("+ std::to_string(i) + ", " + std::to_string(j) +")";
-            add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != j - i; }, "+"+name));
-            add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != i - j; }, "-"+name));
-        }
-    }
-
-    return csp;
-}
 
 Assignment sudoku_hard() {
     return {
@@ -54,6 +37,7 @@ Assignment sudoku_hard() {
         {72+0, 4}, {72+3, 5}, {72+4, 1}, {72+6, 8}, {72+8, 2},
     };
 }
+
 
 Assignment parse_sudoku(const std::string s) {
     Assignment A;
@@ -78,7 +62,6 @@ Assignment sudoku_impossible() {
     );
 }
 
-
 Assignment sudoku_easy() {
     return {
         {0+1, 2}, 
@@ -97,36 +80,15 @@ void do_sudoku(int N = 3) {
     CSP csp = make_sudoku(N);
     Assignment init = sudoku_impossible();
     // Assignment init = sudoku_hard();
-    print_sudoku(init);
+    print_sudoku(init, N);
 
     auto solution = search(csp, init);
-    printf("\nnum_search: %d\n", num_search);
     printf("solution\n");
 
     if(solution.size())
-        print_sudoku(solution);
+        print_sudoku(solution, N);
 }
 
-void do_nqueens(int N) {
-    CSP csp = make_nqueens(N);
-
-    auto solution = search(csp, {});
-    printf("\nnum_search: %d\n", num_search);
-    printf("solution\n");
-
-    // if(solution.size())
-        // print_nqueens(solution);
-}
-
-Assignment make_assignment(array<int> D) {
-    Assignment A;
-    for(int i=0; i<D.size(); i++)
-        A[i] = D[i]-1;
-    return A;
-}
-
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     do_sudoku();
-    // do_nqueens(15);
 }

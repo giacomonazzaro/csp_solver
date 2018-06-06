@@ -13,8 +13,7 @@
 using Domain = array<int>;
 using Assignment = std::unordered_map<int, int>;
 
-static int num_search;
-
+/***** Data definitions *****/
 enum constraint_type {
     CUSTOM, ALL_DIFFERENT, EQUALITY, BINARY
 };
@@ -33,6 +32,8 @@ struct CSP {
     array<Constraint> constraints;
 };
 
+
+/***** Solving functions *****/
 // Check if assignment satisfies the constraints.
 bool satisfies(const array<Domain>& assignment, const array<Constraint>& C);
 
@@ -50,7 +51,8 @@ bool remove_values(int variable, const Constraint& constraint, array<Domain>& D,
 bool search_small(const Constraint& c, array<Domain> D, int depth);
 
 
-// Csp intialization functions.
+
+/***** CSP intialization functions. *****/
 inline CSP make_csp(const std::string& s, const array<Domain>& d, const array<Constraint>& c = {}) {
     CSP csp;
     csp.name = s;
@@ -142,6 +144,7 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
 
 
 // Utilities functions.
+#define add(v, x) v.push_back(x)
 #define remove(v, i) v.erase(v.begin() + i)
 #define contains(v, x) (std::find(v.begin(),v.end(),x) !=v.end())
 #define min(v) *std::min_element(v.begin(),v.end());
@@ -187,8 +190,7 @@ inline Assignment make_assignment(const array<Domain>& D) {
 }
 
 
-inline void print_sudoku(const Assignment& A) {
-    int N = round(std::sqrt(std::sqrt(A.size())));
+inline void print_sudoku(const Assignment& A, int N) {
     for(int i = 0; i<N*N*N*N; i++) {
         if(i%(N*N) == 0) printf("\n");
         if(A.count(i) == 1)
@@ -200,7 +202,7 @@ inline void print_sudoku(const Assignment& A) {
 }
 
 inline void print_sudoku(const array<Domain>& D) {
-    print_sudoku(make_assignment(D));
+    print_sudoku(make_assignment(D), round(std::sqrt(std::sqrt(D.size()))));
 }
 
 inline void print_nqueens(const array<Domain>& D) {

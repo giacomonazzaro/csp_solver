@@ -71,8 +71,6 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
        
         bool success = search(C, D_attempt, depth+1);
         if(not success) {
-            num_search += 1;
-            // printf("%d \n", num_search);
             #ifdef PRINT_SEARCH 
             printf("BACKTRACK\n");
             print_state(D, depth);
@@ -90,7 +88,6 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
 
 
 Assignment search(const CSP& csp, Assignment A = {}) {
-    num_search = 0;
     auto D = csp.domains;
     for(auto& kv : A)
         D[kv.first] = {kv.second};
