@@ -4,12 +4,11 @@
 // #define PRINT_SEARCH_LOG
 // #define PRINT_SEARCH_GAC
 
-void comment(const std::string& c) {
+void comment(const std::string&) {
     #ifdef PRINT_SEARCH_LOG
     printf("%s\n", c.c_str());
     #endif
 }
-
 
 bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for(auto& constraint : C) {
@@ -32,9 +31,7 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
     print_state(D, depth);
     #endif
 
-    // print_nqueens(D);
-
-    // If assignment is complete, return.
+    // If assignment is complete, return success.
     if(is_assignment_complete(D)) {
         return true;
     }
@@ -43,28 +40,23 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
 
     const Domain vdomain = D[variable];
     for(int val : vdomain) {
-        #ifdef PRINT_SEARCH
-            print_times("•", depth);
-            printf(" %d := %d\n", variable, val);
-        #endif
-        
         array<Domain> D_attempt = D; // copying the domains.
         D_attempt[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
         if(not satisfies(C, D_attempt)) {
-            comment("Satisfiaction failure!\n");
+            comment("Satisfiaction failure!");
             continue;
         }
 
         if(not constraint_propagation(C, D_attempt)) {
-            comment("Propagation failure\n");
+            comment("Propagation failure");
             continue;
         }
 
         
         if(not gac3(C, D_attempt)) {
-            comment("GAC3 failure\n");
+            comment("GAC3 failure");
             continue;
         }
 
@@ -82,7 +74,7 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
         }
     }
 
-    // Return empty assignment.
+    // Return failure.
     return false;
 }
 
