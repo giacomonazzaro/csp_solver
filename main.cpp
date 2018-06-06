@@ -24,12 +24,13 @@ CSP make_sudoku() {
 
 
 CSP make_nqueens(int N = 8) {
-    auto domains = vector<vector<int>>(8, {1,2,3,4,5,6,7,8} );
+    const vector<int> range = make_range<int>(N);
+    auto domains = vector<Domain>(N, range);
     CSP csp = make_csp("N-Queens", domains);
-    add_contstraint(csp, all_different({0,1,2,3,4,5,6,7}, "alldiff"));
+    add_contstraint(csp, all_different(range, "alldiff"));
     
-    for (int i = 0; i < 8-1; ++i) {
-        for (int j = i+1; j < 8; ++j) {
+    for (int i = 0; i < N-1; ++i) {
+        for (int j = i+1; j < N; ++j) {
             std::string name = "diag("+ std::to_string(i) + ", " + std::to_string(j) +")";
             add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != j - i; }, "+"+name));
             add_contstraint(csp, binary(i, j, [=](int x, int y) { return x - y != i - j; }, "-"+name));
@@ -40,12 +41,13 @@ CSP make_nqueens(int N = 8) {
 }
 
 void print_nqueens(const Assignment& D) {
-    for(int i = 0; i<8; i++) {
-        for(int k = 0; k<8; k++) {
-            if(D.at(i)-1 == k)
-                printf(" X");
+    int N = D.size();
+    for(int i = 0; i<N; i++) {
+        for(int k = 0; k<N; k++) {
+            if(D.at(i) == k)
+                printf(" Q");
             else
-            printf(" •");
+                printf(" •");
         }
         printf("\n");
     }
@@ -118,8 +120,8 @@ void do_sudoku() {
         print_sudoku(solution);
 }
 
-void do_nqueens() {
-    CSP csp = make_nqueens();
+void do_nqueens(int N) {
+    CSP csp = make_nqueens(N);
 
     auto solution = search(csp, {});
     printf("\nnum_search: %d\n", num_search);
@@ -131,6 +133,6 @@ void do_nqueens() {
 
 int main(int argc, char const *argv[])
 {
-    do_sudoku();
-    // do_nqueens();
+    // do_sudoku();
+    do_nqueens(10);
 }

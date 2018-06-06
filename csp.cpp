@@ -11,7 +11,7 @@ void comment(const std::string& c) {
 }
 
 
-bool satisfies(const vector<Domain>& D, const vector<Constraint>& C) {
+bool satisfies(const vector<Constraint>& C, const vector<Domain>& D) {
     for(auto& constraint : C) {
         if(not constraint.eval(D)) {
             return false;
@@ -48,14 +48,14 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
         vector<Domain> D_new = D;
         D_new[variable] = {val};
 
-        // If new assignment does not satisfies constraints, continue.
         
-        if(not satisfies(D_new, C)) {
+        // If new assignment does not satisfies constraints, continue.
+        if(not satisfies(C, D_new)) {
             comment("Satisfiaction failure!\n");
             continue;
         }
 
-        if(not propagate(C, D_new)) {
+        if(not constraint_propagation(C, D_new)) {
             comment("Propagation failure\n");
             continue;
         }
@@ -93,7 +93,7 @@ Assignment search(const CSP& csp, Assignment A = {}) {
         D[kv.first] = {kv.second};
 
     if(A.size() > 0) {
-        propagate(csp.constraints, D);
+        constraint_propagation(csp.constraints, D);
         D = gac3(csp.constraints, D);
     }
 
@@ -150,7 +150,7 @@ int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
 }
 
 
-bool propagate(const vector<Constraint>& C, vector<Domain>& D) {
+bool constraint_propagation(const vector<Constraint>& C, vector<Domain>& D) {
     for(auto& c : C) {
         if(c.type == ALL_DIFFERENT) {
             for(int v : c.variables) {
@@ -166,6 +166,18 @@ bool propagate(const vector<Constraint>& C, vector<Domain>& D) {
                 }
             }
         }
+
+        // if(c.variables.size() == 2) {
+        //     for(int k : {0,1}) {
+        //         int v0 = c.variables[k];
+        //         int v1 = c.variables[(k+1)%2];
+        //         if(D[v0].size() != 1) continue;
+        //         Domain old_domain = D[v1];
+        //         for (int i = 0; i < D[v1].size(); ) {
+        //             D[v1] = {old_domain[]}
+        //         }
+        //     }
+        // }
     }
 
     return true;
@@ -174,17 +186,21 @@ bool propagate(const vector<Constraint>& C, vector<Domain>& D) {
 
 bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D) {
     bool removed_value = false;
+    // vector<int> removed_values;
     int i = 0;
-    Domain vdomain = D[variable];
+    Domain domain_tmp = D[variable];
+    
     while(true) {
-        int val = vdomain[i];
-        D[variable] = {val};
+        // Make a fake copy of the domain. Will set the just interesting variables.
         vector<Domain> Dfake = vector<Domain>(D.size(), {-1});
+        Dfake[variable] = {domain_tmp[i]};
         for(auto v : constraint.variables) Dfake[v] = D[v];
-        bool exist = search_small(constraint, Dfake, 0);
+        
+        bool exists = search_small(constraint, Dfake, 0);
 
-        if(exist == false) {
-            vdomain.erase(vdomain.begin() + i);
+        if(exists == false) {
+            remove(domain_tmp, i);
+            // removed_values.push_back(domain_tmp, i);
             removed_value = true;
         }
         else {
@@ -192,8 +208,8 @@ bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D
         }
 
 
-        if(i >= vdomain.size()) {
-            D[variable] = vdomain;
+        if(i >= domain_tmp.size()) {
+            D[variable] = domain_tmp;
             return removed_value;
         }
     }
@@ -288,19 +304,21 @@ bool search_small(const Constraint& c, vector<Domain> D, int depth) {
 
     // Still using MRV & Max Degree.
     int variable = choose_variable(D, {c});
-    assert(D[variable].size() > 0);
 
     const Domain domain = D[variable];
     for(int val : domain) {
         D[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
-        if(not c.eval(D)) {
-            continue;
-        }
+        if(not c.eval(D)) continue;
+        
+        // @Speed: We should propagate also in search_small, but copying D seems to slow down.
+        // vector<Domain> D_new = D;
+        // if(not constraint_propagation({c}, D_new)) continue;
 
-        if(search_small(c, D, depth+1))
+        if(search_small(c, D, depth+1)) {
             return true;
+        }
     }
 
     return false;

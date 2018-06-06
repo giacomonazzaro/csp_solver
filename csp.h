@@ -41,8 +41,8 @@ Assignment search(const CSP& csp, Assignment A);
 // Choose next variable (MRV & MaxDegree heuristics).
 int choose_variable(const vector<Domain>& D, const vector<Constraint>& C);
 
-// Make inferences afeter assignment (Genrealized Arc Consistency).
-bool propagate(const vector<Constraint>& C, vector<Domain>& D);
+// Make inferences after assignment (Genrealized Arc Consistency).
+bool constraint_propagation(const vector<Constraint>& C, vector<Domain>& D);
 vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D);
 bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, vector<Domain> A);
 bool search_small(const Constraint& c, vector<Domain> D, int depth);
@@ -155,6 +155,19 @@ inline Type min(const vector<Type>& v){
 
     return m;
 }
+
+template <typename Type>
+inline vector<Type> make_range(int from, int to) {
+    vector<Type> result (to - from);
+    for(int i = 0; i < to-from; i++) result[i] = from + i;
+    return result;
+}
+
+template <typename Type>
+inline vector<Type> make_range(int to) { return make_range<Type>(0, to); }
+
+
+
 
 
 // Printing functions.
