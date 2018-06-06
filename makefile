@@ -1,6 +1,6 @@
 COMPLILE = g++ -std=c++11 -O3
 
-all: sudoku
+all: nqueens
 
 nqueens: csp.o
 	$(COMPLILE) -o examples/nqueens.o examples/nqueens.cpp csp.o 
