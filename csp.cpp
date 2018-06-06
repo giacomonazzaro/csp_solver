@@ -10,6 +10,7 @@ void comment(const std::string&) {
     #endif
 }
 
+
 bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for(auto& constraint : C) {
         if(not constraint.eval(D)) {
@@ -19,12 +20,36 @@ bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     return true;
 }
 
+
 bool is_assignment_complete(const array<Domain>& D) {
     for (int i = 0; i < D.size(); ++i)
         if(D[i].size() != 1) return false;
 
     return true;
 }
+
+
+bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
+    // Check if assignment satisfies constraints.
+    if(not satisfies(C, D)) {
+        comment("Satisfiaction failure!");
+        return false;
+    }
+
+    // Propagate consequences and eventually reduce domains.
+    if(not constraint_propagation(C, D)) {
+        comment("Propagation failure");
+        return false;
+    }
+    
+    if(not gac3(C, D)) {
+        comment("GAC3 failure");
+        return false;
+    }
+
+    return true;
+}
+
 
 bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
     #ifdef PRINT_SEARCH
@@ -38,43 +63,24 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
 
     int variable = choose_variable(D, C);
 
-    const Domain vdomain = D[variable];
-    for(int val : vdomain) {
-        array<Domain> D_attempt = D; // copying the domains.
+    for(int val : D[variable]) {
+        // Copying the domains to make a temp version.
+        array<Domain> D_attempt = D; 
         D_attempt[variable] = {val};
 
-        // If new assignment does not satisfies constraints, continue.
-        if(not satisfies(C, D_attempt)) {
-            comment("Satisfiaction failure!");
+        // Check if constraints can be satisfied from here.
+        if(not do_inferences(C, D_attempt))
             continue;
-        }
-
-        if(not constraint_propagation(C, D_attempt)) {
-            comment("Propagation failure");
-            continue;
-        }
-
         
-        if(not gac3(C, D_attempt)) {
-            comment("GAC3 failure");
-            continue;
-        }
-
-       
+        // Recursive call.
         bool success = search(C, D_attempt, depth+1);
-        if(not success) {
-            #ifdef PRINT_SEARCH 
-            printf("BACKTRACK\n");
-            print_state(D, depth);
-            #endif
-        }
-        else {
-            D = D_attempt; // copying the domains.
+        if(success) {
+            D = D_attempt; // update the domains.
             return true;
         }
     }
 
-    // Return failure.
+    // Return failure. Backtrack.
     return false;
 }
 
