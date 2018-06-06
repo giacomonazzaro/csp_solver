@@ -186,7 +186,6 @@ bool constraint_propagation(const vector<Constraint>& C, vector<Domain>& D) {
 
 bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D) {
     bool removed_value = false;
-    // vector<int> removed_values;
     int i = 0;
     Domain domain_tmp = D[variable]; // copying the domain.
     
@@ -194,7 +193,9 @@ bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D
         // Make a fake copy of the domain. Will set the just interesting variables.
         vector<Domain> Dfake = vector<Domain>(D.size(), {-1});
         Dfake[variable] = {domain_tmp[i]};
-        for(auto v : constraint.variables) Dfake[v] = D[v]; // copying the domains.
+        for(auto v : constraint.variables)
+            if(v != variable) Dfake[v] = D[v]; // copying the domains.
+        
         
         bool exists = search_small(constraint, Dfake, 0);
 
