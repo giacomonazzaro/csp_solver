@@ -17,6 +17,22 @@ CSP make_nqueens(int N = 8) {
     return csp;
 }
 
+inline void print_nqueens(const array<Domain>& D) {
+    int N = D.size();
+    for(int i = 0; i<N; i++) {
+        for(int k = 0; k<N; k++) {
+            if(not contains(D[i], k)) printf(" -");
+            else {
+                if(D[i].size() == 1)
+                    printf(" Q");
+                else
+                    printf(" o");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
 
 void do_nqueens(int N) {
     CSP csp = make_nqueens(N);

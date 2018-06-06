@@ -1,6 +1,4 @@
-#ifndef _CSP_H_
-#define _CSP_H_
-
+#pragma once
 #include <string>
 #include <vector>
 #include <cassert>
@@ -188,41 +186,3 @@ inline Assignment make_assignment(const array<Domain>& D) {
     }
     return A;
 }
-
-
-inline void print_sudoku(const Assignment& A, int N) {
-    for(int i = 0; i<N*N*N*N; i++) {
-        if(i%(N*N) == 0) printf("\n");
-        if(A.count(i) == 1)
-            printf(" %d", A.at(i));
-        else
-            printf(" -");
-    }
-    printf("\n");
-}
-
-inline void print_sudoku(const array<Domain>& D) {
-    print_sudoku(make_assignment(D), round(std::sqrt(std::sqrt(D.size()))));
-}
-
-inline void print_nqueens(const array<Domain>& D) {
-    int N = D.size();
-    for(int i = 0; i<N; i++) {
-        for(int k = 0; k<N; k++) {
-            if(not contains(D[i], k)) printf(" -");
-            else {
-                if(D[i].size() == 1)
-                    printf(" Q");
-                else
-                    printf(" o");
-            }
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
-
-
-#endif
-

@@ -13,3 +13,4 @@ csp.o: csp.cpp csp.h
 
 clean:
 	rm *.o
+	rm examples/*.o
