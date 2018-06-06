@@ -1,5 +1,4 @@
-# csp solver
-Simple Constraint Satisfaction Problem solver, in few lines of code.
+# A simple Constraint Satisfaction Problem solver
 
 # Features
 - Backtrack search.
