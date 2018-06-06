@@ -3,68 +3,81 @@
 #define GAC3
 // #define PRINT_SEARCH
 // #define PRINT_SEARCH_GAC
+#define FULL_PRINT_SEARCH
 
-bool satisfies(const Assignment& assignment, const vector<Constraint>& C) {
-    for(auto& kv : assignment) {
-        int variable = kv.first;
-        int value = kv.second;
-       
-        for(auto& constraint : C) {
-            if(not constraint.eval(assignment)) {
-                return false;
-            }
+void comment(const std::string& c) {
+    #ifdef PRINT_SEARCH
+    printf("%s\n", c.c_str());
+    #endif
+}
+
+
+bool satisfies(const vector<Domain>& D, const vector<Constraint>& C) {
+    for(auto& constraint : C) {
+        if(not constraint.eval(D)) {
+            return false;
         }
     }
+    return true;
+}
+
+bool is_assignment_complete(const vector<Domain>& D) {
+    for (int i = 0; i < D.size(); ++i)
+        if(D[i].size() != 1) return false;
 
     return true;
 }
 
-
-Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, int depth) {
+bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
     #ifdef PRINT_SEARCH
-    print_state(A, D, depth);
+    print_state(D, depth);
     #endif
-    num_search += 1;
 
     // If assignment is complete, return.
-    if(A.size() == D.size()) {
-        return A;
-    }
+    if(is_assignment_complete(D))
+        return true;
 
-    int variable = choose_variable(D, A, C);
-    assert(variable<D.size());
-    assert(D[variable].size() > 0);
+    int variable = choose_variable(D, C);
 
-    for(int val : D[variable]) {
-        A[variable] = val;
+    const Domain vdomain = D[variable];
+    for(int val : vdomain) {
+        #ifdef PRINT_SEARCH
+            print_times(" •", depth);
+            printf("%d := %d\n", variable, val);
+        #endif
+        
+        D[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
-        if(not satisfies(A, C)) {
-            A.erase(variable);
+        if(not satisfies(D, C)) {
+            comment("does not satisfies!\n");
             continue;
         }
 
         #ifdef GAC3
             vector<Domain> D_new;
-            D_new = gac3(C, A, D);
+            D_new = gac3(C, D);
             if(D_new.size() == 0) {
-                A.erase(variable);
+                #ifdef PRINT_SEARCH
+                printf("GAC3 failure\n");
+                #endif
                 continue;
             }
         #else
             vector<Domain>& D_new = D;
         #endif
        
-        Assignment A_new = search(C, D_new, A, depth+1);
-        if(A_new.size() == 0) {
-            A.erase(variable);
+        bool success = search(C, D_new, depth+1);
+        if(not success) {
+            num_search += 1;
             #ifdef PRINT_SEARCH 
             printf("BACKTRACK\n");
-            print_state(A, D, depth);
+            print_state(D, depth);
             #endif
         }
         else {
-            return A_new;
+            D = D_new;
+            return true;
         }
     }
 
@@ -74,15 +87,25 @@ Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, i
 
 
 Assignment search(const CSP& csp, Assignment A = {}) {
-    return search(csp.constraints, csp.domains, A, 0);
+    num_search = 0;
+    auto D = csp.domains;
+    for(auto& kv : A)
+        D[kv.first] = {kv.second};
+
+    if(search(csp.constraints, D, 0)) {
+        for(int i=0; i<D.size(); i++) A[i] = D[i][0];
+        return A;
+    }
+    else
+        return {};
 }
 
 
-int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector<Constraint>& C) {
+int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
     // Choose following minimun remaining values heuristic.
     vector<int> remaining_values (D.size(), 9999); //@Hack: 9999???
     for (int i = 0; i < D.size(); ++i) {
-        if(asg.count(i) > 0) continue;
+        if(D[i].size() == 1) continue;
         remaining_values[i] = D[i].size();
     }
 
@@ -118,35 +141,38 @@ int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector
         }
     }
     assert(max_degree_idx < D.size());
+    assert(D[max_degree_idx].size() > 1);
     return max_degree_idx;
 }
 
 
-bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, Assignment A) {
+bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D) {
     bool removed_value = false;
     int i = 0;
+    Domain vdomain = D[variable];
     while(true) {
-        int val = D[variable][i];
-        A[variable] = val;
-        bool exist = search_small(constraint, D, A, 0);
+        int val = vdomain[i];
+        D[variable] = {val};
+        bool exist = search_small(constraint, D, 0);
 
         if(exist == false) {
-            D[variable].erase(D[variable].begin() + i);
+            vdomain.erase(vdomain.begin() + i);
             removed_value = true;
         }
         else {
             i += 1;
         }
 
-        A.erase(variable);
 
-        if(i >= D[variable].size())
+        if(i >= vdomain.size()) {
+            D[variable] = vdomain;
             return removed_value;
+        }
     }
 }
 
 
-vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<Domain> D) {
+vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D) {
     vector<int> var_queue;
     vector<int> const_queue;
 
@@ -155,8 +181,8 @@ vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<D
     for (int i = 0; i < C.size(); ++i) {
         const Constraint& c = C[i];
         for(int v : c.variables) {
-            if(asg.count(v)) continue;
             assert(D[v].size() > 0);
+            if(D[v].size() == 1) continue;
             var_queue.push_back(v);
             const_queue.push_back(i);
         }
@@ -171,7 +197,7 @@ vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<D
         var_queue.pop_back();
         const_queue.pop_back();
 
-        bool removed_value_from_domain = remove_values(v, C.at(c), D, asg);
+        bool removed_value_from_domain = remove_values(v, C.at(c), D);
         if(removed_value_from_domain) {
             // If the domain was left empty, this assignment cannot
             // be made complete. search() will read {} as failure.
@@ -213,7 +239,7 @@ vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<D
 }
 
 
-bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth) {  
+bool search_small(const Constraint& c, vector<Domain> D, int depth) {  
     // Naive search that just check if there's a possible assignment that
     // satisfy only ONE constraint. Used by remove_values()
     #ifdef PRINT_SEARCH_GAC
@@ -224,7 +250,7 @@ bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth
     const vector<int>& vars = c.variables;
     bool complete = true;
     for(int v : vars) {
-        if(A.count(v) == 0) {
+        if(D[v].size() != 1) {
             complete = false;
             break;
         }
@@ -235,7 +261,7 @@ bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth
     // @Speed: We're not unsing any heuristic to choose the variable!! (MRV, Max Degree)
     int variable = -1;
     for(int v : vars) {
-        if(A.count(v) == 0) {
+        if(D[v].size() > 1) {
             variable = v;
             break;
         }
@@ -243,22 +269,17 @@ bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth
 
     assert(D[variable].size() > 0);
 
-    for(int val : D[variable]) {
-        A[variable] = val;
+    const Domain domain = D[variable];
+    for(int val : domain) {
+        D[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
-        if(not c.eval(A)) {
-            A.erase(variable);
+        if(not c.eval(D)) {
             continue;
         }
 
-        auto ass = search_small(c, D, A, depth+1);
-        if(not ass) {
-            A.erase(variable);
-        }
-        else {
+        if(search_small(c, D, depth+1))
             return true;
-        }
     }
 
     return false;

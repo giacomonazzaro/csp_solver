@@ -22,16 +22,6 @@ CSP make_sudoku() {
     return sudoku;
 }
 
-void print_sudoku(const Assignment& asg) {
-    for(int i = 0; i<81; i++) {
-        if(i%9 == 0) printf("\n");
-        if(asg.count(i))
-            printf(" %d", asg.at(i));
-        else
-            printf(" -");
-    }
-    printf("\n");
-}
 
 CSP make_nqueens(int N = 8) {
     auto domains = vector<vector<int>>(8, {1,2,3,4,5,6,7,8} );
@@ -49,10 +39,10 @@ CSP make_nqueens(int N = 8) {
     return csp;
 }
 
-void print_nqueens(const Assignment& asg) {
+void print_nqueens(const vector<Domain>& D) {
     for(int i = 0; i<8; i++) {
         for(int k = 0; k<8; k++) {
-            if(asg.at(i)-1 == k)
+            if(D[i][0]-1 == k)
                 printf(" X");
             else
             printf(" •");

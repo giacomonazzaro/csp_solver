@@ -10,12 +10,12 @@
 using Domain = vector<int>;
 using Assignment = std::unordered_map<int, int>;
 
-static int num_search = 0;
+static int num_search;
 
 struct Constraint {
     std::string name;
     vector<int> variables;
-    std::function<bool(const Assignment&)> eval;
+    std::function<bool(const vector<Domain>&)> eval;
 };
 
 
@@ -26,19 +26,19 @@ struct CSP {
 };
 
 // Check if assignment satisfies the constraints.
-bool satisfies(const Assignment& assignment, const vector<Constraint>& C);
+bool satisfies(const vector<Domain>& assignment, const vector<Constraint>& C);
 
 // Search satisfying assignment.
-Assignment search(const vector<Constraint>& C, vector<Domain> D, Assignment A, int depth);
+bool search(const vector<Constraint>& C, vector<Domain>& D, int depth);
 Assignment search(const CSP& csp, Assignment A);
 
 // Choose next variable (MRV & MaxDegree heuristics).
-int choose_variable(const vector<Domain>& D, const Assignment& asg, const vector<Constraint>& C);
+int choose_variable(const vector<Domain>& D, const vector<Constraint>& C);
 
 // Make inferences afeter assignment (Genrealized Arc Consistency).
-vector<Domain> gac3(const vector<Constraint>& C, const Assignment& asg, vector<Domain> D);
-bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, Assignment A);
-bool search_small(const Constraint& c, vector<Domain> D, Assignment A, int depth);
+vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D);
+bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, vector<Domain> A);
+bool search_small(const Constraint& c, vector<Domain> D, int depth);
 
 
 // Csp intialization functions.
@@ -60,13 +60,13 @@ static Constraint all_different(const vector<int>& vars, const std::string& name
     Constraint c;
     c.variables = vars;
     c.name = name;
-    c.eval = [vars](const Assignment& asg) {
+    c.eval = [vars](const vector<Domain>& D) {
         for (int i = 0; i < vars.size()-1; ++i)
             for (int k = i+1; k < vars.size(); ++k) {
                 int v0 = vars[i];
                 int v1 = vars[k];
-                if(asg.count(v0) and asg.count(v1))
-                    if(asg.at(v0) == asg.at(v1))
+                if(D[v0].size() == 1 and D[v1].size() == 1)
+                    if(D[v0][0] == D[v1][0])
                         return false;
             }
         
@@ -80,9 +80,9 @@ static Constraint binary(int i, int k, const std::function<bool(int, int)>& rel,
     Constraint c;
     c.variables = {i, k};
     c.name = name;
-    c.eval = [=](const Assignment& asg) {
-        if(asg.count(i) and asg.count(k)) {
-            if(not rel(asg.at(i), asg.at(k))) return false;
+    c.eval = [=](const vector<Domain>& D) {
+        if(D[i].size() == 1 and D[k].size() == 1) {
+            if(not rel(D[i][0], D[k][0])) return false;
         }
 
         return true;
@@ -95,9 +95,9 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
     Constraint c;
     c.name = name;
     c.variables = {v0, v1};
-    c.eval = [v0, v1](const Assignment& asg) {
-        if(asg.count(v0) and asg.count(v1))
-            if(asg.at(v0) != asg.at(v1))
+    c.eval = [v0, v1](const vector<Domain>& D) {
+        if(D[v0].size() == 1 and D[v1].size() == 1)
+            if(D[v0][0] != D[v1][0])
                 return false;
 
         return true;
@@ -144,26 +144,44 @@ inline void print_domains(const vector<Domain>& D) {
 
 inline void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
 
-inline void print(const Assignment& asg, int b = 0) {
-    print_times("-", b);
-    printf("assignment:\n");
-    for (auto kv : asg) {
-        print_times("-", b);
-        printf("var %d := %d\n", kv.first, kv.second);
-    }
-}
-
-inline void print_state(const Assignment& A, const vector<Domain>& D, int depth = 0) {
+inline void print_state(const vector<Domain>& D, int depth = 0) {
     for (int i = 0; i < D.size(); ++i) {
         print_times("-", depth);
-        printf(" %d := ", i);
-        if(A.count(i) > 0) {
-            printf("%d\n", A.at(i));
-        }
-        else
+        printf(" %d = ", i);
+        //if(A.count(i) > 0) {
+        //    printf("%d\n", A.at(i));
+        //}
+        //else
             print_domain(D[i]);
     }
 }
+
+
+inline Assignment make_assignment(const vector<Domain>& D) {
+    Assignment A = {};
+    for(int i=0; i<D.size(); i++) {
+        if(D[i].size() == 1)
+            A[i] = D[i][0];
+    }
+    return A;
+}
+
+
+inline void print_sudoku(const Assignment& A) {
+    for(int i = 0; i<81; i++) {
+        if(i%9 == 0) printf("\n");
+        if(A.count(i) == 1)
+            printf(" %d", A.at(i));
+        else
+            printf(" -");
+    }
+    printf("\n");
+}
+
+inline void print_sudoku(const vector<Domain>& D) {
+    print_sudoku(make_assignment(D));
+}
+
 
 
 #endif
