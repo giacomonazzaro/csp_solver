@@ -33,8 +33,9 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
     #endif
 
     // If assignment is complete, return.
-    if(is_assignment_complete(D))
+    if(is_assignment_complete(D)) {
         return true;
+    }
 
     int variable = choose_variable(D, C);
 
@@ -45,29 +46,28 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
             printf(" %d := %d\n", variable, val);
         #endif
         
-        vector<Domain> D_new = D;
-        D_new[variable] = {val};
+        vector<Domain> D_attempt = D; // copying the domains.
+        D_attempt[variable] = {val};
 
-        
         // If new assignment does not satisfies constraints, continue.
-        if(not satisfies(C, D_new)) {
+        if(not satisfies(C, D_attempt)) {
             comment("Satisfiaction failure!\n");
             continue;
         }
 
-        if(not constraint_propagation(C, D_new)) {
+        if(not constraint_propagation(C, D_attempt)) {
             comment("Propagation failure\n");
             continue;
         }
 
-        D_new = gac3(C, D_new);
-        if(D_new.size() == 0) {
+        
+        if(not gac3(C, D_attempt)) {
             comment("GAC3 failure\n");
             continue;
         }
 
        
-        bool success = search(C, D_new, depth+1);
+        bool success = search(C, D_attempt, depth+1);
         if(not success) {
             num_search += 1;
             #ifdef PRINT_SEARCH 
@@ -76,7 +76,7 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
             #endif
         }
         else {
-            D = D_new;
+            D = D_attempt; // copying the domains.
             return true;
         }
     }
@@ -94,7 +94,7 @@ Assignment search(const CSP& csp, Assignment A = {}) {
 
     if(A.size() > 0) {
         constraint_propagation(csp.constraints, D);
-        D = gac3(csp.constraints, D);
+        gac3(csp.constraints, D);
     }
 
     if(search(csp.constraints, D, 0)) {
@@ -188,13 +188,13 @@ bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D
     bool removed_value = false;
     // vector<int> removed_values;
     int i = 0;
-    Domain domain_tmp = D[variable];
+    Domain domain_tmp = D[variable]; // copying the domain.
     
     while(true) {
         // Make a fake copy of the domain. Will set the just interesting variables.
         vector<Domain> Dfake = vector<Domain>(D.size(), {-1});
         Dfake[variable] = {domain_tmp[i]};
-        for(auto v : constraint.variables) Dfake[v] = D[v];
+        for(auto v : constraint.variables) Dfake[v] = D[v]; // copying the domains.
         
         bool exists = search_small(constraint, Dfake, 0);
 
@@ -216,7 +216,8 @@ bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D
 }
 
 
-vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D) {
+bool gac3(const vector<Constraint>& C, vector<Domain>& D_result) {
+    vector<Domain> D = D_result; // copying the domains.
     vector<int> var_queue;
     vector<int> const_queue;
 
@@ -246,7 +247,7 @@ vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D) {
             // If the domain was left empty, this assignment cannot
             // be made complete. search() will read {} as failure.
             if(D[v].size() == 0) {
-                return {};
+                return false;
             }
 
             // If we shrinked its domain, we add to the queue all
@@ -279,7 +280,8 @@ vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D) {
     }
 
     // Return the updated domain.
-    return D;
+    D_result = D; // copying the domains.
+    return true;
 }
 
 

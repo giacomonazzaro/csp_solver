@@ -43,7 +43,7 @@ int choose_variable(const vector<Domain>& D, const vector<Constraint>& C);
 
 // Make inferences after assignment (Genrealized Arc Consistency).
 bool constraint_propagation(const vector<Constraint>& C, vector<Domain>& D);
-vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D);
+bool gac3(const vector<Constraint>& C, vector<Domain>& D);
 bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, vector<Domain> A);
 bool search_small(const Constraint& c, vector<Domain> D, int depth);
 
