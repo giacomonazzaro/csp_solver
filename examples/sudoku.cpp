@@ -24,26 +24,13 @@ CSP make_sudoku(int N) {
 }
 
 
-Assignment sudoku_hard() {
-    return {
-        {1,4}, {4,3}, {6,2}, {7,5},
-        {9+3, 7}, {9+4, 4},
-        {18+0, 6}, {18+6, 4}, {18+8, 3},
-        {27+0, 1}, {27+8, 6},
-        {36+2, 2}, {36+5, 7},
-        {45+0, 9}, {45+5, 5}, {45+6, 7},
-        {56+3, 2},
-        {63+1, 3}, {63+7, 9}, {63+8, 1},
-        {72+0, 4}, {72+3, 5}, {72+4, 1}, {72+6, 8}, {72+8, 2},
-    };
-}
-
-
-Assignment parse_sudoku(const std::string s) {
+Assignment parse_sudoku(const std::string& s, int N) {
     Assignment A;
-    for(int i = 0; i<80; i++) 
-        if(s[i] != '-')
-            A[i] = s[i] - '0';
+    for(int i = 0; i<N*N*N*N; i++) {
+        int idx = i*2 + 1;
+        if(s[idx] != '-')
+            A[i] = s[idx] - '0';
+    }
 
     return A;
 }
@@ -64,38 +51,22 @@ inline void print_sudoku(const array<Domain>& D) {
 }
 
 
-Assignment sudoku_impossible() {
-    return parse_sudoku(
-        "8--------"
-        "--36-----"
-        "-7--9-2--"
-        "-5---7---"
-        "----457--"
-        "---1---3-"
-        "--1----68"
-        "--85---1-"
-        "-9----4--"
-    );
-}
+Assignment sudoku_hard = parse_sudoku(
+        " 8 - - - - - - - -"
+        " - - 3 6 - - - - -"
+        " - 7 - - 9 - 2 - -"
+        " - 5 - - - 7 - - -"
+        " - - - - 4 5 7 - -"
+        " - - - 1 - - - 3 -"
+        " - - 1 - - - - 6 8"
+        " - - 8 5 - - - 1 -"
+        " - 9 - - - - 4 - -", 3);
 
-Assignment sudoku_easy() {
-    return {
-        {0+1, 2}, 
-        {9+0, 7}, {9+4, 8}, {9+5, 3}, {9+6, 6}, {9+7, 4},
-        {18+0, 8}, {18+1, 1}, {18+5, 5}, {18+7, 3},
-        {27+1, 9}, {27+2, 2}, {27+4, 3}, {27+7, 6}, {27+8, 8},
-        {36+3, 8}, {36+5, 9},
-        {45+0, 4}, {45+1, 8}, {45+4, 6}, {45+6, 1}, {45+7, 7},
-        {54+1, 6}, {54+3, 2}, {54+7, 8}, {54+8, 3},
-        {63+1, 4}, {63+2, 7}, {63+3, 3}, {63+4, 1}, {63+8, 6},
-        {72+7, 1}
-    };
-}
 
-void do_sudoku(int N = 3) {
+int main(int argc, char const *argv[]) {
+    int N = 3;
     CSP csp = make_sudoku(N);
-    Assignment init = sudoku_impossible();
-    // Assignment init = sudoku_hard();
+    Assignment init = sudoku_hard;
     print_sudoku(init, N);
 
     auto solution = search(csp, init);
@@ -103,8 +74,4 @@ void do_sudoku(int N = 3) {
 
     if(solution.size())
         print_sudoku(solution, N);
-}
-
-int main(int argc, char const *argv[]) {
-    do_sudoku();
 }

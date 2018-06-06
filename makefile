@@ -8,6 +8,8 @@ sudoku: csp.o
 	g++ -std=c++11 -o examples/sudoku.o examples/sudoku.cpp csp.o -O3
 	time ./examples/sudoku.o
 
+test: sudoku nqueens
+
 csp.o: csp.cpp csp.h
 	g++ -std=c++11 -o csp.o csp.cpp -O3 -c
 

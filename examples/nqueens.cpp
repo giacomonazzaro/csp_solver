@@ -21,12 +21,10 @@ inline void print_nqueens(const array<Domain>& D) {
     int N = D.size();
     for(int i = 0; i<N; i++) {
         for(int k = 0; k<N; k++) {
-            if(not contains(D[i], k)) printf(" -");
+            if(not contains(D[i], k)) printf(" -"); // Unassigned and cannot be a queen.
             else {
-                if(D[i].size() == 1)
-                    printf(" Q");
-                else
-                    printf(" o");
+                if(D[i].size() == 1)  printf(" Q"); // There's a queen.
+                else                  printf(" o"); // Unassigned, but can be a queen.
             }
         }
         printf("\n");
@@ -34,24 +32,15 @@ inline void print_nqueens(const array<Domain>& D) {
     printf("\n");
 }
 
-void do_nqueens(int N) {
-    CSP csp = make_nqueens(N);
-
-    auto solution = search(csp, {});
-    printf("solution\n");
-
-    // if(solution.size())
-        // print_nqueens(solution);
-}
-
-Assignment make_assignment_from_minizinc(array<int> D) {
+Assignment make_assignment_from_list(array<int> D, bool starts_at_one = false) {
     Assignment A;
     for(int i=0; i<D.size(); i++)
-        A[i] = D[i]-1;
+        A[i] = D[i]-starts_at_one;
     return A;
 }
 
-int main(int argc, char const *argv[])
-{
-    do_nqueens(15);
+int main(int argc, char const *argv[]) {
+    CSP csp = make_nqueens(15);
+    auto solution = search(csp, {});
+    printf("solution\n");
 }

@@ -9,18 +9,18 @@
 //            But 'vector' is a really bad name...
 #define array std::vector
 using Domain = array<int>;
-using Assignment = std::unordered_map<int, int>;
+using Assignment = std::unordered_map<int, int>; // Used only to interface with outside world.
 
 /***** Data definitions *****/
 enum constraint_type {
-    CUSTOM, ALL_DIFFERENT, EQUALITY, BINARY
+    UNKNOWN, ALL_DIFFERENT, EQUALITY, BINARY
 };
 
 struct Constraint {
     std::string name;
     array<int> variables;
     std::function<bool(const array<Domain>&)> eval;
-    constraint_type type = CUSTOM;
+    constraint_type type = UNKNOWN;
 };
 
 
@@ -144,7 +144,7 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
 // Utilities functions.
 #define add(v, x) v.push_back(x)
 #define remove(v, i) v.erase(v.begin() + i)
-#define contains(v, x) (std::find(v.begin(),v.end(),x) !=v.end())
+#define contains(v, x) (std::find(v.begin(),v.end(),x) != v.end())
 #define min(v) *std::min_element(v.begin(),v.end());
 
 template <typename Type>
