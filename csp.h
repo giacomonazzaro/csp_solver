@@ -5,7 +5,6 @@
 #include <vector>
 #include <cassert>
 #include <unordered_map>
-#include <map>
 #include <set>
 
 // @Warining: std::array is a different thing! (It's a statically sized array)
@@ -189,8 +188,9 @@ inline Assignment make_assignment(const array<Domain>& D) {
 
 
 inline void print_sudoku(const Assignment& A) {
-    for(int i = 0; i<81; i++) {
-        if(i%9 == 0) printf("\n");
+    int N = round(std::sqrt(std::sqrt(A.size())));
+    for(int i = 0; i<N*N*N*N; i++) {
+        if(i%(N*N) == 0) printf("\n");
         if(A.count(i) == 1)
             printf(" %d", A.at(i));
         else
