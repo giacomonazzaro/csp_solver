@@ -162,10 +162,8 @@ inline array<Type> make_range(int to) { return make_range<Type>(0, to); }
 
 
 // Printing functions.
-inline void print_domain(const Domain& d) {
-    printf("{ ");
-    for(int val : d) printf("%d ", val);
-    printf("}\n");
+inline void print_array(const Domain& d) {
+    printf("{ "); for(int val : d) printf("%d ", val); printf("}\n");
 }
 
 inline void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
@@ -174,7 +172,7 @@ inline void print_state(const array<Domain>& D, int depth = 0) {
     for (int i = 0; i < D.size(); ++i) {
         print_times("-", depth);
         printf(" %d = ", i);
-        print_domain(D[i]);
+        print_array(D[i]);
     }
 }
 
