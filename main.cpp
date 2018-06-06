@@ -39,10 +39,10 @@ CSP make_nqueens(int N = 8) {
     return csp;
 }
 
-void print_nqueens(const vector<Domain>& D) {
+void print_nqueens(const Assignment& D) {
     for(int i = 0; i<8; i++) {
         for(int k = 0; k<8; k++) {
-            if(D[i][0]-1 == k)
+            if(D.at(i)-1 == k)
                 printf(" X");
             else
             printf(" •");
@@ -82,18 +82,18 @@ Assignment sudoku_easy() {
 
 int main(int argc, char const *argv[])
 {
-    // CSP csp = make_nqueens();
-    // Assignment init = {};
+    CSP csp = make_nqueens();
+    Assignment init = {};
     
-    CSP csp = make_sudoku();
-    Assignment init = sudoku_hard();
-    print_sudoku(init);
+    // CSP csp = make_sudoku();
+    // Assignment init = sudoku_easy();
+    // print_sudoku(init);
 
     auto solution = search(csp, init);
     printf("\nnum_search: %d\n", num_search);
     printf("solution\n");
 
     if(solution.size())
-        // print_nqueens(solution);
-        print_sudoku(solution);
+        print_nqueens(solution);
+        // print_sudoku(solution);
 }

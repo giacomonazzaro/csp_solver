@@ -1,9 +1,9 @@
 #include "csp.h"
 
+// @Warning: Broken without GAC3!!!
 #define GAC3
-// #define PRINT_SEARCH
+#define PRINT_SEARCH
 // #define PRINT_SEARCH_GAC
-#define FULL_PRINT_SEARCH
 
 void comment(const std::string& c) {
     #ifdef PRINT_SEARCH
@@ -42,8 +42,8 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
     const Domain vdomain = D[variable];
     for(int val : vdomain) {
         #ifdef PRINT_SEARCH
-            print_times(" •", depth);
-            printf("%d := %d\n", variable, val);
+            print_times("•", depth);
+            printf(" %d := %d\n", variable, val);
         #endif
         
         D[variable] = {val};
@@ -82,7 +82,7 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
     }
 
     // Return empty assignment.
-    return {};
+    return false;
 }
 
 
@@ -105,7 +105,7 @@ int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
     // Choose following minimun remaining values heuristic.
     vector<int> remaining_values (D.size(), 9999); //@Hack: 9999???
     for (int i = 0; i < D.size(); ++i) {
-        if(D[i].size() == 1) continue;
+        if(D[i].size() <= 1) continue;
         remaining_values[i] = D[i].size();
     }
 
@@ -153,7 +153,9 @@ bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D
     while(true) {
         int val = vdomain[i];
         D[variable] = {val};
-        bool exist = search_small(constraint, D, 0);
+        vector<Domain> Dfake = vector<Domain>(D.size(), {-1});
+        for(auto v : constraint.variables) Dfake[v] = D[v];
+        bool exist = search_small(constraint, Dfake, 0);
 
         if(exist == false) {
             vdomain.erase(vdomain.begin() + i);
@@ -243,7 +245,7 @@ bool search_small(const Constraint& c, vector<Domain> D, int depth) {
     // Naive search that just check if there's a possible assignment that
     // satisfy only ONE constraint. Used by remove_values()
     #ifdef PRINT_SEARCH_GAC
-    print(A, depth);
+    print_state(D, depth);
     #endif
 
     // If assignment is complete, return true.
@@ -258,15 +260,8 @@ bool search_small(const Constraint& c, vector<Domain> D, int depth) {
     if(complete) return true;
 
 
-    // @Speed: We're not unsing any heuristic to choose the variable!! (MRV, Max Degree)
-    int variable = -1;
-    for(int v : vars) {
-        if(D[v].size() > 1) {
-            variable = v;
-            break;
-        }
-    }
-
+    // Still using MRV & Max Degree.
+    int variable = choose_variable(D, {c});
     assert(D[variable].size() > 0);
 
     const Domain domain = D[variable];
