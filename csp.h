@@ -6,16 +6,22 @@
 #include <cassert>
 #include <unordered_map>
 #include <map>
+#include <set>
 #define vector std::vector
 using Domain = vector<int>;
 using Assignment = std::unordered_map<int, int>;
 
 static int num_search;
 
+enum constraint_type {
+    CUSTOM, ALL_DIFFERENT, EQUALITY, BINARY
+};
+
 struct Constraint {
     std::string name;
     vector<int> variables;
     std::function<bool(const vector<Domain>&)> eval;
+    constraint_type type = CUSTOM;
 };
 
 
@@ -36,6 +42,7 @@ Assignment search(const CSP& csp, Assignment A);
 int choose_variable(const vector<Domain>& D, const vector<Constraint>& C);
 
 // Make inferences afeter assignment (Genrealized Arc Consistency).
+bool propagate(const vector<Constraint>& C, vector<Domain>& D);
 vector<Domain> gac3(const vector<Constraint>& C, vector<Domain> D);
 bool remove_values(int variable, const Constraint& constraint, vector<Domain>& D, vector<Domain> A);
 bool search_small(const Constraint& c, vector<Domain> D, int depth);
@@ -60,15 +67,39 @@ static Constraint all_different(const vector<int>& vars, const std::string& name
     Constraint c;
     c.variables = vars;
     c.name = name;
+    c.type = ALL_DIFFERENT;
     c.eval = [vars](const vector<Domain>& D) {
-        for (int i = 0; i < vars.size()-1; ++i)
+        // std::set<int> buckets; // Piccioni
+        // for (int i : vars)
+        //     for (int val : D[i])
+        //         buckets.insert(val);
+        // if(buckets.size() < vars.size()) return false;
+            
+        
+        // auto D_ = D;
+        // for(int v : vars) {
+        //     if(D_[v].size() == 1)
+        //         for(int w : vars) {
+        //             if(w == v) continue;
+        //                 for (int i = 0; i < D_[w].size(); ++i)
+        //                     if(D_[w][i] == D_[v][0]) {
+        //                         D_[w].erase(D_[w].begin() + i);
+        //                         if(D[w].size() == 0) return false;
+        //                         break;
+        //                     }
+
+        //         }
+        // }
+
+        for (int i = 0; i < vars.size()-1; ++i) {
+            int v = vars[i];
+            if(D[v].size() != 1) continue;
             for (int k = i+1; k < vars.size(); ++k) {
-                int v0 = vars[i];
-                int v1 = vars[k];
-                if(D[v0].size() == 1 and D[v1].size() == 1)
-                    if(D[v0][0] == D[v1][0])
-                        return false;
+                int w = vars[k];
+                if(D[w].size() == 1 and D[v][0] == D[w][0])
+                    return false;
             }
+        }
         
         return true;
     };
@@ -108,10 +139,9 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
 
 
 
-
-
-
 // Utilities functions.
+#define remove(v, i) v.erase(v.begin() + i)
+
 template <typename Type>
 inline bool contains(const vector<Type>& v, const Type& x){
     return std::find(v.begin(), v.end(), x) != v.end();

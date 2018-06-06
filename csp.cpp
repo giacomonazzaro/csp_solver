@@ -1,12 +1,11 @@
 #include "csp.h"
 
-// @Warning: Broken without GAC3!!!
-#define GAC3
-#define PRINT_SEARCH
+// #define PRINT_SEARCH
+// #define PRINT_SEARCH_LOG
 // #define PRINT_SEARCH_GAC
 
 void comment(const std::string& c) {
-    #ifdef PRINT_SEARCH
+    #ifdef PRINT_SEARCH_LOG
     printf("%s\n", c.c_str());
     #endif
 }
@@ -46,26 +45,27 @@ bool search(const vector<Constraint>& C, vector<Domain>& D, int depth) {
             printf(" %d := %d\n", variable, val);
         #endif
         
-        D[variable] = {val};
+        vector<Domain> D_new = D;
+        D_new[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
-        if(not satisfies(D, C)) {
-            comment("does not satisfies!\n");
+        
+        if(not satisfies(D_new, C)) {
+            comment("Satisfiaction failure!\n");
             continue;
         }
 
-        #ifdef GAC3
-            vector<Domain> D_new;
-            D_new = gac3(C, D);
-            if(D_new.size() == 0) {
-                #ifdef PRINT_SEARCH
-                printf("GAC3 failure\n");
-                #endif
-                continue;
-            }
-        #else
-            vector<Domain>& D_new = D;
-        #endif
+        if(not propagate(C, D_new)) {
+            comment("Propagation failure\n");
+            continue;
+        }
+
+        D_new = gac3(C, D_new);
+        if(D_new.size() == 0) {
+            comment("GAC3 failure\n");
+            continue;
+        }
+
        
         bool success = search(C, D_new, depth+1);
         if(not success) {
@@ -92,9 +92,13 @@ Assignment search(const CSP& csp, Assignment A = {}) {
     for(auto& kv : A)
         D[kv.first] = {kv.second};
 
+    if(A.size() > 0) {
+        propagate(csp.constraints, D);
+        D = gac3(csp.constraints, D);
+    }
+
     if(search(csp.constraints, D, 0)) {
-        for(int i=0; i<D.size(); i++) A[i] = D[i][0];
-        return A;
+        return make_assignment(D);
     }
     else
         return {};
@@ -143,6 +147,28 @@ int choose_variable(const vector<Domain>& D, const vector<Constraint>& C) {
     assert(max_degree_idx < D.size());
     assert(D[max_degree_idx].size() > 1);
     return max_degree_idx;
+}
+
+
+bool propagate(const vector<Constraint>& C, vector<Domain>& D) {
+    for(auto& c : C) {
+        if(c.type == ALL_DIFFERENT) {
+            for(int v : c.variables) {
+                if(D[v].size() != 1) continue;
+                for(int w : c.variables) {
+                    if(w == v) continue;
+                    for (int i = 0; i < D[w].size(); ++i)
+                        if(D[w][i] == D[v][0]) {
+                            remove(D[w], i);
+                            if(D[w].size() == 0) return false;
+                            break;
+                        }
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 

@@ -66,6 +66,30 @@ Assignment sudoku_hard() {
     };
 }
 
+Assignment parse_sudoku(const std::string s) {
+    Assignment A;
+    for(int i = 0; i<80; i++) 
+        if(s[i] != '-')
+            A[i] = s[i] - '0';
+
+    return A;
+}
+
+Assignment sudoku_impossible() {
+    return parse_sudoku(
+        "8--------"
+        "--36-----"
+        "-7--9-2--"
+        "-5---7---"
+        "----457--"
+        "---1---3-"
+        "--1----68"
+        "--85---1-"
+        "-9----4--"
+    );
+}
+
+
 Assignment sudoku_easy() {
     return {
         {0+1, 2}, 
@@ -80,20 +104,33 @@ Assignment sudoku_easy() {
     };
 }
 
-int main(int argc, char const *argv[])
-{
-    CSP csp = make_nqueens();
-    Assignment init = {};
-    
-    // CSP csp = make_sudoku();
-    // Assignment init = sudoku_easy();
-    // print_sudoku(init);
+void do_sudoku() {
+    CSP csp = make_sudoku();
+    Assignment init = sudoku_impossible();
+    // Assignment init = sudoku_hard();
+    print_sudoku(init);
 
     auto solution = search(csp, init);
     printf("\nnum_search: %d\n", num_search);
     printf("solution\n");
 
     if(solution.size())
+        print_sudoku(solution);
+}
+
+void do_nqueens() {
+    CSP csp = make_nqueens();
+
+    auto solution = search(csp, {});
+    printf("\nnum_search: %d\n", num_search);
+    printf("solution\n");
+
+    if(solution.size())
         print_nqueens(solution);
-        // print_sudoku(solution);
+}
+
+int main(int argc, char const *argv[])
+{
+    do_sudoku();
+    // do_nqueens();
 }
