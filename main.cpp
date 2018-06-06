@@ -133,6 +133,6 @@ void do_nqueens(int N) {
 
 int main(int argc, char const *argv[])
 {
-    do_sudoku();
-    // do_nqueens(16);
+    // do_sudoku();
+    do_nqueens(18);
 }
