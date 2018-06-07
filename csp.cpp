@@ -4,7 +4,7 @@
 // #define PRINT_SEARCH_LOG
 // #define PRINT_SEARCH_GAC
 
-void comment(const std::string&) {
+void comment(const std::string& c) {
     #ifdef PRINT_SEARCH_LOG
     printf("%s\n", c.c_str());
     #endif
@@ -30,18 +30,13 @@ bool is_assignment_complete(const array<Domain>& D) {
 
 
 bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
-    // Check if assignment satisfies constraints.
-    if(not satisfies(C, D)) {
-        comment("Satisfiaction failure!");
-        return false;
-    }
-
-    // Propagate consequences and eventually reduce domains.
+    // Forward propagation.
     if(not constraint_propagation(C, D)) {
         comment("Propagation failure");
         return false;
     }
     
+    // Generalized arc consistency.
     if(not gac3(C, D)) {
         comment("GAC3 failure");
         return false;
@@ -68,7 +63,12 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
         array<Domain> D_attempt = D; 
         D_attempt[variable] = {val};
 
-        // Check if constraints can be satisfied from here.
+        // Check if assignment satisfies constraints.
+        if(not satisfies(C, D))
+            return false;
+
+
+        // Propagate assignment and eventually reduce domains.
         if(not do_inferences(C, D_attempt))
             continue;
         
@@ -120,7 +120,7 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
             candidates.push_back(i);
     }
 
-    // If no tie, return the variable.
+    // If no ties, return the variable.
     if(candidates.size() == 1)
         return candidates[0];
 
@@ -223,9 +223,7 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
     // For each constraint c, for each variable v in the scope of c,
     // add the pair (v, c) to the queue.
     for (int i = 0; i < C.size(); ++i) {
-        const Constraint& c = C[i];
-        for(int v : c.variables) {
-            assert(D[v].size() > 0);
+        for(int v : C[i].variables) {
             if(D[v].size() == 1) continue;
             var_queue.push_back(v);
             const_queue.push_back(i);
@@ -241,7 +239,7 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
         var_queue.pop_back();
         const_queue.pop_back();
 
-        bool removed_value_from_domain = remove_values(v, C.at(c), D);
+        bool removed_value_from_domain = remove_values(v, C[c], D);
         if(removed_value_from_domain) {
             // If the domain was left empty, this assignment cannot
             // be made complete. search() will read {} as failure.
@@ -259,7 +257,8 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
 
                 for(int w : C[i].variables) {
                     if(w == v) continue;
-                    
+                    if(D[w].size() == 1) continue;
+
                     // Check if it is already in queue.
                     bool already_in_queue = false;
                     for(int k = 0; k < var_queue.size(); k++) {
