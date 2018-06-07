@@ -43,7 +43,7 @@ Assignment search(const CSP& csp, Assignment A);
 int choose_variable(const array<Domain>& D, const array<Constraint>& C);
 
 // Make inferences after assignment (Genrealized Arc Consistency).
-bool constraint_propagation(const array<Constraint>& C, array<Domain>& D);
+bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);
 bool gac3(const array<Constraint>& C, array<Domain>& D);
 bool remove_values(int variable, const Constraint& constraint, array<Domain>& D, array<Domain> A);
 bool search_small(const Constraint& c, array<Domain> D, int depth);

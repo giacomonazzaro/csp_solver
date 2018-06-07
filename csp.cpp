@@ -105,21 +105,12 @@ Assignment search(const CSP& csp, Assignment A = {}) {
 
 int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // Choose following minimun remaining values heuristic.
-    array<int> candidates; candidates.reserve(D.size());
-    
-    // Find the first non-assigned variable and take its size as minimum.
-    int min_size = -1;
-    int i = 0;
-    while(min_size < 0) {
-        if(D[i].size() != 1) {
-            min_size = D[i].size();
-            candidates.push_back(i);
-        }
-        i += 1;
-    }
-    
-    // Populate candidates with all the variables that have domain size == min_size
-    for( ; i<D.size(); i++) {
+    // Gradually update min_size and populate candidates with all 
+    // the variables that have domain size == min_size.
+    array<int> candidates;
+    candidates.reserve(D.size());
+    int min_size = 9999999; // @Hack.
+    for(int i=0 ; i<D.size(); i++) {
         auto size = D[i].size();
         if(size == 1) continue;
         if(size == min_size) candidates.push_back(i);
