@@ -1,4 +1,4 @@
-COMPLILE = g++ -std=c++11
+COMPLILE = g++ -std=c++11 -O3
 
 all: nqueens
 
