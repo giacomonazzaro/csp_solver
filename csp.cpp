@@ -105,13 +105,13 @@ Assignment search(const CSP& csp, Assignment A = {}) {
 
 int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // Choose following minimun remaining values heuristic.
-    array<int> remaining_values (D.size(), 9999); //@Hack: 9999???
+    array<int> remaining_values (D.size());
     for (int i = 0; i < D.size(); ++i) {
-        if(D[i].size() <= 1) continue;
-        remaining_values[i] = D[i].size();
+        if(D[i].size() == 1) remaining_values[i] = INT_MAX;
+        else                 remaining_values[i] = D[i].size();
     }
 
-    // Choose as candidates all varibale which have minimum remaining values.
+    // Choose as candidates all varibales which have minimum remaining values.
     int min_val = min(remaining_values);
     array<int> candidates;
     candidates.reserve(D.size());
