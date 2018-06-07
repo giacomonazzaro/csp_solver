@@ -31,7 +31,7 @@ bool is_assignment_complete(const array<Domain>& D) {
 
 bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
     // Forward propagation.
-    if(not constraint_propagation(C, D)) {
+    if(not constraints_propagation(C, D)) {
         comment("Propagation failure");
         return false;
     }
@@ -91,7 +91,7 @@ Assignment search(const CSP& csp, Assignment A = {}) {
         D[kv.first] = {kv.second};
 
     if(A.size() > 0) {
-        constraint_propagation(csp.constraints, D);
+        constraints_propagation(csp.constraints, D);
         gac3(csp.constraints, D);
     }
 
@@ -105,19 +105,28 @@ Assignment search(const CSP& csp, Assignment A = {}) {
 
 int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // Choose following minimun remaining values heuristic.
-    array<int> remaining_values (D.size());
-    for (int i = 0; i < D.size(); ++i) {
-        if(D[i].size() == 1) remaining_values[i] = INT_MAX;
-        else                 remaining_values[i] = D[i].size();
-    }
-
-    // Choose as candidates all varibales which have minimum remaining values.
-    int min_val = min(remaining_values);
-    array<int> candidates;
-    candidates.reserve(D.size());
-    for (int i = 0; i < remaining_values.size(); ++i) {
-        if(remaining_values[i] == min_val)
+    array<int> candidates; candidates.reserve(D.size());
+    
+    // Find the first non-assigned variable and take its size as minimum.
+    int min_size = -1;
+    int i = 0;
+    while(min_size < 0) {
+        if(D[i].size() != 1) {
+            min_size = D[i].size();
             candidates.push_back(i);
+        }
+        i += 1;
+    }
+    
+    // Populate candidates with all the variables that have domain size == min_size
+    for( ; i<D.size(); i++) {
+        auto size = D[i].size();
+        if(size == 1) continue;
+        if(size == min_size) candidates.push_back(i);
+        if(size < min_size) {
+            min_size = size;
+            candidates = {i};
+        }
     }
 
     // If no ties, return the variable.
@@ -127,7 +136,7 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
 
     // If there's a tie, use Max Degree heuristic.
     // Start with computing degrees. We can cache that, but it
-    // is probably unexpensive to compute on the fly (@Profile it).
+    // is probably unexpensive to compute them on the fly (@Profile it).
     array<int> degrees (D.size(), 0);
     for(auto& c : C)
         for(int v : c.variables) 
@@ -148,7 +157,7 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
 }
 
 
-bool constraint_propagation(const array<Constraint>& C, array<Domain>& D) {
+bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
     for(auto& c : C) {
         if(c.type == ALL_DIFFERENT) {
             for(int v : c.variables) {
@@ -314,7 +323,7 @@ bool search_small(const Constraint& c, array<Domain> D, int depth) {
         
         // @Speed: We should propagate also in search_small, but copying D seems to slow down.
         // array<Domain> D_new = D;
-        // if(not constraint_propagation({c}, D_new)) continue;
+        // if(not constraints_propagation({c}, D_new)) continue;
 
         if(search_small(c, D, depth+1)) {
             return true;
