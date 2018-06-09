@@ -33,7 +33,8 @@ struct CSP {
 
 /***** Solving functions *****/
 // Check if assignment satisfies the constraints.
-bool satisfies(const array<Domain>& assignment, const array<Constraint>& C);
+bool satisfies(const array<Constraint>& C, const array<Domain>& A);
+bool satisfies(const array<Constraint>& C, const Assignment& A);
 
 // Search satisfying assignment.
 bool search(const array<Constraint>& C, array<Domain>& D, int depth);
@@ -47,8 +48,6 @@ bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);
 bool gac3(const array<Constraint>& C, array<Domain>& D);
 bool remove_values(int variable, const Constraint& constraint, array<Domain>& D, array<Domain> A);
 bool search_small(const Constraint& c, array<Domain> D, int depth);
-
-
 
 /***** CSP intialization functions. *****/
 inline CSP make_csp(const std::string& s, const array<Domain>& d, const array<Constraint>& c = {}) {
@@ -183,4 +182,29 @@ inline Assignment make_assignment(const array<Domain>& D) {
             A[i] = D[i][0];
     }
     return A;
+}
+
+inline array<Domain> make_domains(const Assignment& A) {
+    array<Domain> D (A.size());
+    for(auto& kv : A)  D[kv.first] = {kv.second};
+    return D;
+}
+
+inline void apply_assignment(Domain& D, const Assignment& A) {
+    for(auto& kv : A)  D[kv.first] = kv.second;
+}
+
+inline void print_unsatisfied(const array<Domain> D, const array<Constraint>& C) {
+    printf("unsatisfied constraints: ");
+    //for(auto& d : D) assert(d.size() == 1);
+    bool found = false;
+    for (int i = 0; i < C.size(); ++i)
+    {
+        if(not C[i].eval(D)) {
+            found = true;
+            printf("\n%d: %s\n", i, C[i].name.c_str());
+        }
+    }
+    if(not found) printf("nothing\n");
+    printf("\n");
 }

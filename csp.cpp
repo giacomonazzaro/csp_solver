@@ -20,6 +20,16 @@ bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     return true;
 }
 
+bool satisfies(const array<Constraint>& C, const Assignment& A) {
+    auto D = make_domains(A);
+    for(auto& c : C) {
+        if(not c.eval(D)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 bool is_assignment_complete(const array<Domain>& D) {
     for (int i = 0; i < D.size(); ++i)
@@ -37,10 +47,11 @@ bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
     }
     
     // Generalized arc consistency.
+    /*
     if(not gac3(C, D)) {
         comment("GAC3 failure");
         return false;
-    }
+    }*/
 
     return true;
 }
@@ -51,9 +62,10 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
     print_state(D, depth);
     #endif
 
-    // If assignment is complete, return success.
+    // If assignment is complete, just check if it satisfies contraints.
     if(is_assignment_complete(D)) {
-        return true;
+        if(satisfies(C, D)) return true;
+        else                return false;
     }
 
     int variable = choose_variable(D, C);
@@ -64,9 +76,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
         D_attempt[variable] = {val};
 
         // Check if assignment satisfies constraints.
-        if(not satisfies(C, D))
-            return false;
-
+        if(not satisfies(C, D_attempt))
+            continue;
 
         // Propagate assignment and eventually reduce domains.
         if(not do_inferences(C, D_attempt))
@@ -95,11 +106,28 @@ Assignment search(const CSP& csp, Assignment A = {}) {
         gac3(csp.constraints, D);
     }
 
-    if(search(csp.constraints, D, 0)) {
+    if(is_assignment_complete(D)) {
+        if(not satisfies(csp.constraints, D)) {
+            printf("No solution found! (search not needed)\n");
+            print_unsatisfied(D, csp.constraints);
+        }
         return make_assignment(D);
     }
-    else
-        return {};
+
+    bool success = search(csp.constraints, D, 0);
+    A = make_assignment(D);
+    if(success) {
+        bool check = satisfies(csp.constraints, D);
+        if(not check) {
+            printf("\n***** Search found a solution, but it's wrong! *****\n");
+            print_unsatisfied(D, csp.constraints);
+        }
+        return A;
+    }
+    else {
+        printf("No solution found!\n");
+        return A;
+    }
 }
 
 
@@ -119,14 +147,15 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
             candidates = {i};
         }
     }
-
+    assert(candidates.size() > 0);
+    
     // If no ties, return the variable.
     if(candidates.size() == 1)
         return candidates[0];
 
 
     // If there's a tie, use Max Degree heuristic.
-    // Start with computing degrees. We can cache that, but it
+    // Start with computing degrees. We could cache that, but it
     // is probably unexpensive to compute them on the fly (@Profile it).
     array<int> degrees (D.size(), 0);
     for(auto& c : C)
@@ -323,4 +352,6 @@ bool search_small(const Constraint& c, array<Domain> D, int depth) {
 
     return false;
 }
+
+
 

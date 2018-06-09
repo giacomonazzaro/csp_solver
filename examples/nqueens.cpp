@@ -10,8 +10,8 @@ CSP make_nqueens(int N = 8) {
     for (int i = 0; i < N-1; ++i) {
         for (int j = i+1; j < N; ++j) {
             std::string name = "diag("+ std::to_string(i) + ", " + std::to_string(j) +")";
-            add(csp.constraints, binary(i, j, [i,j](int x, int y) { return x - y != j - i; }, "+"+name));
-            add(csp.constraints, binary(i, j, [i,j](int x, int y) { return x - y != i - j; }, "-"+name));
+            add(csp.constraints, binary(i, j, [i,j](int x, int y) { return x + i != y + j; }, "+"+name));
+            add(csp.constraints, binary(i, j, [i,j](int x, int y) { return x - i != y - j; }, "-"+name));
         }
     }
 
@@ -52,9 +52,13 @@ Assignment make_assignment_from_list(array<int> D, bool starts_at_one = false) {
     return A;
 }
 
+
 int main(int argc, char const *argv[]) {
-    CSP csp = make_nqueens(12);
+    int N = 20;
+    if(argc == 2)
+        N = atoi(argv[2]);
+
+    CSP csp = make_nqueens(N);
     auto solution = search(csp, {});
-    printf("solution\n");
     print_nqueens(solution);
 }
