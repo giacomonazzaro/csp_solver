@@ -1,4 +1,5 @@
 #include "csp.h"
+// #include "csp_constraints.cpp"
 
 // #define PRINT_SEARCH
 // #define PRINT_SEARCH_LOG
@@ -11,19 +12,19 @@ void comment(const std::string& c) {
 }
 
 
-bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
+bool satisfies(const array<const Constraint*>& C, const array<Domain>& D) {
     for(auto& constraint : C) {
-        if(not constraint.eval(D)) {
+        if(not constraint->eval(D)) {
             return false;
         }
     }
     return true;
 }
 
-bool satisfies(const array<Constraint>& C, const Assignment& A) {
+bool satisfies(const array<const Constraint*>& C, const Assignment& A) {
     auto D = make_domains(A);
     for(auto& c : C) {
-        if(not c.eval(D)) {
+        if(not c->eval(D)) {
             return false;
         }
     }
@@ -39,7 +40,7 @@ bool is_assignment_complete(const array<Domain>& D) {
 }
 
 
-bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
+bool do_inferences(const array<const Constraint*>& C, array<Domain>& D) {
     // Forward propagation.
     if(not constraints_propagation(C, D)) {
         comment("Propagation failure");
@@ -47,20 +48,21 @@ bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
     }
     
     // Generalized arc consistency.
-    /*
+    
     if(not gac3(C, D)) {
         comment("GAC3 failure");
         return false;
-    }*/
+    }
 
     return true;
 }
 
 
-bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
+bool search(const array<const Constraint*>& C, array<Domain>& D, int depth, search_stats& stats) {
     #ifdef PRINT_SEARCH
     print_state(D, depth);
     #endif
+    stats.expansions += 1;
 
     // If assignment is complete, just check if it satisfies contraints.
     if(is_assignment_complete(D)) {
@@ -84,7 +86,7 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
             continue;
         
         // Recursive call.
-        bool success = search(C, D_attempt, depth+1);
+        bool success = search(C, D_attempt, depth+1, stats);
         if(success) {
             D = D_attempt; // update the domains.
             return true;
@@ -92,11 +94,12 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth) {
     }
 
     // Return failure. Backtrack.
+    stats.backtracks += 1;
     return false;
 }
 
 
-Assignment search(const CSP& csp, Assignment A = {}) {
+Assignment search(const CSP& csp, Assignment A, search_stats& stats) {
     auto D = csp.domains;
     for(auto& kv : A)
         D[kv.first] = {kv.second};
@@ -114,7 +117,7 @@ Assignment search(const CSP& csp, Assignment A = {}) {
         return make_assignment(D);
     }
 
-    bool success = search(csp.constraints, D, 0);
+    bool success = search(csp.constraints, D, 0, stats);
     A = make_assignment(D);
     if(success) {
         bool check = satisfies(csp.constraints, D);
@@ -131,7 +134,7 @@ Assignment search(const CSP& csp, Assignment A = {}) {
 }
 
 
-int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
+int choose_variable(const array<Domain>& D, const array<const Constraint*>& C) {
     // Choose following minimun remaining values heuristic.
     // Gradually update min_size and populate candidates with all 
     // the variables that have domain size == min_size.
@@ -159,7 +162,7 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // is probably unexpensive to compute them on the fly (@Profile it).
     array<int> degrees (D.size(), 0);
     for(auto& c : C)
-        for(int v : c.variables) 
+        for(int v : c->variables) 
             degrees[v] += 1;
 
     int max_degree_idx = candidates[0];
@@ -177,12 +180,12 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
 }
 
 
-bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
+bool constraints_propagation(const array<const Constraint*>& C, array<Domain>& D) {
     for(auto& c : C) {
-        if(c.type == ALL_DIFFERENT) {
-            for(int v : c.variables) {
+        if(c->type == ALL_DIFFERENT) {
+            for(int v : c->variables) {
                 if(D[v].size() != 1) continue;
-                for(int w : c.variables) {
+                for(int w : c->variables) {
                     if(w == v) continue;
                     for (int i = 0; i < D[w].size(); ++i)
                         if(D[w][i] == D[v][0]) {
@@ -194,10 +197,23 @@ bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
             }
         }
 
-        // if(c.variables.size() == 2) {
+
+        if(c->type == EQUAL) {
+            Domain intersection;
+            intersection.reserve(D[c->variables[0]].size());
+            for(int v0 : D[c->variables[0]]) {
+                if(contains(D[c->variables[1]], v0))
+                    intersection.push_back(v0); 
+            }
+            if(intersection.size() == 0) return false;
+            D[c->variables[0]] = intersection;
+            D[c->variables[1]] = intersection;
+        }
+
+        // if(c->variables.size() == 2) {
         //     for(int k : {0,1}) {
-        //         int v0 = c.variables[k];
-        //         int v1 = c.variables[(k+1)%2];
+        //         int v0 = c->variables[k];
+        //         int v1 = c->variables[(k+1)%2];
         //         if(D[v0].size() != 1) continue;
         //         Domain old_domain = D[v1];
         //         for (int i = 0; i < D[v1].size(); ) {
@@ -211,7 +227,7 @@ bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
 }
 
 
-bool remove_values(int variable, const Constraint& constraint, array<Domain>& D) {
+bool remove_values(int variable, const Constraint* constraint, array<Domain>& D) {
     bool removed_value = false;
     int i = 0;
     Domain domain_tmp = D[variable]; // copying the domain.
@@ -220,7 +236,7 @@ bool remove_values(int variable, const Constraint& constraint, array<Domain>& D)
         // Make a fake copy of the domain. Will set the just interesting variables.
         array<Domain> Dfake = array<Domain>(D.size(), {-1});
         Dfake[variable] = {domain_tmp[i]};
-        for(auto v : constraint.variables)
+        for(auto v : constraint->variables)
             if(v != variable) Dfake[v] = D[v]; // copying the domains.
         
         
@@ -244,7 +260,7 @@ bool remove_values(int variable, const Constraint& constraint, array<Domain>& D)
 }
 
 
-bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
+bool gac3(const array<const Constraint*>& C, array<Domain>& D_result) {
     array<Domain> D = D_result; // copying the domains.
     array<int> var_queue;
     array<int> const_queue;
@@ -252,7 +268,7 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
     // For each constraint c, for each variable v in the scope of c,
     // add the pair (v, c) to the queue.
     for (int i = 0; i < C.size(); ++i) {
-        for(int v : C[i].variables) {
+        for(int v : C[i]->variables) {
             if(D[v].size() == 1) continue;
             var_queue.push_back(v);
             const_queue.push_back(i);
@@ -281,10 +297,10 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
             for (int i = 0; i < C.size(); ++i) {
                 if(i == c) continue;
 
-                if(not contains(C[i].variables, v))
+                if(not contains(C[i]->variables, v))
                     continue;
 
-                for(int w : C[i].variables) {
+                for(int w : C[i]->variables) {
                     if(w == v) continue;
                     if(D[w].size() == 1) continue;
 
@@ -312,15 +328,15 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
 }
 
 
-bool search_small(const Constraint& c, array<Domain> D, int depth) {  
+bool search_small(const Constraint* c, array<Domain> D, int depth) {  
     // Naive search that just check if there's a possible assignment that
-    // satisfy only ONE constraint. Used by remove_values()
+    // satisfy only ONE constraint-> Used by remove_values()
     #ifdef PRINT_SEARCH_GAC
     print_state(D, depth);
     #endif
 
     // If assignment is complete, return true.
-    const array<int>& vars = c.variables;
+    const array<int>& vars = c->variables;
     bool complete = true;
     for(int v : vars) {
         if(D[v].size() != 1) {
@@ -332,14 +348,15 @@ bool search_small(const Constraint& c, array<Domain> D, int depth) {
 
 
     // Still using MRV & Max Degree.
-    int variable = choose_variable(D, {c});
+    array<const Constraint*> cc; cc.push_back(c);
+    int variable = choose_variable(D, cc);
 
     const Domain domain = D[variable];
     for(int val : domain) {
         D[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
-        if(not c.eval(D)) continue;
+        if(not c->eval(D)) continue;
         
         // @Speed: We should propagate also in search_small, but copying D seems to slow down.
         // array<Domain> D_new = D;

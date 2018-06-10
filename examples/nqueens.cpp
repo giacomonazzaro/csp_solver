@@ -1,17 +1,17 @@
 #include "../csp.h"
 
 CSP make_nqueens(int N = 8) {
-    const array<int> range = make_range<int>(N);
+    const array<int> range = make_range(N);
     auto domains = array<Domain>(N, range);
     CSP csp = make_csp("N-Queens", domains);
-    add(csp.constraints, all_different(range, "alldiff"));
+    add_constraint(csp, new all_different(range, "alldiff"));
     
     // Diagonal attack constraints.
     for (int i = 0; i < N-1; ++i) {
         for (int j = i+1; j < N; ++j) {
             std::string name = "diag("+ std::to_string(i) + ", " + std::to_string(j) +")";
-            add(csp.constraints, binary(i, j, [i,j](int x, int y) { return x + i != y + j; }, "+"+name));
-            add(csp.constraints, binary(i, j, [i,j](int x, int y) { return x - i != y - j; }, "-"+name));
+            add_constraint(csp, new binary(i, j, [i,j](int x, int y) { return x + i != y + j; }, "+"+name));
+            add_constraint(csp, new binary(i, j, [i,j](int x, int y) { return x - i != y - j; }, "-"+name));
         }
     }
 
@@ -54,11 +54,13 @@ Assignment make_assignment_from_list(array<int> D, bool starts_at_one = false) {
 
 
 int main(int argc, char const *argv[]) {
-    int N = 20;
+    int N = 13;
     if(argc == 2)
         N = atoi(argv[2]);
 
     CSP csp = make_nqueens(N);
-    auto solution = search(csp, {});
+    search_stats stats;
+    auto solution = search(csp, {}, stats);
     print_nqueens(solution);
+    print_stats(stats);
 }

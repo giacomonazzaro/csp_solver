@@ -13,44 +13,50 @@ using Assignment = std::unordered_map<int, int>; // Used only to interface with 
 
 /***** Data definitions *****/
 enum constraint_type {
-    UNKNOWN, ALL_DIFFERENT, EQUALITY, BINARY
+    RELATION, ALL_DIFFERENT, EQUAL, BINARY, UNKNOWN
 };
 
 struct Constraint {
     std::string name;
     array<int> variables;
-    std::function<bool(const array<Domain>&)> eval;
+    // std::function<bool(const array<Domain>&)> eval;
     constraint_type type = UNKNOWN;
+
+    virtual bool eval(const array<Domain>&) const = 0;
 };
 
 
 struct CSP {
     std::string name;
     array<Domain> domains;
-    array<Constraint> constraints;
+    array<const Constraint*> constraints;
 };
 
+struct search_stats {
+    int backtracks = 0;
+    int expansions = 0;
+};
 
 /***** Solving functions *****/
 // Check if assignment satisfies the constraints.
-bool satisfies(const array<Constraint>& C, const array<Domain>& A);
-bool satisfies(const array<Constraint>& C, const Assignment& A);
+bool satisfies(const array<const Constraint*>& C, const array<Domain>& A);
+bool satisfies(const array<const Constraint*>& C, const Assignment& A);
 
 // Search satisfying assignment.
-bool search(const array<Constraint>& C, array<Domain>& D, int depth);
-Assignment search(const CSP& csp, Assignment A);
+bool search(const array<const Constraint*>& C, array<Domain>& D, int depth);
+Assignment search(const CSP& csp, Assignment A, search_stats& stats);
 
 // Choose next variable (MRV & MaxDegree heuristics).
-int choose_variable(const array<Domain>& D, const array<Constraint>& C);
+int choose_variable(const array<Domain>& D, const array<const Constraint*>& C);
 
 // Make inferences after assignment (Genrealized Arc Consistency).
-bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);
-bool gac3(const array<Constraint>& C, array<Domain>& D);
+bool constraints_propagation(const array<const Constraint*>& C, array<Domain>& D);
+bool gac3(const array<const Constraint*>& C, array<Domain>& D);
 bool remove_values(int variable, const Constraint& constraint, array<Domain>& D, array<Domain> A);
-bool search_small(const Constraint& c, array<Domain> D, int depth);
+bool search_small(const Constraint* c, array<Domain> D, int depth);
 
 /***** CSP intialization functions. *****/
-inline CSP make_csp(const std::string& s, const array<Domain>& d, const array<Constraint>& c = {}) {
+inline CSP make_csp(const std::string& s, const array<Domain>& d, const array<const Constraint*>& c = {}) {
     CSP csp;
     csp.name = s;
     csp.domains = d;
@@ -58,86 +64,24 @@ inline CSP make_csp(const std::string& s, const array<Domain>& d, const array<Co
     return csp;
 }
 
-
-inline void add_contstraint(CSP& csp, const Constraint& c) {
+inline void add_constraint(CSP& csp, Constraint* c) {
     csp.constraints.push_back(c);
 }
 
+// inline void add_constraint(CSP& csp, Constraint c) {
+//     Constraint* cp = new Constraint();
+//     cp->name = c.name;
+//     cp->variables = c.variables;
+//     cp->eval = c.eval;
+//     cp->type = c.type;
+//     csp.constraints.push_back(cp);
+// }
 
-static Constraint all_different(const array<int>& vars, const std::string& name = "") {
-    Constraint c;
-    c.variables = vars;
-    c.name = name;
-    c.type = ALL_DIFFERENT;
-    c.eval = [vars](const array<Domain>& D) {
-        // std::set<int> buckets; // Piccioni
-        // for (int i : vars)
-        //     for (int val : D[i])
-        //         buckets.insert(val);
-        // if(buckets.size() < vars.size()) return false;
-            
-        
-        // auto D_ = D;
-        // for(int v : vars) {
-        //     if(D_[v].size() == 1)
-        //         for(int w : vars) {
-        //             if(w == v) continue;
-        //                 for (int i = 0; i < D_[w].size(); ++i)
-        //                     if(D_[w][i] == D_[v][0]) {
-        //                         D_[w].erase(D_[w].begin() + i);
-        //                         if(D[w].size() == 0) return false;
-        //                         break;
-        //                     }
-
-        //         }
-        // }
-
-        for (int i = 0; i < vars.size()-1; ++i) {
-            int v = vars[i];
-            if(D[v].size() != 1) continue;
-            for (int k = i+1; k < vars.size(); ++k) {
-                int w = vars[k];
-                if(D[w].size() == 1 and D[v][0] == D[w][0])
-                    return false;
-            }
-        }
-        
-        return true;
-    };
-    return c;
-}
-
-
-static Constraint binary(int i, int k, const std::function<bool(int, int)>& rel, const std::string& name = "") {
-    Constraint c;
-    c.variables = {i, k};
-    c.name = name;
-    c.eval = [=](const array<Domain>& D) {
-        if(D[i].size() == 1 and D[k].size() == 1) {
-            if(not rel(D[i][0], D[k][0])) return false;
-        }
-
-        return true;
-    };
-    return c;
-}
-
-
-static Constraint equal(int v0, int v1, const std::string& name = "") {
-    Constraint c;
-    c.name = name;
-    c.variables = {v0, v1};
-    c.eval = [v0, v1](const array<Domain>& D) {
-        if(D[v0].size() == 1 and D[v1].size() == 1)
-            if(D[v0][0] != D[v1][0])
-                return false;
-
-        return true;
-    };
-    return c;
-}
-
-
+// Constraint definitions.
+// Constraint all_different(const array<int>& vars, const std::string& name);
+// Constraint binary(int i, int k, const std::function<bool(int, int)>& rel, const std::string& name);
+// Constraint relation(const array<int>, const std::function<bool(const array<Domain>&)>, const std::string&);
+// Constraint equal(int i, int k, const std::string& name);
 
 
 // Utilities functions.
@@ -145,16 +89,15 @@ static Constraint equal(int v0, int v1, const std::string& name = "") {
 #define remove(v, i) v.erase(v.begin() + i)
 #define contains(v, x) (std::find(v.begin(),v.end(),x) != v.end())
 #define min(v) *std::min_element(v.begin(),v.end());
+#define append(v, w) v.reserve(v.size()+w.size()); v.insert( v.end(), w.begin(), w.end() )
 
-template <typename Type>
-inline array<Type> make_range(int from, int to) {
-    array<Type> result (to - from);
+inline array<int> make_range(int from, int to) {
+    array<int> result (to - from);
     for(int i = 0; i < to-from; i++) result[i] = from + i;
     return result;
 }
 
-template <typename Type>
-inline array<Type> make_range(int to) { return make_range<Type>(0, to); }
+inline array<int> make_range(int to) { return make_range(0, to); }
 
 
 
@@ -194,17 +137,69 @@ inline void apply_assignment(Domain& D, const Assignment& A) {
     for(auto& kv : A)  D[kv.first] = kv.second;
 }
 
-inline void print_unsatisfied(const array<Domain> D, const array<Constraint>& C) {
+inline void print_stats(const search_stats& stats) {
+    printf("\nSearch statistics:\n");
+    printf("   num_backtracks = %d\n", stats.backtracks);
+    printf("   num_expansions = %d\n\n", stats.expansions);
+}
+
+inline void print_unsatisfied(const array<Domain> D, const array<const Constraint*>& C) {
     printf("unsatisfied constraints: ");
     //for(auto& d : D) assert(d.size() == 1);
     bool found = false;
     for (int i = 0; i < C.size(); ++i)
     {
-        if(not C[i].eval(D)) {
+        if(not C[i]->eval(D)) {
             found = true;
-            printf("\n%d: %s\n", i, C[i].name.c_str());
+            printf("\n%d: %s\n", i, C[i]->name.c_str());
         }
     }
     if(not found) printf("nothing\n");
     printf("\n");
 }
+
+
+
+
+struct all_different : Constraint {
+     all_different(const array<int>& vars, const std::string& n = "") {
+        variables = vars;
+        name = n;
+        type = ALL_DIFFERENT;
+    }
+
+    bool eval(const array<Domain>& D) const {
+        for (int i = 0; i < variables.size()-1; ++i) {
+            int v = variables[i];
+            if(D[v].size() != 1) continue;
+            for (int k = i+1; k < variables.size(); ++k) {
+                int w = variables[k];
+                if(D[w].size() == 1 and D[v][0] == D[w][0])
+                    return false;
+            }
+        }
+        
+        return true;
+    }
+};
+
+struct binary : Constraint {
+    std::function<bool(int, int)> rel;
+
+    binary(int i, int k, std::function<bool(int, int)> r, const std::string& n = "") {
+        variables = {i, k};
+        name = n;
+        rel = r;
+        type = BINARY;
+    }
+
+    bool eval(const array<Domain>& D) const {
+        int i = variables[0];
+        int k = variables[1];
+        if(D[i].size() == 1 and D[k].size() == 1) {
+            if(not rel(D[i][0], D[k][0])) return false;
+        }
+
+        return true;
+    };
+};

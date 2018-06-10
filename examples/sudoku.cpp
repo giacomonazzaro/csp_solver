@@ -1,7 +1,7 @@
 #include "../csp.h"
 
 CSP make_sudoku(int N) {
-    auto range = make_range<int>(1, N*N+1);
+    auto range = make_range(1, N*N+1);
     auto domains = array<Domain>(N*N*N*N, range);
     CSP sudoku = make_csp("Sudoku", domains);
 
@@ -69,9 +69,8 @@ int main(int argc, char const *argv[]) {
     Assignment init = sudoku_hard;
     print_sudoku(init, N);
 
-    auto solution = search(csp, init);
-    printf("solution\n");
-
-    if(solution.size())
-        print_sudoku(solution, N);
+    search_stats stats;
+    auto solution = search(csp, init, stats);
+    print_sudoku(solution, N);
+    print_stats(stats);
 }
