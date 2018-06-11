@@ -48,11 +48,10 @@ bool do_inferences(const array<const Constraint*>& C, array<Domain>& D) {
     }
     
     // Generalized arc consistency.
-    
-    if(not gac3(C, D)) {
-        comment("GAC3 failure");
-        return false;
-    }
+    // if(not gac3(C, D)) {
+    //     comment("GAC3 failure");
+    //     return false;
+    // }
 
     return true;
 }
@@ -322,7 +321,7 @@ bool search_small(const Constraint* c, array<Domain> D, int depth) {
         
         // @Speed: We should propagate also in search_small, but copying D seems to slow down.
         // array<Domain> D_new = D;
-        // if(not constraints_propagation({c}, D_new)) continue;
+        // if(not c->propagate(D_new)) continue;
 
         if(search_small(c, D, depth+1)) {
             return true;
