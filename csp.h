@@ -18,11 +18,17 @@ enum constraint_type {
 
 struct Constraint {
     std::string name;
-    array<int> variables;
-    // std::function<bool(const array<Domain>&)> eval;
-    constraint_type type = UNKNOWN;
+    array<int> scope;
+    
+    Constraint(array<int> vars, std::string s): scope(vars), name(s) {
+        name += "(";
+        for (int i = 0; i < scope.size()-1; ++i)
+            name += std::to_string(scope[i]) + ", ";
+        name += std::to_string(scope.back()) + ")";
+    }
 
     virtual bool eval(const array<Domain>&) const = 0;
+    virtual bool propagate(array<Domain>&) const = 0;
 };
 
 
@@ -71,7 +77,7 @@ inline void add_constraint(CSP& csp, Constraint* c) {
 // inline void add_constraint(CSP& csp, Constraint c) {
 //     Constraint* cp = new Constraint();
 //     cp->name = c.name;
-//     cp->variables = c.variables;
+//     cp->scope = c.scope;
 //     cp->eval = c.eval;
 //     cp->type = c.type;
 //     csp.constraints.push_back(cp);
@@ -118,6 +124,11 @@ inline void print_state(const array<Domain>& D, int depth = 0) {
     }
 }
 
+inline void print_constraints(const CSP& csp) {
+    for(auto c : csp.constraints)
+        printf("%s\n", c->name.c_str());
+}
+
 inline Assignment make_assignment(const array<Domain>& D) {
     Assignment A = {};
     for(int i=0; i<D.size(); i++) {
@@ -162,18 +173,15 @@ inline void print_unsatisfied(const array<Domain> D, const array<const Constrain
 
 
 struct all_different : Constraint {
-     all_different(const array<int>& vars, const std::string& n = "") {
-        variables = vars;
-        name = n;
-        type = ALL_DIFFERENT;
-    }
+     all_different(const array<int>& vars, std::string n = "all_different"):
+        Constraint(vars, n) {}
 
     bool eval(const array<Domain>& D) const {
-        for (int i = 0; i < variables.size()-1; ++i) {
-            int v = variables[i];
+        for (int i = 0; i < scope.size()-1; ++i) {
+            int v = scope[i];
             if(D[v].size() != 1) continue;
-            for (int k = i+1; k < variables.size(); ++k) {
-                int w = variables[k];
+            for (int k = i+1; k < scope.size(); ++k) {
+                int w = scope[k];
                 if(D[w].size() == 1 and D[v][0] == D[w][0])
                     return false;
             }
@@ -181,25 +189,89 @@ struct all_different : Constraint {
         
         return true;
     }
+
+    bool propagate(array<Domain>& D) const {
+        for(int v : scope) {
+            if(D[v].size() != 1) continue;
+            for(int w : scope) {
+                if(w == v) continue;
+                for (int i = 0; i < D[w].size(); ++i)
+                    if(D[w][i] == D[v][0]) {
+                        remove(D[w], i);
+                        if(D[w].size() == 0) return false;
+                        break;
+                    }
+            }
+        }
+        return true;
+    }
 };
 
 struct binary : Constraint {
     std::function<bool(int, int)> rel;
 
-    binary(int i, int k, std::function<bool(int, int)> r, const std::string& n = "") {
-        variables = {i, k};
-        name = n;
-        rel = r;
-        type = BINARY;
-    }
+    binary(int i, int k, std::function<bool(int, int)> r, std::string n = "binary") :
+        Constraint({i,k}, n), rel(r) {}
 
     bool eval(const array<Domain>& D) const {
-        int i = variables[0];
-        int k = variables[1];
+        int i = scope[0];
+        int k = scope[1];
         if(D[i].size() == 1 and D[k].size() == 1) {
-            if(not rel(D[i][0], D[k][0])) return false;
+            if(not rel(D[i][0], D[k][0]))
+                return false;
         }
 
         return true;
     };
+
+    bool propagate(array<Domain>& D) const {
+        int x0 = scope[0];
+        int x1 = scope[1];
+        Domain d0, d1;
+        // std::set d0, d1; // @Try with std::set, code will be simpler.
+        for(int v0 : D[x0]) {
+            bool found = false;
+            for(int v1 : D[x1]) {
+                if(rel(v0, v1)) {
+                    if(not contains(d1, v1))
+                        d1.push_back(v1);
+                    found = true;
+                }
+            }
+            if(found) d0.push_back(v0);
+        }
+        if(d0.size() == 0) return false;
+        if(d1.size() == 0) return false;
+        D[x0] = d0;
+        D[x1] = d1;
+        return true;
+    }
+};
+
+
+struct equal : Constraint {
+    equal(int i, int k, std::string name = "equal"):
+        Constraint({i,k}, name) {}
+
+    bool eval(const array<Domain>& D) const {
+        int i = scope[0];
+        int k = scope[1];
+        if(D[i].size() == 1 and D[k].size() == 1) {
+            if(D[i][0] != D[k][0]) return false;
+        }
+        return true;
+    }
+    
+    bool propagate(array<Domain>& D) const {
+        Domain intersection;
+        intersection.reserve(D[scope[0]].size());
+        for(int v0 : D[scope[0]]) {
+            if(contains(D[scope[1]], v0))
+                intersection.push_back(v0); 
+        }
+        if(intersection.size() == 0) return false;
+        D[scope[0]] = intersection;
+        D[scope[1]] = intersection;
+        return true;
+    }
 };

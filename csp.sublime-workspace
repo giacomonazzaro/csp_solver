@@ -1,0 +1,1640 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"va",
+				"variable"
+			],
+			[
+				"con",
+				"const"
+			],
+			[
+				"start",
+				"starts_at_one"
+			],
+			[
+				"contr",
+				"constraints\t(csp.cpp)"
+			],
+			[
+				"num",
+				"num_search"
+			],
+			[
+				"mak",
+				"make_assignment"
+			],
+			[
+				"make_",
+				"make_assignment\t(csp.cpp)"
+			],
+			[
+				"print_",
+				"print_nqueens"
+			],
+			[
+				"reu",
+				"result"
+			],
+			[
+				"remo",
+				"removed_value_from_domain"
+			],
+			[
+				"vc",
+				"vector"
+			],
+			[
+				"removed_",
+				"removed_values"
+			],
+			[
+				"PRINT_SEARCH_",
+				"PRINT_SEARCH_LOG"
+			],
+			[
+				"sudo",
+				"sudoku_impossible"
+			],
+			[
+				"var",
+				"variables"
+			],
+			[
+				"typ",
+				"type"
+			],
+			[
+				"constr",
+				"constraint"
+			],
+			[
+				"do_",
+				"do_nqueens"
+			],
+			[
+				"prin",
+				"print_nqueens"
+			],
+			[
+				"rer",
+				"return"
+			],
+			[
+				"choo",
+				"choose_variable"
+			],
+			[
+				"cou",
+				"count"
+			],
+			[
+				"end",
+				"endif"
+			],
+			[
+				"cons",
+				"const"
+			],
+			[
+				"mka",
+				"make_assignment"
+			],
+			[
+				"vet",
+				"vector"
+			],
+			[
+				"se",
+				"second\t(csp.h)"
+			],
+			[
+				"ass",
+				"assignment"
+			],
+			[
+				"a",
+				"assignment"
+			],
+			[
+				"co",
+				"constraints"
+			],
+			[
+				"csp",
+				"csp.cpp"
+			],
+			[
+				"gac",
+				"gac3"
+			],
+			[
+				"can",
+				"candidates"
+			],
+			[
+				"degre",
+				"degrees"
+			],
+			[
+				"for",
+				"for\tFor Loop"
+			],
+			[
+				"Do",
+				"does"
+			],
+			[
+				"vec",
+				"vector"
+			],
+			[
+				"exi",
+				"exist_assignment"
+			],
+			[
+				"spc",
+				"spectrum\t(yocto_volume.h)"
+			],
+			[
+				"wi",
+				"width\t(yocto_trace.cpp)"
+			],
+			[
+				"ha",
+				"has"
+			],
+			[
+				"vl",
+				"volume"
+			],
+			[
+				"re",
+				"return"
+			],
+			[
+				"ktr",
+				"ktr"
+			],
+			[
+				"rn",
+				"rng"
+			],
+			[
+				"ks",
+				"ks_air"
+			],
+			[
+				"max_",
+				"max_density"
+			],
+			[
+				"rng",
+				"rng_state"
+			],
+			[
+				"vol",
+				"volume"
+			],
+			[
+				"abs",
+				"absorption"
+			],
+			[
+				"ret",
+				"return\t(yocto_trace.cpp)"
+			],
+			[
+				"transform_in",
+				"transform_point_inverse\t(yocto_math.h)"
+			],
+			[
+				"transf",
+				"transform\t(yocto_math.h)"
+			],
+			[
+				"scattering_",
+				"scattering_event"
+			],
+			[
+				"ksc",
+				"ksc_x"
+			],
+			[
+				"one",
+				"one3f"
+			],
+			[
+				"ab",
+				"absorption_event"
+			],
+			[
+				"null_",
+				"null_prob"
+			],
+			[
+				"abso",
+				"absorption_prob"
+			],
+			[
+				"k",
+				"ksc"
+			],
+			[
+				"scatt",
+				"scatter_prob"
+			],
+			[
+				"null",
+				"null_collision"
+			],
+			[
+				"scatter",
+				"scatter_prob"
+			],
+			[
+				"eval",
+				"eval_transmission"
+			],
+			[
+				"last",
+				"last_ist"
+			],
+			[
+				"tr",
+				"true"
+			],
+			[
+				"Ze",
+				"zero3f"
+			],
+			[
+				"star",
+				"starting_from_inside"
+			],
+			[
+				"transmission_",
+				"transmission_div_pdf"
+			],
+			[
+				"li",
+				"light"
+			],
+			[
+				"is",
+				"ist"
+			],
+			[
+				"inter",
+				"intersect"
+			],
+			[
+				"transmi",
+				"transmission"
+			],
+			[
+				"scatter_",
+				"scatter_dist"
+			],
+			[
+				"ve",
+				"vec3f"
+			],
+			[
+				"di",
+				"dist"
+			],
+			[
+				"sample_",
+				"sample_ggx_pdf"
+			],
+			[
+				"sample",
+				"sample_hemisphere_cosine"
+			],
+			[
+				"sample_gg",
+				"sample_ggx_pdf\t(yocto_trace.h)"
+			],
+			[
+				"refle",
+				"reflect\t(yocto_trace.cpp)"
+			],
+			[
+				"sample_hemi",
+				"sample_hemisphere_cosine\t(yocto_math.h)"
+			],
+			[
+				"prob_",
+				"prob_kd"
+			],
+			[
+				"sample_brdf_",
+				"sample_brdf_volume"
+			],
+			[
+				"pathtrace_",
+				"pathtrace_volume"
+			],
+			[
+				"has_",
+				"has_texcooords"
+			],
+			[
+				"pos",
+				"positions"
+			],
+			[
+				"nam",
+				"namespace"
+			],
+			[
+				"is_",
+				"is_retina_display\t(demo.cpp)"
+			],
+			[
+				"zo",
+				"zero_centered_coods"
+			],
+			[
+				"si",
+				"size"
+			],
+			[
+				"frag",
+				"fragColor"
+			],
+			[
+				"fra",
+				"fragment_filename"
+			],
+			[
+				"verte",
+				"vertex"
+			],
+			[
+				"scree",
+				"screen.vs\t(ScreenQuad.h)"
+			],
+			[
+				"shader",
+				"shaders\t(test.cpp)"
+			],
+			[
+				"comp",
+				"compile"
+			],
+			[
+				"compi",
+				"compile\t(Shader.h)"
+			],
+			[
+				"fil",
+				"filename"
+			],
+			[
+				"loa",
+				"load_txtfile"
+			],
+			[
+				"rea",
+				"read_entire_file\t(File.jai)"
+			],
+			[
+				"fragment_",
+				"fragment_source"
+			],
+			[
+				"ver",
+				"vertex"
+			],
+			[
+				"GL",
+				"GLuint"
+			],
+			[
+				"Sha",
+				"Shadertoy\t(window.h)"
+			],
+			[
+				"sh",
+				"shader_program"
+			],
+			[
+				"dra",
+				"draw_quad"
+			],
+			[
+				"qu",
+				"quad_VAO"
+			],
+			[
+				"fi",
+				"filename"
+			],
+			[
+				"compile_s",
+				"compile_shader_files"
+			],
+			[
+				"vertex_",
+				"vertex_code"
+			],
+			[
+				"qua",
+				"quad_VAO\t(window.h)"
+			],
+			[
+				"Gl",
+				"GLuint"
+			],
+			[
+				"str",
+				"struct\tstruct"
+			],
+			[
+				"ty",
+				"typename\t(scope.h)"
+			],
+			[
+				"all",
+				"allocate"
+			],
+			[
+				"err",
+				"error〔function〕"
+			],
+			[
+				"mess",
+				"message_object"
+			],
+			[
+				"sl",
+				"split"
+			],
+			[
+				"ite",
+				"item"
+			],
+			[
+				"spl",
+				"split"
+			],
+			[
+				"test",
+				"test_all"
+			],
+			[
+				"Mes",
+				"Mesh_libigl"
+			],
+			[
+				"Ad",
+				"Adjacency_Data"
+			],
+			[
+				"len",
+				"length"
+			],
+			[
+				"av",
+				"avgw"
+			],
+			[
+				"Ve",
+				"Vector3d"
+			],
+			[
+				"if",
+				"ifmain\tif __name__ == '__main__'"
+			],
+			[
+				"dar",
+				"dark_orange\t(play.txt)"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					""
+				],
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					"Run"
+				]
+			],
+			[
+				"Packages/C++/C++ Single File.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/Java/Ant.sublime-build",
+					""
+				],
+				[
+					"Packages/Java/JavaC.sublime-build",
+					""
+				]
+			],
+			[
+				"Packages/Java/JavaC.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/Makefile/Make.sublime-build",
+					""
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					"Clean"
+				]
+			],
+			[
+				"Packages/Makefile/Make.sublime-build",
+				""
+			]
+		],
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				"Syntax Check"
+			]
+		],
+		[
+			[
+				[
+					"make nqueens",
+					""
+				],
+				[
+					"make sudoku",
+					""
+				],
+				[
+					"make test",
+					""
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					""
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					"Clean"
+				],
+				[
+					"Packages/SublimeREPL/sublimerepl_build_system_hack.sublime-build",
+					""
+				],
+				[
+					"Packages/User/run_sh.sublime-build",
+					""
+				]
+			],
+			[
+				"make nqueens",
+				""
+			]
+		],
+		[
+			[
+				[
+					"make_test",
+					""
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					""
+				],
+				[
+					"Packages/Makefile/Make.sublime-build",
+					"Clean"
+				],
+				[
+					"Packages/SublimeREPL/sublimerepl_build_system_hack.sublime-build",
+					""
+				],
+				[
+					"Packages/User/run_sh.sublime-build",
+					""
+				]
+			],
+			[
+				"make_test",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 389.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Colorsublime: Install Theme"
+			],
+			[
+				"git",
+				"Git: Diff Current File"
+			],
+			[
+				"linte",
+				"SublimeLinter: Disable Linter"
+			],
+			[
+				"diff",
+				"Git: Diff All Files"
+			],
+			[
+				"make",
+				"Build With: Make"
+			],
+			[
+				"git log",
+				"Git: Log All"
+			],
+			[
+				"git st",
+				"Git: Status"
+			],
+			[
+				"linter",
+				"SublimeLinter: Choose Lint Mode"
+			],
+			[
+				"git com",
+				"Git: Commit"
+			],
+			[
+				"open res",
+				"PackageResourceViewer: Open Resource"
+			],
+			[
+				"packager",
+				"PackageResourceViewer: Open Resource"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Disable Package"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"my",
+				"myPDDL-new: Create New Project"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: gls",
+				"Package Control: List Packages"
+			],
+			[
+				"Package Control: li",
+				"Package Control: List Packages"
+			],
+			[
+				"glsl",
+				"Build With: GLSL"
+			],
+			[
+				"Package: gl ",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 436.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/giacomo/dev/Cpp/csp_solver"
+	],
+	"file_history":
+	[
+		"/Users/giacomo/dev/Cpp/csp_solver/csp.sublime-project",
+		"/Users/giacomo/Documents/University/SpienzaGraphics/decosurf/src/operator.cpp",
+		"/Users/giacomo/dev/Cpp/csp_solver/nqueens.cpp",
+		"/Users/giacomo/dev/Cpp/csp_solver/sudoku.cpp",
+		"/Users/giacomo/dev/Cpp/csp_solver/csp_gac3.h",
+		"/Users/giacomo/Documents/University/SpienzaGraphics/decosurf/src/geodesic_graph.h",
+		"/Users/giacomo/Documents/University/Tesi/yocto-gl/tests/shapes/sphere.mtl",
+		"/Users/giacomo/Documents/University/Tesi/yocto-gl/tests/shapes/cube.mtl",
+		"/Users/giacomo/Documents/University/Tesi/yocto-gl/yocto/yocto_volume.h",
+		"/Users/giacomo/Documents/University/Tesi/yocto-gl_old/yocto/yocto_volume.h",
+		"/Users/giacomo/Documents/University/Tesi/yocto-gl_old/build/compile_commands.json",
+		"/Users/giacomo/Documents/University/Computer Graphics/model/src/tesselation.cpp",
+		"/Users/giacomo/Documents/University/Tesi/yocto-gl/bin/tests/shapes/sphereflipcap.mtl",
+		"/Users/giacomo/Documents/University/SpienzaGraphics/decosurf/src/operator.h",
+		"/Users/giacomo/Documents/not_a_text_editor/test.cpp",
+		"/Users/giacomo/Documents/not_a_text_editor/pointer.h",
+		"/Users/giacomo/Documents/not_a_text_editor/demo.cpp",
+		"/Users/giacomo/Downloads/Preview for Demo of 28 February 2016/traveller/invaders.jai",
+		"/Users/giacomo/Google Drive/University/NLP/project_new/src/telegram.py",
+		"/Users/giacomo/Documents/telegram_bot/*piatto.rewritten",
+		"/Users/giacomo/Documents/telegram_bot/MO.txt",
+		"/Users/giacomo/Documents/telegram_bot/MO.txt.rewritten",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/scripts/small.txt",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/external/cork/src/math/vec.h",
+		"/Users/giacomo/Google Drive/University/NLP/project_new/src/main.py",
+		"/Users/giacomo/Documents/telegram_bot/take_note.py",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/cotmatrix.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/cotmatrix_entries.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/scripts/recursive_eleph.txt",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/graph/my_dijkstra.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/graph/graph_geodesics.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/graph_geodesics.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/graph_geodesics.cpp",
+		"/Users/giacomo/Downloads/Preview for Demo of 28 February 2016/modules/Basic.jai",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/scripts/bunny_with_snow.txt",
+		"/Users/giacomo/Library/Application Support/Sublime Text 3/Packages/JaiLang/Jai.json-tmLanguage",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/adjacency_list.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/geodesic_heat.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/geodesic_heat.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/README.md",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/graph/graph_geodesics.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/my_dijkstra.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/my_dijkstra.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/my_dijkstra.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/massmatrix.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/graveyard.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/bounding_box.h",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/model/src/tesselation.cpp",
+		"/Users/giacomo/Downloads/Telegram Desktop/THESTORY.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/graph_geodesics.cpp.old",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/external/embree/tutorials/common/tutorial/application.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/graph_geodesics.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/graph_geodesics.h",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pella_model/src/tesselation.cpp",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pella_model/src/model.cpp",
+		"/Users/giacomo/Desktop/untitled.html",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/boundary_loop.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/writeMESH.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/writePLY.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/writeOBJ.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/writeOBJ.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/writePLY.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/build/prova0.obj",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/external/nanogui/ext/eigen/unsupported/test/openglsupport.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/run.sh",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/point_mesh_squared_distance.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/centroid.h",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pathtrace/src/image.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/external/embree/tutorials/displacement_geometry/displacement_geometry_device.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/main.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/discrete_geometry.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/src/discrete_geometry.h",
+		"/Users/giacomo/Downloads/Telegram Desktop/LAB4P.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/is_vertex_manifold.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/script.njk",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/shaders/geodesic_old.frag",
+		"/Users/giacomo/Downloads/triangleWithoutIndices.bin",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/per_face_normals.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/copyleft/cgal/wire_mesh.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/viewer/ViewerPlugin.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/viewer.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/main.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/yocto/yocto/yocto_utils.h",
+		"/Users/giacomo/Google Drive/Documenti/GameEngine/vmath_pella.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/contour_cutting.hpp",
+		"/Users/giacomo/Downloads/Telegram Desktop/lab03.cpp",
+		"/Users/giacomo/Downloads/Telegram Desktop/LAB02F.cpp",
+		"/Users/giacomo/Downloads/eigen-eigen-5a0156e40feb/Eigen/src/SparseCholesky/SimplicialCholesky.h",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pathtrace/tests/cornellbox.json",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/on_boundary.h",
+		"/Users/giacomo/Google Drive/University/Machine Learning/Progetto/codice_python.py",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/on_boundary.cpp",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pathtrace/tests/dof.json",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pathtrace/src/material.h",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pathtrace/src/mesh.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/grad.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/viewer/OpenGL_shader.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/get_seconds.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/edge_topology.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/build/run.sh",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/Notes_to_self.txt",
+		"/Users/giacomo/Downloads/Geodesics/GUI/graph_geodesics.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/per_vertex_normals.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/per_vertex_attribute_smoothing.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/external/nanogui/ext/eigen/test/stddeque_overload.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/per_vertex_attribute_smoothing.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/copyleft/cgal/triangle_triangle_squared_distance.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/face_areas.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/CMakeLists.txt",
+		"/Users/giacomo/Google Drive/University/Computer Graphics/pathtrace/src/pathtrace.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/build.sh",
+		"/Users/giacomo/Downloads/out/src/yocto_math.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/shaders/geodesic.frag",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/mesh.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/mesh.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/internal_angles.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/gaussian_curvature.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/gaussian_curvature.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/parallel_transport_angles.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/edge_topology.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/edge_lengths.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/parallel_transport_angles.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/edge_lengths.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/squared_edge_lengths.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/local_basis.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/vertex_triangle_adjacency.h",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/libigl/include/igl/viewer/ViewerData.cpp",
+		"/Users/giacomo/Google Drive/University/SpienzaGraphics/decosurf/streamlines.h"
+	],
+	"find":
+	{
+		"height": 26.0
+	},
+	"find_in_files":
+	{
+		"height": 102.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 26.0
+	},
+	"input":
+	{
+		"height": 40.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 612.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.git":
+	{
+		"height": 115.0
+	},
+	"output.sublime_haskell_error_panel":
+	{
+		"height": 130.0
+	},
+	"output.unsaved_changes":
+	{
+		"height": 124.0
+	},
+	"pinned_build_system": "",
+	"project": "csp.sublime-project",
+	"replace":
+	{
+		"height": 48.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"vol",
+				"yocto/yocto_volume.h"
+			],
+			[
+				"spher",
+				"tests/shapes/sphere.mtl"
+			],
+			[
+				"",
+				"yocto/yocto_volume.h"
+			],
+			[
+				"mak",
+				"makefile"
+			],
+			[
+				"basi",
+				"opengl_basic.h"
+			],
+			[
+				"make",
+				"makefile"
+			],
+			[
+				"win",
+				"window.h"
+			],
+			[
+				"ma",
+				"makefile"
+			],
+			[
+				"op",
+				"src/operator.h"
+			],
+			[
+				"main",
+				"src/main.cpp"
+			],
+			[
+				"yo",
+				"src/include/yocto_math.h"
+			],
+			[
+				"ope",
+				"src/operator.h"
+			],
+			[
+				"cot",
+				"libigl/include/igl/cotmatrix.cpp"
+			],
+			[
+				"json",
+				"~/Google Drive/University/Computer Graphics/pathtrace/tests/decosurf.json"
+			],
+			[
+				"pla",
+				"scripts/play.txt"
+			],
+			[
+				"big",
+				"scripts/big.txt"
+			],
+			[
+				"geo",
+				"src/geodesic_graph.h"
+			],
+			[
+				"boun",
+				"libigl/include/igl/boundary_loop.cpp"
+			],
+			[
+				"u",
+				"src/utilities.h"
+			],
+			[
+				"sca",
+				"shaders/scalars.frag"
+			],
+			[
+				"uti",
+				"src/utilities.h"
+			],
+			[
+				"frag",
+				"shaders/scalars.frag"
+			],
+			[
+				"scal",
+				"shaders/scalars.frag"
+			],
+			[
+				"n",
+				"scripts/new_shape.txt"
+			],
+			[
+				"vi",
+				"src/viewer.h"
+			],
+			[
+				"vie",
+				"src/viewer.cpp"
+			],
+			[
+				"test",
+				"scripts/test0.txt"
+			],
+			[
+				"new",
+				"scripts/new_shape.txt"
+			],
+			[
+				"adj",
+				"libigl/include/igl/adjacency_list.h"
+			],
+			[
+				"gra",
+				"src/graph_geodesics.cpp"
+			],
+			[
+				"grav",
+				"~/Google Drive/University/SpienzaGraphics/decosurf/graveyard.h"
+			],
+			[
+				"mai",
+				"src/main.cpp"
+			],
+			[
+				"cma",
+				"CMakeLists.txt"
+			],
+			[
+				"cmak",
+				"CMakeLists.txt"
+			],
+			[
+				"viewer",
+				"src/viewer.cpp"
+			],
+			[
+				"my",
+				"my_dijkstra.cpp"
+			],
+			[
+				"appl",
+				"libigl/external/embree/tutorials/common/tutorial/application.cpp"
+			],
+			[
+				"ge",
+				"src/geodesic_heat.h"
+			],
+			[
+				"v",
+				"src/viewer.cpp"
+			],
+			[
+				"m",
+				"src/main.cpp"
+			],
+			[
+				"util",
+				"src/utilities.h"
+			],
+			[
+				"geode",
+				"src/geodesic_heat.h"
+			],
+			[
+				"view",
+				"src/viewer.cpp"
+			],
+			[
+				"utilities.h",
+				"src/utilities.h"
+			],
+			[
+				"viewe",
+				"src/viewer.h"
+			],
+			[
+				"state",
+				"libigl/include/igl/viewer/OpenGL_state.h"
+			],
+			[
+				"open",
+				"libigl/include/igl/viewer/OpenGL_state.cpp"
+			],
+			[
+				"writepl",
+				"libigl/include/igl/writePLY.h"
+			],
+			[
+				"mesh",
+				"libigl/include/igl/writeMESH.h"
+			],
+			[
+				"ut",
+				"src/utilities.h"
+			],
+			[
+				"rnu",
+				"run.sh"
+			],
+			[
+				"cotm",
+				"libigl/include/igl/cotmatrix.cpp"
+			],
+			[
+				"geodesic",
+				"src/geodesic_heat.cpp"
+			],
+			[
+				"lumped",
+				"libigl/include/igl/point_mesh_squared_distance.cpp"
+			],
+			[
+				"mass",
+				"libigl/include/igl/massmatrix.h"
+			],
+			[
+				"cent",
+				"libigl/include/igl/centroid.h"
+			],
+			[
+				"doublearea",
+				"libigl/include/igl/doublearea.h"
+			],
+			[
+				"no",
+				"novità:"
+			],
+			[
+				"math",
+				"src/yocto_math.h"
+			],
+			[
+				"box",
+				"libigl/include/igl/bounding_box.h"
+			],
+			[
+				"lode",
+				"src/lodepng.cpp"
+			],
+			[
+				"mat",
+				"src/yocto_math.h"
+			],
+			[
+				"o",
+				"src/operator.h"
+			],
+			[
+				"novi",
+				"novità:"
+			],
+			[
+				"vier",
+				"libigl/include/igl/viewer/ViewerCore.cpp"
+			],
+			[
+				"fra",
+				"shaders/geodesic.frag"
+			],
+			[
+				"viewerc",
+				"libigl/include/igl/viewer/ViewerCore.h"
+			],
+			[
+				"viewerda",
+				"libigl/include/igl/viewer/ViewerData.h"
+			],
+			[
+				"viewerco",
+				"libigl/include/igl/viewer/ViewerCore.h"
+			],
+			[
+				"dou",
+				"libigl/include/igl/doublearea.h"
+			],
+			[
+				"face_",
+				"libigl/include/igl/face_areas.h"
+			],
+			[
+				"geod",
+				"src/geodesic_heat.cpp"
+			],
+			[
+				"viewerd",
+				"libigl/include/igl/viewer/ViewerData.h"
+			],
+			[
+				"stre",
+				"streamlines.cpp"
+			],
+			[
+				"geom",
+				"discrete_geometry.h"
+			],
+			[
+				"plugin",
+				"libigl/include/igl/viewer/ViewerPlugin.h"
+			],
+			[
+				"run",
+				"run.sh"
+			],
+			[
+				"grave",
+				"graveyard.h"
+			],
+			[
+				"per_fae",
+				"libigl/include/igl/per_face_normals.h"
+			],
+			[
+				"grap",
+				"graph_geodesics.cpp"
+			],
+			[
+				"graph",
+				"graph_geodesics.h"
+			],
+			[
+				"wire",
+				"libigl/include/igl/copyleft/cgal/wire_mesh.cpp"
+			],
+			[
+				"adja",
+				"libigl/include/igl/adjacency_list.h"
+			],
+			[
+				"manifol",
+				"libigl/include/igl/is_vertex_manifold.h"
+			],
+			[
+				"scri",
+				"script.njk"
+			],
+			[
+				"utils",
+				"parser/yocto_utils.h"
+			],
+			[
+				"viw",
+				"libigl/include/igl/viewer/Viewer.h"
+			],
+			[
+				"edge_top",
+				"libigl/include/igl/edge_topology.cpp"
+			],
+			[
+				"geome",
+				"discrete_geometry.h"
+			],
+			[
+				"edge_fl",
+				"libigl/include/igl/edge_flaps.h"
+			],
+			[
+				"parall",
+				"libigl/include/igl/parallel_transport_angles.h"
+			],
+			[
+				"utili",
+				"utilities.h"
+			],
+			[
+				"hea",
+				"geodesic_heat.h"
+			],
+			[
+				"he",
+				"geodesic_heat.cpp"
+			],
+			[
+				"heat",
+				"geodesic_heat.cpp"
+			],
+			[
+				"resize.",
+				"libigl/external/nanogui/ext/eigen/test/resize.cpp"
+			],
+			[
+				"bounda",
+				"libigl/include/igl/boundary_loop.cpp"
+			],
+			[
+				"boundary",
+				"libigl/include/igl/on_boundary.h"
+			],
+			[
+				"data",
+				"libigl/include/igl/viewer/ViewerData.h"
+			],
+			[
+				"bench",
+				"benchmark.txt"
+			],
+			[
+				"cut",
+				"contour_cutting.hpp"
+			],
+			[
+				"vierwedata",
+				"libigl/include/igl/viewer/ViewerData.h"
+			],
+			[
+				"my_",
+				"my_dijkstra.cpp"
+			],
+			[
+				"mys",
+				"my_dijkstra.cpp"
+			],
+			[
+				"utilit",
+				"utilities.h"
+			],
+			[
+				"grad",
+				"libigl/include/igl/grad.cpp"
+			],
+			[
+				"get",
+				"libigl/include/igl/get_seconds.cpp"
+			],
+			[
+				"get_",
+				"libigl/include/igl/get_seconds.cpp"
+			],
+			[
+				"str",
+				"streamlines.h"
+			],
+			[
+				"re",
+				"README.md"
+			],
+			[
+				"double",
+				"libigl/include/igl/doublearea.h"
+			],
+			[
+				"so",
+				"libigl/external/nanogui/ext/eigen/test/stddeque_overload.cpp"
+			],
+			[
+				"per_ver",
+				"libigl/include/igl/per_vertex_attribute_smoothing.cpp"
+			],
+			[
+				"per_verte",
+				"libigl/include/igl/per_vertex_attribute_smoothing.h"
+			],
+			[
+				"per_ve",
+				"libigl/include/igl/per_vertex_normals.cpp"
+			],
+			[
+				"face_are",
+				"libigl/include/igl/face_areas.h"
+			],
+			[
+				"triangle_area",
+				"libigl/include/igl/copyleft/cgal/triangle_triangle_squared_distance.cpp"
+			],
+			[
+				"cmake",
+				"CMakeLists.txt"
+			],
+			[
+				"vertex",
+				"libigl/include/igl/vertex_triangle_adjacency.h"
+			],
+			[
+				"vert",
+				"libigl/include/igl/vertex_triangle_adjacency.h"
+			],
+			[
+				"gau",
+				"libigl/include/igl/gaussian_curvature.h"
+			],
+			[
+				"ga",
+				"libigl/include/igl/gaussian_curvature.cpp"
+			],
+			[
+				"gaus",
+				"libigl/include/igl/gaussian_curvature.h"
+			],
+			[
+				"graph_",
+				"graph_geodesics.h"
+			],
+			[
+				"par",
+				"libigl/include/igl/parallel_transport_angles.cpp"
+			],
+			[
+				"s",
+				"streamlines.cpp"
+			],
+			[
+				"para",
+				"libigl/include/igl/parallel_transport_angles.cpp"
+			],
+			[
+				"tra",
+				"libigl/include/igl/parallel_transport_angles.h"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 210.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"sat",
+				"satisfies"
+			],
+			[
+				"print",
+				"print_nqueens"
+			],
+			[
+				"prin",
+				"print_sudoku"
+			],
+			[
+				"make",
+				"make_assignment"
+			],
+			[
+				"cho",
+				"choose_variable"
+			],
+			[
+				"make_ray",
+				"make_ray"
+			],
+			[
+				"eval_homo",
+				"eval_homogeneous_transmission"
+			],
+			[
+				"exp",
+				"exp"
+			],
+			[
+				"SetTe",
+				"SetText"
+			],
+			[
+				"toU",
+				"toUTF32"
+			],
+			[
+				"split",
+				"split2"
+			],
+			[
+				"acos_",
+				"acos_safe"
+			],
+			[
+				"cut_",
+				"cut_contour"
+			],
+			[
+				"color_",
+				"color_from_int"
+			],
+			[
+				"mat",
+				"mat4f"
+			],
+			[
+				"frame3",
+				"frame3f"
+			],
+			[
+				"frame3f",
+				"frame3f"
+			],
+			[
+				"vec3f",
+				"vec3f"
+			],
+			[
+				"range3f",
+				"range3f"
+			]
+		],
+		"width": 592.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 170.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

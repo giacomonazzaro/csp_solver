@@ -1,0 +1,29 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+            "folder_exclude_patterns": ["csp_solver", "build"],
+            "file_exclude_patterns": ["*project", "*.md"]
+		}
+	],
+    "build_systems":
+    [
+        {
+            "name": "test",
+            "shell_cmd": "make test"
+        },
+        {
+            "name": "sudoku",
+            "shell_cmd": "make sudoku"
+        },
+        {
+            "name": "edge_coloring",
+            "shell_cmd": "make edge_coloring"
+        },
+        {
+            "name": "nqueens",
+            "shell_cmd": "make nqueens"
+        }
+    ]
+}
