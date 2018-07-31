@@ -52,9 +52,9 @@ Assignment make_assignment_from_list(array<int> D, bool starts_at_one = false) {
 
 
 int main(int argc, char const *argv[]) {
-    int N = 100;
+    int N = 20;
     if(argc == 2)
-        N = atoi(argv[2]);
+        N = atoi(argv[1]);
 
     CSP csp = make_nqueens(N);
     search_stats stats;

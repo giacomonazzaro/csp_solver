@@ -1,10 +1,11 @@
 COMPILE = g++ -std=c++11 -O3
+N = 8
 
-all: nqueens
+all: local_nqueens
 
 nqueens: build/csp.o
 	$(COMPILE) -o bin/nqueens examples/nqueens.cpp build/csp.o 
-	time ./bin/nqueens
+	time ./bin/nqueens $(N)
 
 sudoku: build/csp.o
 	$(COMPILE) -o bin/sudoku examples/sudoku.cpp build/csp.o
@@ -16,7 +17,7 @@ edge_coloring: build/csp.o
 
 local_nqueens: build/csp.o
 	$(COMPILE) -o bin/local_nqueens examples/local_nqueens.cpp build/csp.o
-	time ./bin/local_nqueens
+	time ./bin/local_nqueens $(N)
 
 test: sudoku nqueens
 

@@ -36,6 +36,10 @@ struct CSP {
     std::string name;
     array<Domain> domains;
     array<const Constraint*> constraints;
+
+    void all_different(const array<int>& scope, std::string name);
+    void binary(int i, int k, std::function<bool(int, int)> r, std::string name);
+    void equal(int i, int k, std::string name);
 };
 
 struct search_stats {
@@ -172,8 +176,8 @@ inline void print_unsatisfied(const array<Domain> D, const array<const Constrain
 
 
 
-struct all_different : Constraint {
-     all_different(const array<int>& vars, std::string n = "all_different"):
+struct AllDifferent : Constraint {
+     AllDifferent(const array<int>& vars, std::string n = "all_different"):
         Constraint(vars, n) {}
 
     bool eval(const array<Domain>& D) const {
@@ -207,10 +211,10 @@ struct all_different : Constraint {
     }
 };
 
-struct binary : Constraint {
+struct Binary : Constraint {
     std::function<bool(int, int)> rel;
 
-    binary(int i, int k, std::function<bool(int, int)> r, std::string n = "binary") :
+    Binary(int i, int k, std::function<bool(int, int)> r, std::string n = "binary") :
         Constraint({i,k}, n), rel(r) {}
 
     bool eval(const array<Domain>& D) const {
@@ -249,8 +253,8 @@ struct binary : Constraint {
 };
 
 
-struct equal : Constraint {
-    equal(int i, int k, std::string name = "equal"):
+struct Equal : Constraint {
+    Equal(int i, int k, std::string name = "equal"):
         Constraint({i,k}, name) {}
 
     bool eval(const array<Domain>& D) const {

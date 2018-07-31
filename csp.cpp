@@ -61,7 +61,6 @@ bool search(const array<const Constraint*>& C, array<Domain>& D, int depth, sear
     #ifdef PRINT_SEARCH
     print_state(D, depth);
     #endif
-    stats.expansions += 1;
 
     // If assignment is complete, just check if it satisfies contraints.
     if(is_assignment_complete(D)) {
@@ -72,6 +71,7 @@ bool search(const array<const Constraint*>& C, array<Domain>& D, int depth, sear
     int variable = choose_variable(D, C);
 
     for(int val : D[variable]) {
+        stats.expansions += 1;
         // Copying the domains to make a temp version.
         array<Domain> D_attempt = D; 
         D_attempt[variable] = {val};
@@ -329,6 +329,17 @@ bool search_small(const Constraint* c, array<Domain> D, int depth) {
     }
 
     return false;
+}
+
+
+void CSP::all_different(const array<int>& scope, std::string name = "AllDifferent") {
+    constraints.push_back(new AllDifferent(scope, name));
+}
+void CSP::binary(int i, int k, std::function<bool(int, int)> r, std::string name = "binary") {
+    constraints.push_back(new Binary(i, k, r, name));
+}
+void CSP::equal(int i, int k, std::string name = "equal"){
+    constraints.push_back(new Equal(i, k, name));
 }
 
 
