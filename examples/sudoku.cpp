@@ -2,13 +2,13 @@
 
 CSP make_sudoku(int N) {
     auto range = make_range(1, N*N+1);
-    auto domains = array<Domain>(N*N*N*N, range);
+    auto domains = Array<Domain>(N*N*N*N, range);
     CSP sudoku = make_csp("Sudoku", domains);
 
     for (int k = 0; k < N*N; ++k) {
-        array<int> row (N*N);
-        array<int> col (N*N);
-        array<int> block (N*N);
+        Array<int> row (N*N);
+        Array<int> col (N*N);
+        Array<int> block (N*N);
         int block_start = (k/N) * (N*N*N) + (k%N)*N;
         for (int i = 0; i < N*N; ++i) {
             row[i] = k * N*N + i;
@@ -46,7 +46,7 @@ inline void print_sudoku(const Assignment& A, int N) {
     printf("\n");
 }
 
-inline void print_sudoku(const array<Domain>& D) {
+inline void print_sudoku(const Array<Domain>& D) {
     print_sudoku(make_assignment(D), round(std::sqrt(std::sqrt(D.size()))));
 }
 

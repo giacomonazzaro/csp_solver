@@ -1,8 +1,8 @@
 #include "../csp.h"
 
 CSP make_nqueens(int N = 8) {
-    const array<int> range = make_range(N);
-    auto domains = array<Domain>(N, range);
+    const Array<int> range = make_range(N);
+    auto domains = Array<Domain>(N, range);
     CSP csp = make_csp("N-Queens", domains);
     add_constraint(csp, new AllDifferent(range, "one_per_column"));
     
@@ -16,7 +16,7 @@ CSP make_nqueens(int N = 8) {
     return csp;
 }
 
-inline void print_nqueens(const array<Domain>& D) {
+inline void print_nqueens(const Array<Domain>& D) {
     int N = D.size();\
     for(int i = 0; i<N; i++) {
         for(int k = 0; k<N; k++) {
@@ -43,7 +43,7 @@ inline void print_nqueens(const Assignment& A) {
     printf("\n");
 }
 
-Assignment make_assignment_from_list(array<int> D, bool starts_at_one = false) {
+Assignment make_assignment_from_list(Array<int> D, bool starts_at_one = false) {
     Assignment A;
     for(int i=0; i<D.size(); i++)
         A[i] = D[i]-starts_at_one;
