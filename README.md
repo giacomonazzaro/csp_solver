@@ -10,7 +10,8 @@
 - N-queens
 - Sudoku
 
-# N-queens (N = 20)
+# Results
+## N-queens (N = 20)
 ```
 Q • • • • • • • • • • • • • • • • • • •  
 • • Q • • • • • • • • • • • • • • • • •  
