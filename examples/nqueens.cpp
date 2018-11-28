@@ -4,13 +4,13 @@ CSP make_nqueens(int N = 8) {
     const array<int> range = make_range(N);
     auto domains = array<Domain>(N, range);
     CSP csp = make_csp("N-Queens", domains);
-    add_constraint(csp, new all_different(range, "one_per_column"));
+    add_constraint(csp, new AllDifferent(range, "one_per_column"));
     
     // Diagonal attack constraints.
     for (int i = 0; i < N-1; ++i) {
         for (int j = i+1; j < N; ++j) {
-            add_constraint(csp, new binary(i, j, [i,j](int x, int y) { return x + i != y + j; }, "diag+"));
-            add_constraint(csp, new binary(i, j, [i,j](int x, int y) { return x - i != y - j; }, "diag-"));
+            add_constraint(csp, new Binary(i, j, [i,j](int x, int y) { return x + i != y + j; }, "diag+"));
+            add_constraint(csp, new Binary(i, j, [i,j](int x, int y) { return x - i != y - j; }, "diag-"));
         }
     }
     return csp;
