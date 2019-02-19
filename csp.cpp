@@ -332,15 +332,3 @@ bool search_small(const Constraint* c, Array<Domain> D, int depth) {
 }
 
 
-void CSP::all_different(const Array<int>& scope, std::string name = "AllDifferent") {
-    constraints.push_back(new AllDifferent(scope, name));
-}
-void CSP::binary(int i, int k, std::function<bool(int, int)> r, std::string name = "binary") {
-    constraints.push_back(new Binary(i, k, r, name));
-}
-void CSP::equal(int i, int k, std::string name = "equal"){
-    constraints.push_back(new Equal(i, k, name));
-}
-
-
-

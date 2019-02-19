@@ -34,10 +34,6 @@ struct CSP {
     std::string name;
     Array<Domain> domains;
     Array<const Constraint*> constraints;
-
-    void all_different(const Array<int>& scope, std::string name);
-    void binary(int i, int k, std::function<bool(int, int)> r, std::string name);
-    void equal(int i, int k, std::string name);
 };
 
 struct search_stats {
@@ -75,22 +71,6 @@ inline CSP make_csp(const std::string& s, const Array<Domain>& d, const Array<co
 inline void add_constraint(CSP& csp, Constraint* c) {
     csp.constraints.push_back(c);
 }
-
-// inline void add_constraint(CSP& csp, Constraint c) {
-//     Constraint* cp = new Constraint();
-//     cp->name = c.name;
-//     cp->scope = c.scope;
-//     cp->eval = c.eval;
-//     cp->type = c.type;
-//     csp.constraints.push_back(cp);
-// }
-
-// Constraint definitions.
-// Constraint all_different(const Array<int>& vars, const std::string& name);
-// Constraint binary(int i, int k, const std::function<bool(int, int)>& rel, const std::string& name);
-// Constraint relation(const Array<int>, const std::function<bool(const Array<Domain>&)>, const std::string&);
-// Constraint equal(int i, int k, const std::string& name);
-
 
 // Utilities functions.
 #define add(v, x) v.push_back(x)
