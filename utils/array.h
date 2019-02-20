@@ -1,5 +1,4 @@
 #pragma once
-#include <cassert>
 #include <initializer_list>
 
 template <typename Type>
@@ -29,12 +28,16 @@ struct array {
     }
 
     inline void insert(const array<Type>& arr, int index) {
-        for (int i = count; i > index; i--) data[i] = data[i - arr.count];
-
-        for (int i = 0; i < arr.count; ++i) data[index + i] = arr[i];
-
+        for (int i = count; i > index; i--) {
+            data[i] = data[i - arr.count];
+        }
+        for (int i = 0; i < arr.count; ++i) {
+            data[index + i] = arr[i];
+        }
         count += arr.count;
     }
+
+    inline void append(const array<Type>& arr) { insert(arr, count); }
 
     inline void remove(int index) {
         for (int i = index; i < count - 1; ++i) {

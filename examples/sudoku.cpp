@@ -24,7 +24,7 @@ CSP make_sudoku(int N) {
 }
 
 
-Assignment parse_sudoku(const std::string& s, int N) {
+Assignment parse_sudoku(const string& s, int N) {
     Assignment A;
     for(int i = 0; i<N*N*N*N; i++) {
         int idx = i*2 + 1;

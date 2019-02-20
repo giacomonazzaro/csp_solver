@@ -1,8 +1,8 @@
 #pragma once
-#include <string>
 #include <unordered_map>
 #include "utils/array_algorithms.h"
 #include "utils/stack_allocator.h"
+#include "utils/string.h"
 
 using Domain     = array<int>;
 using Assignment = std::unordered_map<int, int>;  // Used only to interface with
@@ -11,18 +11,21 @@ using Assignment = std::unordered_map<int, int>;  // Used only to interface with
 enum constraint_type { RELATION, ALL_DIFFERENT, EQUAL, BINARY, UNKNOWN };
 
 struct Constraint {
-    std::string name;
-    array<int>  scope;
+    string     name;
+    array<int> scope;
 
     Constraint() {}
 
-    Constraint(const array<int>& vars, std::string s) {
+    Constraint(const array<int>& vars, string s) {
         scope = copy(vars);
         name  = s;
         name += "(";
-        for (int i = 0; i < scope.size() - 1; ++i)
-            name += std::to_string(scope[i]) + ", ";
-        name += std::to_string(scope.back()) + ")";
+        for (int i = 0; i < scope.size() - 1; ++i) {
+            name += to_string(scope[i]);
+            name += ", ";
+        }
+        name += to_string(scope.back());
+        name += ")";
     }
 
     virtual bool eval(const array<Domain>&) const = 0;
@@ -30,7 +33,7 @@ struct Constraint {
 };
 
 struct CSP {
-    std::string              name;
+    string                   name;
     array<Domain>            domains;
     array<const Constraint*> constraints;
 };
@@ -61,7 +64,7 @@ bool remove_values(int variable, const Constraint& constraint, array<Domain>& D,
 bool search_small(const Constraint* c, const array<Domain>& D_, int depth);
 
 /***** CSP intialization functions. *****/
-inline CSP make_csp(const std::string& s, const array<Domain>& d,
+inline CSP make_csp(const string& s, const array<Domain>& d,
                     int num_constraints) {
     CSP csp;
     csp.name              = s;
@@ -111,7 +114,7 @@ inline void print_state(const array<Domain>& D, int depth = 0) {
 }
 
 inline void print_constraints(const CSP& csp) {
-    for (auto c : csp.constraints) printf("%s\n", c->name.c_str());
+    for (auto c : csp.constraints) write(c->name);
 }
 
 inline Assignment make_assignment(const array<Domain>& D) {
@@ -154,7 +157,7 @@ inline void print_unsatisfied(const array<Domain>&            D,
 }
 
 struct AllDifferent : Constraint {
-    AllDifferent(const array<int>& vars, std::string n = "all_different")
+    AllDifferent(const array<int>& vars, string n = "all_different")
         : Constraint(vars, n) {}
 
     bool eval(const array<Domain>& D) const {
@@ -191,8 +194,7 @@ struct AllDifferent : Constraint {
 struct Binary : Constraint {
     std::function<bool(int, int)> rel;
 
-    Binary(int i, int k, std::function<bool(int, int)> r,
-           std::string n = "binary") {
+    Binary(int i, int k, std::function<bool(int, int)> r, string n = "binary") {
         scope = allocate_array<int>(2);
         scope = {i, k};
         rel   = r;
@@ -238,7 +240,7 @@ struct Binary : Constraint {
 };
 
 struct Equal : Constraint {
-    Equal(int i, int k, const std::string name = "equal") {
+    Equal(int i, int k, const string name = "equal") {
         scope      = allocate_array<int>(2);
         scope      = {i, k};
         this->name = name;

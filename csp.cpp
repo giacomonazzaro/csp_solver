@@ -1,7 +1,7 @@
 #include "csp.h"
 stack_allocator default_allocator;
 
-void comment(const std::string& c) {
+void comment(const string& c) {
 #ifdef PRINT_SEARCH_LOG
     printf("%s\n", c.c_str());
 #endif
