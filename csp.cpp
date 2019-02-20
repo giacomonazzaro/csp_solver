@@ -1,12 +1,5 @@
 #include "csp.h"
-// extern stack_allocator* default_allocator;
 stack_allocator default_allocator;
-
-// #include "csp_constraints.cpp"
-
-// #define PRINT_SEARCH
-// #define PRINT_SEARCH_LOG
-// #define PRINT_SEARCH_GAC
 
 void comment(const std::string& c) {
 #ifdef PRINT_SEARCH_LOG
@@ -104,7 +97,7 @@ bool search(const array<const Constraint*>& C, array<Domain>& D, int depth,
 Assignment search(const CSP& csp, Assignment A, search_stats& stats) {
     stack_frame();
     auto D = copy(csp.domains);
-    
+
     for (auto& kv : A) D[kv.first] = {kv.second};
 
     if (A.size() > 0) {
@@ -209,7 +202,7 @@ bool remove_values(int variable, const Constraint* constraint,
         bool exists = search_small(constraint, Dfake, 0);
 
         if (exists == false) {
-            remove(domain_tmp, i);
+            domain_tmp.remove(i);
             // removed_values.push_back(domain_tmp, i);
             removed_value = true;
         } else {

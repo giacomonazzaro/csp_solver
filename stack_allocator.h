@@ -1,5 +1,4 @@
 #pragma once
-
 #include "array.h"
 
 struct stack_allocator {
@@ -45,6 +44,7 @@ inline unsigned char* allocate(stack_allocator& stack, int bytes) {
 
     assert(ptr != nullptr);  // Resize stack? Not for now.
     stack.offset += bytes;
+    printf("stack size: %d\n", stack.offset);
     return ptr;
 }
 
@@ -134,37 +134,21 @@ struct _stack_frame {
         start       = stack->offset;
     }
 
-    ~_stack_frame() { stack->offset = start; }
-};
+    ~_stack_frame() {
+        printf("free %d\n", stack->offset-start);
+        stack->offset = start;
+        printf("stack size: %d\n", stack->offset);
 
-// Init and destroy default_allocator.
-#define INIT_STACK_ALLOCATOR(N) init_stack_allocator(default_allocator, N);
-#define DESTROY_STACK_ALLOCATOR() destroy_stack_allocator(default_allocator);
+    }
+};
 
 // Used to temporarly allocate local data in stack frames.
 #define stack_frame() auto _frame = _stack_frame(&default_allocator);
 
-// #define STACK_FRAME_RETURN(init)
-// auto  result = init;
-// auto  _frame = stack_frame(default_allocator);
-
-// allocate single uninitialized struct
-// #define make(T) allocate<T>(_stack)
-
-// Uninitialized array of capacity S and count S.
-// #define allocate_array(T, S) allocate_array<T>(default_allocator, S)
-// #define allocate_arrays(T, S) allocate_arrays<T>(default_allocator, S)
-
-// Uninitialized array of capacity S and count 0.
-// #define allocate_array_fill(T, S, Val) \
-//     allocate_array<T>(default_allocator, S, Val)
-// #define allocate_arrays_fill(T, S, def) \
-//     allocate_arrays<T>(default_allocator, S, def)
-
 template <typename Type>
 inline array<Type> copy(stack_allocator& stack, const array<Type>& arr) {
     auto result = allocate_array<Type>(stack, arr.count);
-    for (int i = 0; i < result.count; i++) result[i] = arr[i];
+    copy_to(arr, result);
     return result;
 }
 

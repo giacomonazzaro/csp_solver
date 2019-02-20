@@ -4,19 +4,10 @@
 #include "array_algorithms.h"
 #include "stack_allocator.h"
 
-template <typename Type>
-void remove(array<Type>& arr, int index) {
-    for (int i = index; i < arr.count - 1; ++i) {
-        arr[i] = arr[i + 1];
-    }
-    arr.count -= 1;
-}
-
 using Domain     = array<int>;
 using Assignment = std::unordered_map<int, int>;  // Used only to interface with
                                                   // outside world.
 
-/***** Data definitions *****/
 enum constraint_type { RELATION, ALL_DIFFERENT, EQUAL, BINARY, UNKNOWN };
 
 struct Constraint {
@@ -83,15 +74,6 @@ inline CSP make_csp(const std::string& s, const array<Domain>& d,
 inline void add_constraint(CSP& csp, Constraint* c) {
     csp.constraints.push_back(c);
 }
-
-// Utilities functions.
-#define add(v, x) v.push_back(x)
-// #define remove(v, i) v.erase(v.begin() + i)
-// #define contains(v, x) (v.contains(x));
-// #define min(v) *std::min_element(v.begin(), v.end());
-// #define append(v, w)                \
-    // v.reserve(v.size() + w.size()); \
-    v.insert(v.end(), w.begin(), w.end())
 
 inline array<int> make_range(int from, int to) {
     auto result = allocate_array<int>(to - from);
@@ -196,7 +178,7 @@ struct AllDifferent : Constraint {
                 if (w == v) continue;
                 for (int i = 0; i < D[w].size(); ++i)
                     if (D[w][i] == D[v][0]) {
-                        remove(D[w], i);
+                        D[w].remove(i);
                         if (D[w].size() == 0) return false;
                         break;
                     }

@@ -7,9 +7,6 @@ struct array {
     Type* data  = nullptr;
     int   count = 0;
 
-    // array() {}
-    // array(Type* d, int c) : data(d), count(c) {}
-
     inline             operator bool() const { return data == nullptr; }
     inline const Type& operator[](int i) const { return data[i]; }
     inline Type&       operator[](int i) { return data[i]; }
@@ -32,13 +29,18 @@ struct array {
     }
 
     inline void insert(const array<Type>& arr, int index) {
-        for (int i = count; i > index; i--) {
-            data[i] = data[i - arr.count];
-        }
-        for (int i = 0; i < arr.count; ++i) {
-            data[index + i] = arr[i];
-        }
+        for (int i = count; i > index; i--) data[i] = data[i - arr.count];
+
+        for (int i = 0; i < arr.count; ++i) data[index + i] = arr[i];
+
         count += arr.count;
+    }
+
+    inline void remove(int index) {
+        for (int i = index; i < count - 1; ++i) {
+            data[i] = data[i + 1];
+        }
+        count -= 1;
     }
 
     void operator=(const std::initializer_list<Type>& list) {
