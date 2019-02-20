@@ -102,7 +102,9 @@ bool search(const array<const Constraint*>& C, array<Domain>& D, int depth,
 }
 
 Assignment search(const CSP& csp, Assignment A, search_stats& stats) {
+    stack_frame();
     auto D = copy(csp.domains);
+    
     for (auto& kv : A) D[kv.first] = {kv.second};
 
     if (A.size() > 0) {

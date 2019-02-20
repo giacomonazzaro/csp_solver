@@ -1,9 +1,6 @@
 #pragma once
-#include <cassert>
-#include <set>
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include "array_algorithms.h"
 #include "stack_allocator.h"
 
@@ -105,10 +102,18 @@ inline array<int> make_range(int from, int to) {
 inline array<int> make_range(int to) { return make_range(0, to); }
 
 // Printing functions.
-inline void print_array(const Domain& d) {
-    printf("{ ");
-    for (int val : d) printf("%d ", val);
-    printf("}\n");
+inline void print_array(const array<int>& d) {
+    printf("[");
+    for (int i = 0; i < d.count - 1; ++i) printf("%d, ", d[i]);
+    printf("%d]\n", d.back());
+}
+
+inline void print_domains(const array<Domain>& domains) {
+    printf("\ndomains:\n");
+    for (int i = 0; i < domains.count; ++i) {
+        printf("%d: ", i);
+        print_array(domains[i]);
+    }
 }
 
 inline void print_times(const char* s, int times) {
@@ -136,7 +141,7 @@ inline Assignment make_assignment(const array<Domain>& D) {
 }
 
 inline array<Domain> make_domains(const Assignment& A) {
-    auto D = allocate_array<array<int>>(A.size(), {nullptr, 0});
+    auto D = allocate_array<array<int>>((int)A.size(), {nullptr, 0});
     for (auto& kv : A) D[kv.first] = allocate_array<int>(1, kv.second);
     return D;
 }
@@ -176,7 +181,8 @@ struct AllDifferent : Constraint {
             if (D[v].size() != 1) continue;
             for (int k = i + 1; k < scope.size(); ++k) {
                 int w = scope[k];
-                if (D[w].size() == 1 and D[v][0] == D[w][0]) return false;
+                if (D[w].size() == 1)
+                    if (D[v][0] == D[w][0]) return false;
             }
         }
 

@@ -162,23 +162,9 @@ struct _stack_frame {
 //     allocate_arrays<T>(default_allocator, S, def)
 
 template <typename Type>
-inline void copy_to(const array<Type>& from, array<Type>& to) {
-    assert(from.count <= to.count);
-    for (int i = 0; i < from.count; ++i) to[i] = from[i];
-    to.count = from.count;
-}
-
-template <typename Type>
-inline void copy_to(const array<array<Type>>& from, array<array<Type>>& to) {
-    assert(from.count <= to.count);
-    for (int i = 0; i < from.count; ++i) copy_to(from[i], to[i]);
-    to.count = from.count;
-}
-
-template <typename Type>
 inline array<Type> copy(stack_allocator& stack, const array<Type>& arr) {
     auto result = allocate_array<Type>(stack, arr.count);
-    memcpy(result.data, arr.data, arr.count);
+    for (int i = 0; i < result.count; i++) result[i] = arr[i];
     return result;
 }
 

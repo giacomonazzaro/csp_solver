@@ -1,7 +1,6 @@
 #pragma once
 #include <cassert>
 #include <initializer_list>
-#include <memory>
 
 template <typename Type>
 struct array {
@@ -25,8 +24,6 @@ struct array {
     }
 
     inline void insert(const Type& element, int index) {
-        // memcpy(data + index + 1, data + index, (count - index) *
-        // sizeof(Type));
         for (int i = count; i > index; i--) {
             data[i] = data[i - 1];
         }
@@ -35,9 +32,12 @@ struct array {
     }
 
     inline void insert(const array<Type>& arr, int index) {
-        memcpy(data + index + arr.count, data + index,
-               (count - index - arr.count) * sizeof(Type));
-        memcpy(data + index, arr.data, arr.count);
+        for (int i = count; i > index; i--) {
+            data[i] = data[i - arr.count];
+        }
+        for (int i = 0; i < arr.count; ++i) {
+            data[index + i] = arr[i];
+        }
         count += arr.count;
     }
 
@@ -90,11 +90,21 @@ struct array {
     };
     inline nonconst_iterator begin() { return nonconst_iterator{data, 0}; }
     inline nonconst_iterator end() { return nonconst_iterator{data, count}; }
-
-   private:
-    // array<Type>(const array<Type>&);
-    // array<Type>& operator=(const array<Type>&);
 };
+
+template <typename Type>
+inline void copy_to(const array<Type>& from, array<Type>& to) {
+    assert(from.count <= to.count);
+    for (int i = 0; i < from.count; ++i) to[i] = from[i];
+    to.count = from.count;
+}
+
+template <typename Type>
+inline void copy_to(const array<array<Type>>& from, array<array<Type>>& to) {
+    assert(from.count <= to.count);
+    for (int i = 0; i < from.count; ++i) copy_to(from[i], to[i]);
+    to.count = from.count;
+}
 
 template <typename Container>
 inline void print(const char* name, Container&& a, int line_size = 32,

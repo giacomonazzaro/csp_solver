@@ -1,9 +1,10 @@
 #include "../csp.h"
 
 CSP make_nqueens(int N = 8) {
-    auto range           = make_range(N);
-    auto counts          = allocate_array(N, N);
-    auto domains         = allocate_arrays<int>(counts, range);
+    auto range   = make_range(N);
+    auto counts  = allocate_array(N, N);
+    auto domains = allocate_arrays<int>(counts, range);
+
     auto num_constraints = N * N * N;
     CSP  csp             = make_csp("N-Queens", domains, num_constraints);
     add_constraint(csp, new AllDifferent(range, "one_per_column"));
