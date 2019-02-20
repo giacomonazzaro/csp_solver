@@ -44,7 +44,6 @@ inline unsigned char* allocate(stack_allocator& stack, int bytes) {
 
     assert(ptr != nullptr);  // Resize stack? Not for now.
     stack.offset += bytes;
-    printf("stack size: %d\n", stack.offset);
     return ptr;
 }
 
@@ -134,12 +133,7 @@ struct _stack_frame {
         start       = stack->offset;
     }
 
-    ~_stack_frame() {
-        printf("free %d\n", stack->offset-start);
-        stack->offset = start;
-        printf("stack size: %d\n", stack->offset);
-
-    }
+    ~_stack_frame() { stack->offset = start; }
 };
 
 // Used to temporarly allocate local data in stack frames.

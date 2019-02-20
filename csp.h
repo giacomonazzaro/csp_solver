@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-#include "array_algorithms.h"
-#include "stack_allocator.h"
+#include "utils/array_algorithms.h"
+#include "utils/stack_allocator.h"
 
 using Domain     = array<int>;
 using Assignment = std::unordered_map<int, int>;  // Used only to interface with
