@@ -11,8 +11,9 @@ using Assignment = std::unordered_map<int, int>;  // Used only to interface with
 enum constraint_type { RELATION, ALL_DIFFERENT, EQUAL, BINARY, UNKNOWN };
 
 struct Constraint {
-    string     name;
-    array<int> scope;
+    string          name;
+    array<int>      scope;
+    constraint_type type;
 
     Constraint() {}
 
@@ -20,11 +21,12 @@ struct Constraint {
         scope = copy(vars);
         name  = s;
         name += "(";
+        
         for (int i = 0; i < scope.size() - 1; ++i) {
-            name += to_string(scope[i]);
+            name += string(scope[i]);
             name += ", ";
         }
-        name += to_string(scope.back());
+        name += string(scope.back());
         name += ")";
     }
 
@@ -114,7 +116,11 @@ inline void print_state(const array<Domain>& D, int depth = 0) {
 }
 
 inline void print_constraints(const CSP& csp) {
-    for (auto c : csp.constraints) write(c->name);
+    for (auto c : csp.constraints) {
+        write_inline(c->name);
+        write_inline(" ");
+    }
+    write("");
 }
 
 inline Assignment make_assignment(const array<Domain>& D) {
@@ -149,7 +155,7 @@ inline void print_unsatisfied(const array<Domain>&            D,
     for (int i = 0; i < C.size(); ++i) {
         if (not C[i]->eval(D)) {
             found = true;
-            printf("\n%d: %s\n", i, C[i]->name.c_str());
+            printf("\n%d: %s\n", i, (const char *)C[i]->name);
         }
     }
     if (not found) printf("nothing\n");
@@ -236,7 +242,8 @@ struct Binary : Constraint {
 };
 
 struct Equal : Constraint {
-    Equal(int i, int k, const string name = "equal") : Constraint(allocate_array({i,k}), name) {}
+    Equal(int i, int k, const string name = "equal")
+        : Constraint(allocate_array({i, k}), name) {}
 
     bool eval(const array<Domain>& D) const {
         int i = scope[0];

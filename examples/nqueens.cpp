@@ -67,7 +67,7 @@ Assignment make_assignment_from_list(const array<int>& D,
 }
 
 int main(int argc, char const* argv[]) {
-    int N = 20;
+    int N = 10;
     if (argc == 2) N = atoi(argv[1]);
 
     init_default_stack_allocator(10e8);

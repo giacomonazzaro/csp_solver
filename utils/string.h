@@ -10,17 +10,29 @@ struct string : array<char> {
         data = &buffer[0];
     }
 
+    string(const string& s) : string() {
+        for (int i = 0; i < s.count; i++) buffer[i] = s.buffer[i];
+        count = s.count;
+    }
+
     string(const char* literal) : string() {
         count = (int)strlen(literal);
         for (int i = 0; i < count; ++i) buffer[i] = literal[i];
         buffer[count] = '\0';
     }
-    void operator+=(const string& s) { this->append(s); }
 
-    const char* c_str() const {
-        data[count] = '\0';
-        return data;
+    string(int i) : string() {
+        count = 100;
+        sprintf(buffer, "%d", i);
+        count = (int)strlen(buffer);
     }
+
+    void operator+=(const string& s) {
+        for (int i = 0; i < s.count; ++i) buffer[count + i] = s[i];
+        count += s.count;
+    }
+
+    operator const char*() const { return &buffer[0]; }
 };
 
 inline string operator+(const string& a, const string& b) {
@@ -29,14 +41,6 @@ inline string operator+(const string& a, const string& b) {
     return result;
 }
 
-inline void write(const string& s) { printf("%.*s\n", s.count, s.data); }
+inline void write(const string& s) { printf("%.*s\n", s.count, s.buffer); }
 
-inline void write_inline(const string& s) { printf("%.*s", s.count, s.data); }
-
-inline string to_string(int i) {
-    auto result  = string();
-    result.count = 100;
-    sprintf(result.data, "%d", i);
-    result.count = (int)strlen(result.data);
-    return result;
-}
+inline void write_inline(const string& s) { printf("%.*s", s.count, s.buffer); }
