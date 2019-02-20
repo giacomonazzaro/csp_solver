@@ -124,6 +124,19 @@ inline array<array<Type>> allocate_arrays(const array<int>&  counts,
     return allocate_arrays<Type>(default_allocator, counts, def);
 }
 
+template <typename Type>
+inline array<Type> allocate_array(stack_allocator&                   stack,
+                                  const std::initializer_list<Type>& list) {
+    auto result = allocate_array<Type>(stack, (int)list.size());
+    memcpy(result.data, list.begin(), list.size() * sizeof(Type));
+    return result;
+}
+
+template <typename Type>
+inline array<Type> allocate_array(const std::initializer_list<Type>& list) {
+    return allocate_array(default_allocator, list);
+}
+
 struct _stack_frame {
     stack_allocator* stack = nullptr;
     int              start = 0;

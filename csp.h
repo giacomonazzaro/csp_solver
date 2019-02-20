@@ -194,12 +194,8 @@ struct AllDifferent : Constraint {
 struct Binary : Constraint {
     std::function<bool(int, int)> rel;
 
-    Binary(int i, int k, std::function<bool(int, int)> r, string n = "binary") {
-        scope = allocate_array<int>(2);
-        scope = {i, k};
-        rel   = r;
-        name  = n;
-    }
+    Binary(int i, int k, std::function<bool(int, int)> r, string n = "binary")
+        : Constraint(allocate_array({i, k}), n), rel(r) {}
 
     bool eval(const array<Domain>& D) const {
         int i = scope[0];
@@ -240,11 +236,7 @@ struct Binary : Constraint {
 };
 
 struct Equal : Constraint {
-    Equal(int i, int k, const string name = "equal") {
-        scope      = allocate_array<int>(2);
-        scope      = {i, k};
-        this->name = name;
-    }
+    Equal(int i, int k, const string name = "equal") : Constraint(allocate_array({i,k}), name) {}
 
     bool eval(const array<Domain>& D) const {
         int i = scope[0];
