@@ -1,9 +1,11 @@
 #include "../csp.h"
 
 CSP make_nqueens(int N = 8) {
-    const Array<int> range   = make_range(N);
-    auto             domains = Array<Domain>(N, range);
-    CSP              csp     = make_csp("N-Queens", domains);
+    auto range           = make_range(N);
+    auto counts          = allocate_array(N, N);
+    auto domains         = allocate_arrays<int>(counts, range);
+    auto num_constraints = N * N * N;
+    CSP  csp             = make_csp("N-Queens", domains, num_constraints);
     add_constraint(csp, new AllDifferent(range, "one_per_column"));
 
     // Diagonal attack constraints.
@@ -24,7 +26,7 @@ CSP make_nqueens(int N = 8) {
     return csp;
 }
 
-inline void print_nqueens(const Array<Domain>& D) {
+inline void print_nqueens(const array<Domain>& D) {
     int N = D.size();
     for (int i = 0; i < N; i++) {
         for (int k = 0; k < N; k++) {
@@ -43,7 +45,7 @@ inline void print_nqueens(const Array<Domain>& D) {
 }
 
 inline void print_nqueens(const Assignment& A) {
-    int N = A.size();
+    auto N = A.size();
     for (int i = 0; i < N; i++) {
         for (int k = 0; k < N; k++) {
             if (A.at(i) == k)
@@ -56,7 +58,8 @@ inline void print_nqueens(const Assignment& A) {
     printf("\n");
 }
 
-Assignment make_assignment_from_list(Array<int> D, bool starts_at_one = false) {
+Assignment make_assignment_from_list(const array<int>& D,
+                                     bool              starts_at_one = false) {
     Assignment A;
     for (int i = 0; i < D.size(); i++) A[i] = D[i] - starts_at_one;
     return A;
@@ -66,9 +69,13 @@ int main(int argc, char const* argv[]) {
     int N = 20;
     if (argc == 2) N = atoi(argv[1]);
 
+    init_default_stack_allocator(10e8);
+
     CSP          csp = make_nqueens(N);
     search_stats stats;
     auto         solution = search(csp, {}, stats);
     print_nqueens(solution);
     print_stats(stats);
+
+    destroy_default_stack_allocator();
 }
