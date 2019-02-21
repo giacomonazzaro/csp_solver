@@ -25,7 +25,7 @@ CSP make_sudoku(int N) {
 }
 
 Assignment parse_sudoku(const string& s, int N) {
-    Assignment A;
+    auto A = allocate_array<int>(N * N * N * N);
     for (int i = 0; i < N * N * N * N; i++) {
         int idx = i * 2 + 1;
         if (s[idx] != '-') A[i] = s[idx] - '0';
@@ -37,35 +37,33 @@ Assignment parse_sudoku(const string& s, int N) {
 inline void print_sudoku(const Assignment& A, int N) {
     for (int i = 0; i < N * N * N * N; i++) {
         if (i % (N * N) == 0) printf("\n");
-        if (A.count(i) == 1)
-            printf(" %d", A.at(i));
+        if (A[i] > 0)
+            printf(" %d", A[i]);
         else
             printf(" -");
     }
     printf("\n");
 }
 
-inline void print_sudoku(const array<Domain>& D) {
-    print_sudoku(make_assignment(D), round(std::sqrt(std::sqrt(D.size()))));
+Assignment make_sudoku_hard() {
+    return parse_sudoku(
+        " 8 - - - - - - - -"
+        " - - 3 6 - - - - -"
+        " - 7 - - 9 - 2 - -"
+        " - 5 - - - 7 - - -"
+        " - - - - 4 5 7 - -"
+        " - - - 1 - - - 3 -"
+        " - - 1 - - - - 6 8"
+        " - - 8 5 - - - 1 -"
+        " - 9 - - - - 4 - -",
+        3);
 }
-
-Assignment sudoku_hard = parse_sudoku(
-    " 8 - - - - - - - -"
-    " - - 3 6 - - - - -"
-    " - 7 - - 9 - 2 - -"
-    " - 5 - - - 7 - - -"
-    " - - - - 4 5 7 - -"
-    " - - - 1 - - - 3 -"
-    " - - 1 - - - - 6 8"
-    " - - 8 5 - - - 1 -"
-    " - 9 - - - - 4 - -",
-    3);
 
 int main(int argc, char const* argv[]) {
     int N = 3;
     init_default_stack_allocator(10e7);
     CSP        csp  = make_sudoku(N);
-    Assignment init = sudoku_hard;
+    Assignment init = make_sudoku_hard();
     print_sudoku(init, N);
 
     search_stats stats;
