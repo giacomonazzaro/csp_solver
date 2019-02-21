@@ -1,10 +1,10 @@
 COMPILE = g++ -std=c++11 -O3
-
+N = 20
 all: nqueens
 
 nqueens: build/csp.o
 	$(COMPILE) -o bin/nqueens nqueens.cpp build/csp.o 
-	time ./bin/nqueens
+	time ./bin/nqueens $(N)
 
 sudoku: build/csp.o
 	$(COMPILE) -o bin/sudoku sudoku.cpp build/csp.o
