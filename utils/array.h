@@ -113,6 +113,18 @@ inline void copy_to(const array<array<Type>>& from, array<array<Type>>& to) {
     to.count = from.count;
 }
 
+template <typename Type>
+inline int find(const array<Type>& vec, const Type& val) {
+    for (int i = 0; i < vec.count; ++i)
+        if (vec[i] == val) return i;
+    return -1;
+}
+
+template <typename Type>
+inline bool contains(const array<Type>& vec, const Type& val) {
+    return find(vec, val) != -1;
+}
+
 // template <typename Container>
 // inline void print(const char* name, Container&& a, int line_size = 32,
 //                   int max_elems = 300) {

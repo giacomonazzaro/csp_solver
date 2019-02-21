@@ -1,5 +1,6 @@
-#include "array.h"
+#pragma once
 #include <stdio.h>
+#include "array.h"
 
 #define STRING_SIZE (4096)
 
