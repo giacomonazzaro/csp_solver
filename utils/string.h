@@ -1,6 +1,13 @@
 #include "array.h"
+#include <stdio.h>
 
 #define STRING_SIZE (4096)
+
+inline int literal_length(const char* literal) {
+    int len = 0;
+    while (literal[len] != '\0') len += 1;
+    return len;
+}
 
 struct string : array<char> {
     char buffer[STRING_SIZE];
@@ -16,7 +23,7 @@ struct string : array<char> {
     }
 
     string(const char* literal) : string() {
-        count = (int)strlen(literal);
+        count = literal_length(literal);
         for (int i = 0; i < count; ++i) buffer[i] = literal[i];
         buffer[count] = '\0';
     }
@@ -24,7 +31,7 @@ struct string : array<char> {
     string(int i) : string() {
         count = 100;
         sprintf(buffer, "%d", i);
-        count = (int)strlen(buffer);
+        count = literal_length(buffer);
     }
 
     void operator+=(const string& s) {

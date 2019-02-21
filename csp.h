@@ -1,12 +1,10 @@
 #pragma once
-#include <unordered_map>
 #include "utils/array_algorithms.h"
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
 
 using Domain     = array<int>;
-using Assignment = std::unordered_map<int, int>;  // Used only to interface with
-                                                  // outside world.
+using Assignment = array<int>;
 
 enum constraint_type {
     ALL_DIFFERENT,
@@ -133,7 +131,7 @@ inline void print_constraints(const array<Constraint>& constraints) {
 }
 
 inline Assignment make_assignment(const array<Domain>& D) {
-    Assignment A = {};
+    auto A = allocate_array<int>(D.count);
     for (int i = 0; i < D.size(); i++) {
         if (D[i].size() == 1) A[i] = D[i][0];
     }
@@ -142,12 +140,17 @@ inline Assignment make_assignment(const array<Domain>& D) {
 
 inline array<Domain> make_domains(const Assignment& A) {
     auto D = allocate_array<array<int>>((int)A.size(), {nullptr, 0});
-    for (auto& kv : A) D[kv.first] = allocate_array<int>(1, kv.second);
+    for (int i = 0; i < A.size(); ++i) {
+        D[i] = allocate_array<int>(1, A[i]);
+    }
     return D;
 }
 
 inline void apply_assignment(Domain& D, const Assignment& A) {
-    for (auto& kv : A) D[kv.first] = kv.second;
+    for (int i = 0; i < A.count; ++i) {
+        /* code */
+        D[i] = {A[i]};
+    }
 }
 
 inline void print_stats(const search_stats& stats) {

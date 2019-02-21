@@ -145,7 +145,8 @@ template <typename Type>
 inline array<Type> allocate_array(stack_allocator&                   stack,
                                   const std::initializer_list<Type>& list) {
     auto result = allocate_array<Type>(stack, (int)list.size());
-    memcpy(result.data, list.begin(), list.size() * sizeof(Type));
+    int  i      = 0;
+    for (auto& v : list) result[i++] = v;
     return result;
 }
 

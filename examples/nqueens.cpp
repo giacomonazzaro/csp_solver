@@ -52,7 +52,7 @@ inline void print_nqueens(const Assignment& A) {
     auto N = A.size();
     for (int i = 0; i < N; i++) {
         for (int k = 0; k < N; k++) {
-            if (A.at(i) == k)
+            if (A[i] == k)
                 printf(" Q");  // There's a queen.
             else
                 printf(" -");  // Empty cell.

@@ -1,17 +1,18 @@
-# A simple Constraint Satisfaction Problem solver
+# A simple CSP solver
+The code implements a simple [constraint satisfaction problem solver](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem).
 
-# Features
+The library is minimal, it only includes `<stdio.h>` for printing, `<cassert>` for debugging and `<initializer_list>` as array utiliy. The only data structures used are arrays, implemented in `utils/array.h`. Memory managment is implemented in `utils/stack_allocator.h`.
+
+## Features and heuristics
 - Backtrack search.
 - Minimum remaining values + max degree heuristics.
 - Generalized Arc Consistency.
 - Forward propagation.
 
-# Examples
-- N-queens
-- Sudoku
+## Examples
 
-# Results
-## N-queens (N = 20)
+### N-queens (N = 20)
+Solve in less than 0.01 seconds.
 ```
 Q • • • • • • • • • • • • • • • • • • •  
 • • Q • • • • • • • • • • • • • • • • •  
@@ -35,7 +36,7 @@ Q • • • • • • • • • • • • • • • • • • •
 • • • • • • • • • Q • • • • • • • • • •  
 ```
 
-## Sudoku (hard)
+### Sudoku (hard)
  ```
  8 • • • • • • • •     8 1 2 7 5 3 6 4 9  
  • • 3 6 • • • • •     9 4 3 6 8 2 1 7 5  

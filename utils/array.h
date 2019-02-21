@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <initializer_list>
 
 template <typename Type>
@@ -48,17 +49,18 @@ struct array {
 
     void operator=(const std::initializer_list<Type>& list) {
         count = (int)list.size();
-        memcpy(data, list.begin(), list.size() * sizeof(Type));
+        int i = 0;
+        for (auto& v : list) data[i++] = v;
     }
 
-    array<Type> operator()(int from, int to) {
+    array<Type> slice(int from, int to) {
         assert(from >= 0 and from <= count);
         assert(to >= 0 and to <= count);
         assert(from <= to);
         return {data + from, to - from};
     }
 
-    const array<const Type> operator()(int from, int to) const {
+    const array<const Type> slice(int from, int to) const {
         assert(from >= 0 and from <= count);
         assert(to >= 0 and to <= count);
         assert(from <= to);
@@ -111,30 +113,30 @@ inline void copy_to(const array<array<Type>>& from, array<array<Type>>& to) {
     to.count = from.count;
 }
 
-template <typename Container>
-inline void print(const char* name, Container&& a, int line_size = 32,
-                  int max_elems = 300) {
-    int count = a.count;
-    printf("%s (count: %d)\n", name, count);  // capacity(a));
-    if (count)
-        printf(" ");
-    else {
-        printf("\n");
-        return;
-    }
-    for (int i = 0; i < count; ++i) {
-        printf("%d", a[i]);
-        if (i == count - 1)
-            printf("\n\n");
+// template <typename Container>
+// inline void print(const char* name, Container&& a, int line_size = 32,
+//                   int max_elems = 300) {
+//     int count = a.count;
+//     printf("%s (count: %d)\n", name, count);  // capacity(a));
+//     if (count)
+//         printf(" ");
+//     else {
+//         printf("\n");
+//         return;
+//     }
+//     for (int i = 0; i < count; ++i) {
+//         printf("%d", a[i]);
+//         if (i == count - 1)
+//             printf("\n\n");
 
-        else if (i % line_size == line_size - 1)
-            printf("\n ");
-        else
-            printf(", ");
+//         else if (i % line_size == line_size - 1)
+//             printf("\n ");
+//         else
+//             printf(", ");
 
-        if (i > max_elems) {
-            printf("...\n\n");
-            return;
-        }
-    }
-}
+//         if (i > max_elems) {
+//             printf("...\n\n");
+//             return;
+//         }
+//     }
+// }
