@@ -42,9 +42,9 @@ bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
     }
 
     // Generalized arc consistency.
-    // if(not gac3(C, D)) {
+    // if (not gac3(C, D)) {
     //     comment("GAC3 failure");
-    //     return false;
+    // return false;
     // }
 
     return true;
@@ -178,7 +178,8 @@ bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
     return true;
 }
 
-bool remove_values(int variable, Constraint constraint, array<Domain>& D) {
+bool remove_values(int variable, const Constraint& constraint,
+                   array<Domain>& D) {
     stack_frame();
     bool removed_value = false;
     int  i             = 0;
@@ -191,11 +192,17 @@ bool remove_values(int variable, Constraint constraint, array<Domain>& D) {
         // variables.
         // array<Domain> Dfake = array<Domain>(D.size(), {-1});
 
-        auto Dfake = allocate_arrays<int>(ones);
-        for (auto& d : Dfake) d.count = 0;
-        Dfake[variable] = {domain_tmp[i]};
-        for (auto v : constraint.scope)
+        auto Dfake = allocate_array<array<int>>(D.size());
+        for (int k = 0; k < Dfake.count; ++k) {
+            Dfake[k]       = allocate_array<int>(D[k].count);
+            Dfake[k].count = 0;
+        }
+
+        Dfake[variable].push_back(domain_tmp[i]);
+        for (auto v : constraint.scope) {
+            Dfake[v].count = D[v].count;
             if (v != variable) copy_to(D[v], Dfake[v]);  // copying the domains.
+        }
 
         bool exists = search_small(constraint, Dfake, 0);
 
@@ -215,9 +222,15 @@ bool remove_values(int variable, Constraint constraint, array<Domain>& D) {
 }
 
 bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
-    array<Domain> D = D_result;  // copying the domains.
-    array<int>    var_queue;
-    array<int>    const_queue;
+    stack_frame();
+    auto D = copy(D_result);  // copying the domains.
+
+    int size = 0;
+    for (auto& c : C) size += c.scope.count;
+    auto var_queue    = allocate_array<int>(size);
+    auto const_queue  = allocate_array<int>(size);
+    var_queue.count   = 0;
+    const_queue.count = 0;
 
     // For each constraint c, for each variable v in the scope of c,
     // add the pair (v, c) to the queue.
@@ -276,7 +289,7 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
     }
 
     // Return the updated domain.
-    D_result = D;  // copying the domains.
+    copy_to(D, D_result);  // copying the domains.
     return true;
 }
 

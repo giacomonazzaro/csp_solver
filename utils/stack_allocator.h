@@ -100,7 +100,7 @@ inline array<array<Type>> allocate_arrays(stack_allocator&  stack,
 
 template <typename Type>
 inline array<array<Type>> allocate_arrays(const array<int>& counts) {
-    return allocate_arrays<Type>(counts);
+    return allocate_arrays<Type>(default_allocator, counts);
 }
 
 template <typename Type>

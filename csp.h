@@ -241,8 +241,10 @@ inline bool eval_nary(const Constraint&    constraint,
         if (domains[var].count != 1) return true;
 
     stack_frame();
-    auto values = allocate_array<int>(domains.count);
-    for (auto var : constraint.scope) values[var] = domains[var][0];
+    auto values = allocate_array<int>(constraint.scope.count);
+    for (int i = 0; i < constraint.scope.count; ++i) {
+        values[i] = domains[constraint.scope[i]][0];
+    }
 
     return constraint.eval_custom(constraint, values);
 }

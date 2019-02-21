@@ -70,7 +70,7 @@ Assignment make_assignment_from_list(const array<int>& D,
 }
 
 int main(int argc, char const* argv[]) {
-    int N = 80;
+    int N = 8;
     if (argc == 2) N = atoi(argv[1]);
 
     init_default_stack_allocator(10e8);
