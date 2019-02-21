@@ -11,6 +11,10 @@ sudoku: build/csp.o
 	$(COMPILE) -o bin/sudoku sudoku.cpp build/csp.o
 	time ./bin/sudoku
 
+pipes: build/csp.o
+	$(COMPILE) -o bin/pipes pipes.cpp build/csp.o 
+	time ./bin/pipes $(N)
+
 test: sudoku nqueens
 
 build/csp.o: ../csp.cpp ../csp.h

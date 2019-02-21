@@ -91,7 +91,7 @@ template <typename Type>
 inline array<array<Type>> allocate_arrays(stack_allocator&  stack,
                                           const array<int>& counts) {
     auto result  = allocate_array<array<Type>>(stack, counts.count);
-    result.count = counts.count;
+    result.count = counts.count;  // @Cleanup
     for (int i = 0; i < counts.count; ++i) {
         result[i] = allocate_array<Type>(stack, counts[i]);
     }
@@ -114,6 +114,23 @@ inline array<array<Type>> allocate_arrays(stack_allocator&   stack,
     return result;
 }
 
+template <typename Type>
+inline array<array<Type>> allocate_arrays(stack_allocator& stack, int count,
+                                          const array<Type>& def) {
+    auto result = allocate_array<array<Type>>(stack, count);
+    for (int i = 0; i < result.count; ++i) {
+        result[i] = allocate_array<Type>(def.count);
+        copy_to(def, result[i]);
+    }
+    return result;
+}
+
+template <typename Type>
+inline array<array<Type>> allocate_arrays(int count, const array<Type>& def) {
+    return allocate_arrays(default_allocator, count, def);
+}
+
+/* DEPRECATE THIS */
 template <typename Type>
 inline array<array<Type>> allocate_arrays(const array<int>&  counts,
                                           const array<Type>& def) {
