@@ -24,11 +24,11 @@ CSP make_sudoku(int N) {
     return sudoku;
 }
 
-Assignment parse_sudoku(const string& s, int N) {
-    auto A = allocate_array<int>(N * N * N * N);
+array<Domain> parse_sudoku(const string& s, int N) {
+    auto A = allocate_arrays<int>(N * N * N * N, make_range(1, N * N + 1));
     for (int i = 0; i < N * N * N * N; i++) {
         int idx = i * 2 + 1;
-        if (s[idx] != '-') A[i] = s[idx] - '0';
+        if (s[idx] != '-') A[i] = {s[idx] - '0'};
     }
 
     return A;
@@ -45,7 +45,7 @@ inline void print_sudoku(const Assignment& A, int N) {
     printf("\n");
 }
 
-Assignment make_sudoku_hard() {
+array<Domain> make_sudoku_hard() {
     return parse_sudoku(
         " 8 - - - - - - - -"
         " - - 3 6 - - - - -"
@@ -62,9 +62,9 @@ Assignment make_sudoku_hard() {
 int main(int argc, char const* argv[]) {
     int N = 3;
     init_default_stack_allocator(10e7);
-    CSP        csp  = make_sudoku(N);
-    Assignment init = make_sudoku_hard();
-    print_sudoku(init, N);
+    CSP  csp  = make_sudoku(N);
+    auto init = make_sudoku_hard();
+    //print_sudoku(init, N);
 
     search_stats stats;
     auto         solution = search(csp, init, stats);

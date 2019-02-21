@@ -93,18 +93,18 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
     return false;
 }
 
-Assignment search(const CSP& csp, Assignment A, search_stats& stats) {
+Assignment search(const CSP& csp, const array<Domain>& assignment, search_stats& stats) {
     stack_frame();
-    auto D = copy(csp.domains);
+    auto D = copy(assignment);
 
-    for (int i = 0; i < A.count; i++) {
-        D[i] = {A[i]};
-    }
+    // for (int i = 0; i < A.count; i++) {
+    // D[i] = {A[i]};
+    // }
 
-    if (A.size() > 0) {
-        constraints_propagation(csp.constraints, D);
-        // gac3(csp.constraints, D);
-    }
+    // if (A.size() > 0) {
+    constraints_propagation(csp.constraints, D);
+    // gac3(csp.constraints, D);
+    // }
 
     if (is_assignment_complete(D)) {
         if (not satisfies(csp.constraints, D)) {
@@ -115,7 +115,7 @@ Assignment search(const CSP& csp, Assignment A, search_stats& stats) {
     }
 
     bool success = search(csp.constraints, D, 0, stats);
-    A            = make_assignment(D);
+    auto A       = make_assignment(D);
     if (success) {
         bool check = satisfies(csp.constraints, D);
         if (not check) {

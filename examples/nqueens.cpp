@@ -77,7 +77,7 @@ int main(int argc, char const* argv[]) {
 
     CSP          csp = make_nqueens(N);
     search_stats stats;
-    auto         solution = search(csp, {}, stats);
+    auto         solution = search(csp, stats);
     print_nqueens(solution);
     print_stats(stats);
 

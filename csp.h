@@ -58,7 +58,11 @@ bool satisfies(const array<Constraint>& C, const Assignment& A);
 
 // Search satisfying assignment.
 bool       search(const array<Constraint>& C, array<Domain>& D, int depth);
-Assignment search(const CSP& csp, Assignment A, search_stats& stats);
+Assignment search(const CSP& csp, const array<Domain>& assignment,
+                  search_stats& stats);
+inline Assignment search(const CSP& csp, search_stats& stats) {
+    return search(csp, csp.domains, stats);
+}
 
 // Choose next variable (MRV & MaxDegree heuristics).
 int choose_variable(const array<Domain>& D, const array<Constraint>& C);
