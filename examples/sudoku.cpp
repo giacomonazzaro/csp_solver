@@ -34,11 +34,11 @@ array<Domain> parse_sudoku(const string& s, int N) {
     return A;
 }
 
-inline void print_sudoku(const Assignment& A, int N) {
+inline void print_sudoku(const array<Domain>& D, int N) {
     for (int i = 0; i < N * N * N * N; i++) {
         if (i % (N * N) == 0) printf("\n");
-        if (A[i] > 0)
-            printf(" %d", A[i]);
+        if (D[i].count == 1)
+            printf(" %d", D[i][0]);
         else
             printf(" -");
     }
@@ -64,11 +64,12 @@ int main(int argc, char const* argv[]) {
     init_default_stack_allocator(10e7);
     CSP  csp  = make_sudoku(N);
     auto init = make_sudoku_hard();
-    //print_sudoku(init, N);
+    print_sudoku(init, N);
 
     search_stats stats;
     auto         solution = search(csp, init, stats);
-    print_sudoku(solution, N);
+    apply_assignment(csp.domains, solution);
+    print_sudoku(csp.domains, N);
     print_stats(stats);
 
     destroy_default_stack_allocator();

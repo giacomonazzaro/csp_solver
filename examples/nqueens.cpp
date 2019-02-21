@@ -48,11 +48,10 @@ inline void print_nqueens(const array<Domain>& D) {
     printf("\n");
 }
 
-inline void print_nqueens(const Assignment& A) {
-    auto N = A.size();
+inline void print_nqueens(int N, const Assignment& A) {
     for (int i = 0; i < N; i++) {
         for (int k = 0; k < N; k++) {
-            if (A[i] == k)
+            if (k == A[i].value)
                 printf(" Q");  // There's a queen.
             else
                 printf(" -");  // Empty cell.
@@ -60,13 +59,6 @@ inline void print_nqueens(const Assignment& A) {
         printf("\n");
     }
     printf("\n");
-}
-
-Assignment make_assignment_from_list(const array<int>& D,
-                                     bool              starts_at_one = false) {
-    Assignment A;
-    for (int i = 0; i < D.size(); i++) A[i] = D[i] - starts_at_one;
-    return A;
 }
 
 int main(int argc, char const* argv[]) {
@@ -78,7 +70,7 @@ int main(int argc, char const* argv[]) {
     CSP          csp = make_nqueens(N);
     search_stats stats;
     auto         solution = search(csp, stats);
-    print_nqueens(solution);
+    print_nqueens(N, solution);
     print_stats(stats);
 
     destroy_default_stack_allocator();

@@ -16,16 +16,19 @@ bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     return true;
 }
 
-bool satisfies(const array<Constraint>& C, const Assignment& A) {
-    stack_frame();
-    auto D = make_domains(A);
-    for (auto& c : C) {
-        if (not eval(c, D)) {
-            return false;
-        }
-    }
-    return true;
-}
+// bool satisfies(const array<Constraint>& C, const Assignment& A) {
+//     stack_frame();
+//     auto D = copy(
+//     for (auto& a : A)
+//         D[a.variable] = {a.value};
+
+//     for (auto& c : C) {
+//         if (not eval(c, D)) {
+//             return false;
+//         }
+//     }
+//     return true;
+// }
 
 bool is_assignment_complete(const array<Domain>& D) {
     for (int i = 0; i < D.size(); ++i)
@@ -93,7 +96,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
     return false;
 }
 
-Assignment search(const CSP& csp, const array<Domain>& assignment, search_stats& stats) {
+Assignment search(const CSP& csp, const array<Domain>& assignment,
+                  search_stats& stats) {
     stack_frame();
     auto D = copy(assignment);
 

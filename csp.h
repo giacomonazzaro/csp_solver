@@ -2,8 +2,13 @@
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
 
-using Domain     = array<int>;
-using Assignment = array<int>;
+using Domain = array<int>;
+struct assignment {
+    int variable;
+    int value;
+};
+
+using Assignment = array<assignment>;
 
 enum constraint_type {
     ALL_DIFFERENT,
@@ -134,26 +139,26 @@ inline void print_constraints(const array<Constraint>& constraints) {
 }
 
 inline Assignment make_assignment(const array<Domain>& D) {
-    auto A = allocate_array<int>(D.count);
+    auto A = allocate_array<assignment>(D.count);
+    A.count = 0;
     for (int i = 0; i < D.size(); i++) {
-        if (D[i].size() == 1) A[i] = D[i][0];
+        if (D[i].size() == 1) A.push_back({i, D[i][0]});
     }
     return A;
 }
 
+/*
 inline array<Domain> make_domains(const Assignment& A) {
-    auto D = allocate_array<array<int>>((int)A.size(), {nullptr, 0});
-    for (int i = 0; i < A.size(); ++i) {
-        D[i] = allocate_array<int>(1, A[i]);
+    auto D = allocate_arrays<int>((int)A.size(), );
+    for (auto& a : A) {
+        D[a.variable] = allocate_array<assi>(1, A[i]);
     }
     return D;
-}
+}*/
 
-inline void apply_assignment(Domain& D, const Assignment& A) {
-    for (int i = 0; i < A.count; ++i) {
-        /* code */
-        D[i] = {A[i]};
-    }
+inline void apply_assignment(array<Domain>& D, const Assignment& A) {
+    for (auto& a : A)
+        D[a.variable] = {a.value};
 }
 
 inline void print_stats(const search_stats& stats) {
