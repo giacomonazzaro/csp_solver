@@ -71,8 +71,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
 
         stats.expansions += 1;
         // Copying the domains to make a temp version.
-        auto D_attempt            = copy(D);
-        D_attempt[variable][0]    = {val};
+        auto D_attempt      = copy(D);
+        D_attempt[variable] = {val};
 
         // Check if assignment satisfies constraints.
         if (not satisfies(C, D_attempt)) continue;
@@ -96,8 +96,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
 Assignment search(const CSP& csp, Assignment A, search_stats& stats) {
     stack_frame();
     auto D = copy(csp.domains);
-    
-    for (int i=0; i<A.count; i++) {
+
+    for (int i = 0; i < A.count; i++) {
         D[i] = {A[i]};
     }
 
