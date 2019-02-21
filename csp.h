@@ -2,13 +2,12 @@
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
 
-using Domain = array<int>;
 struct assignment {
     int variable;
     int value;
 };
-
 using Assignment = array<assignment>;
+using Domain     = array<int>;
 
 enum constraint_type {
     ALL_DIFFERENT,
@@ -27,19 +26,8 @@ struct Constraint {
     bool (*eval_custom)(const Constraint&, const array<int>&) = nullptr;
     constraint_type type;
 
-    Constraint(constraint_type t, const array<int>& vars, const string& s) {
-        type  = t;
-        scope = copy(vars);
-        name  = s;
-        name += "(";
-
-        for (int i = 0; i < scope.size() - 1; ++i) {
-            name += string(scope[i]);
-            name += ", ";
-        }
-        name += string(scope.back());
-        name += ")";
-    }
+    inline Constraint(constraint_type t, const array<int>& vars,
+                      const string& s);
 };
 
 inline bool eval(const Constraint& constraint, const array<Domain>& domains);
@@ -56,30 +44,26 @@ struct search_stats {
     int expansions = 0;
 };
 
-/***** Solving functions *****/
 // Check if assignment satisfies the constraints.
 bool satisfies(const array<Constraint>& C, const array<Domain>& A);
-bool satisfies(const array<Constraint>& C, const Assignment& A);
 
 // Search satisfying assignment.
 bool       search(const array<Constraint>& C, array<Domain>& D, int depth);
-Assignment search(const CSP& csp, const array<Domain>& assignment,
+Assignment search(const CSP& csp, const Assignment& assignment,
                   search_stats& stats);
-inline Assignment search(const CSP& csp, search_stats& stats) {
-    return search(csp, csp.domains, stats);
-}
+bool       search_single_constraint(const Constraint& c, const array<Domain>& D,
+                                    int depth);
 
-// Choose next variable (MRV & MaxDegree heuristics).
-int choose_variable(const array<Domain>& D, const array<Constraint>& C);
+    // Choose next variable to assign (MRV & MaxDegree heuristics).
+    int choose_variable(const array<Domain>& D, const array<Constraint>& C);
 
-// Make inferences after assignment (Genrealized Arc Consistency).
+// Propagate consequences after assignment in order to reduce domains.
 bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);
 bool gac3(const array<Constraint>& C, array<Domain>& D);
 bool remove_values(int variable, const Constraint& constraint, array<Domain>& D,
                    array<Domain> A);
-bool search_small(Constraint c, const array<Domain>& D_, int depth);
 
-/***** CSP intialization functions. *****/
+// Initialize CSP.
 inline CSP make_csp(const string& s, const array<Domain>& d,
                     int num_constraints) {
     CSP csp;
@@ -90,10 +74,7 @@ inline CSP make_csp(const string& s, const array<Domain>& d,
     return csp;
 }
 
-inline void add_constraint(CSP& csp, const Constraint& c) {
-    csp.constraints.push_back(c);
-}
-
+// Useful functions to initialize domains.
 inline array<int> make_range(int from, int to) {
     auto result = allocate_array<int>(to - from);
     for (int i = 0; i < to - from; i++) result[i] = from + i;
@@ -117,13 +98,9 @@ inline void print_domains(const array<Domain>& domains) {
     }
 }
 
-inline void print_times(const char* s, int times) {
-    for (int i = 0; i < times; ++i) printf("%s", s);
-}
-
 inline void print_state(const array<Domain>& D, int depth = 0) {
     for (int i = 0; i < D.size(); ++i) {
-        print_times("-", depth);
+        for (int k = 0; k < depth; ++k) printf("-");
         printf(" %d = ", i);
         print_array(D[i]);
     }
@@ -132,14 +109,14 @@ inline void print_state(const array<Domain>& D, int depth = 0) {
 inline void print_constraints(const array<Constraint>& constraints) {
     for (auto& c : constraints) {
         write(c.name);
-        print_array(c.scope);
+        // print_array(c.scope);
         write("");
     }
     write("\n");
 }
 
 inline Assignment make_assignment(const array<Domain>& D) {
-    auto A = allocate_array<assignment>(D.count);
+    auto A  = allocate_array<assignment>(D.count);
     A.count = 0;
     for (int i = 0; i < D.size(); i++) {
         if (D[i].size() == 1) A.push_back({i, D[i][0]});
@@ -147,24 +124,29 @@ inline Assignment make_assignment(const array<Domain>& D) {
     return A;
 }
 
-/*
-inline array<Domain> make_domains(const Assignment& A) {
-    auto D = allocate_arrays<int>((int)A.size(), );
-    for (auto& a : A) {
-        D[a.variable] = allocate_array<assi>(1, A[i]);
-    }
-    return D;
-}*/
-
 inline void apply_assignment(array<Domain>& D, const Assignment& A) {
-    for (auto& a : A)
-        D[a.variable] = {a.value};
+    for (auto& a : A) D[a.variable] = {a.value};
 }
 
 inline void print_stats(const search_stats& stats) {
     printf("\nSearch statistics:\n");
     printf("   num_backtracks = %d\n", stats.backtracks);
     printf("   num_expansions = %d\n\n", stats.expansions);
+}
+
+inline Constraint::Constraint(constraint_type t, const array<int>& vars,
+                              const string& s) {
+    type  = t;
+    scope = copy(vars);
+    name  = s;
+    name += "(";
+
+    for (int i = 0; i < scope.size() - 1; ++i) {
+        name += string(scope[i]);
+        name += ", ";
+    }
+    name += string(scope.back());
+    name += ")";
 }
 
 // Constraint all_different

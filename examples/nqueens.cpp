@@ -8,10 +8,11 @@ CSP make_nqueens(int N = 8) {
     auto num_constraints = N * N;
     CSP  csp             = make_csp("N-Queens", domains, num_constraints);
 
+    // constraint: One queen per column.
     auto one_per_column = all_different(range, "one_per_column");
     csp.constraints.push_back(one_per_column);
 
-    // Diagonal attack constraints.
+    // constraint: No diagonal threats.
     for (int i = 0; i < N - 1; ++i) {
         for (int j = i + 1; j < N; ++j) {
             auto scope       = allocate_array({i, j});
@@ -28,24 +29,6 @@ CSP make_nqueens(int N = 8) {
         }
     }
     return csp;
-}
-
-inline void print_nqueens(const array<Domain>& D) {
-    int N = D.size();
-    for (int i = 0; i < N; i++) {
-        for (int k = 0; k < N; k++) {
-            if (not contains(D[i], k))
-                printf(" -");  // Unassigned and cannot be a queen.
-            else {
-                if (D[i].size() == 1)
-                    printf(" X");  // There's a queen.
-                else
-                    printf(" o");  // Unassigned, but can be a queen.
-            }
-        }
-        printf("\n");
-    }
-    printf("\n");
 }
 
 inline void print_nqueens(int N, const Assignment& A) {
@@ -69,7 +52,7 @@ int main(int argc, char const* argv[]) {
 
     CSP          csp = make_nqueens(N);
     search_stats stats;
-    auto         solution = search(csp, stats);
+    auto         solution = search(csp, {}, stats);
     print_nqueens(N, solution);
     print_stats(stats);
 

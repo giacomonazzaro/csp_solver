@@ -1,12 +1,6 @@
 #include "csp.h"
 stack_allocator default_allocator;
 
-void comment(const string& c) {
-#ifdef PRINT_SEARCH_LOG
-    printf("%s\n", c.c_str());
-#endif
-}
-
 bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for (auto& constraint : C) {
         if (not eval(constraint, D)) {
@@ -15,20 +9,6 @@ bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     }
     return true;
 }
-
-// bool satisfies(const array<Constraint>& C, const Assignment& A) {
-//     stack_frame();
-//     auto D = copy(
-//     for (auto& a : A)
-//         D[a.variable] = {a.value};
-
-//     for (auto& c : C) {
-//         if (not eval(c, D)) {
-//             return false;
-//         }
-//     }
-//     return true;
-// }
 
 bool is_assignment_complete(const array<Domain>& D) {
     for (int i = 0; i < D.size(); ++i)
@@ -40,7 +20,6 @@ bool is_assignment_complete(const array<Domain>& D) {
 bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
     // Forward propagation.
     if (not constraints_propagation(C, D)) {
-        comment("Propagation failure");
         return false;
     }
 
@@ -55,10 +34,6 @@ bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
 
 bool search(const array<Constraint>& C, array<Domain>& D, int depth,
             search_stats& stats) {
-#ifdef PRINT_SEARCH
-    print_state(D, depth);
-#endif
-
     // If assignment is complete, just check if it satisfies contraints.
     if (is_assignment_complete(D)) {
         if (satisfies(C, D))
@@ -96,19 +71,13 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
     return false;
 }
 
-Assignment search(const CSP& csp, const array<Domain>& assignment,
+Assignment search(const CSP& csp, const Assignment& assignment,
                   search_stats& stats) {
     stack_frame();
-    auto D = copy(assignment);
+    auto D = copy(csp.domains);
 
-    // for (int i = 0; i < A.count; i++) {
-    // D[i] = {A[i]};
-    // }
-
-    // if (A.size() > 0) {
+    apply_assignment(D, assignment);
     constraints_propagation(csp.constraints, D);
-    // gac3(csp.constraints, D);
-    // }
 
     if (is_assignment_complete(D)) {
         if (not satisfies(csp.constraints, D)) {
@@ -118,18 +87,18 @@ Assignment search(const CSP& csp, const array<Domain>& assignment,
         return make_assignment(D);
     }
 
-    bool success = search(csp.constraints, D, 0, stats);
-    auto A       = make_assignment(D);
+    bool success  = search(csp.constraints, D, 0, stats);
+    auto solution = make_assignment(D);
     if (success) {
         bool check = satisfies(csp.constraints, D);
         if (not check) {
             printf("\n***** Search found a solution, but it's wrong! *****\n");
             print_unsatisfied(D, csp.constraints);
         }
-        return A;
+        return solution;
     } else {
         printf("No solution found!\n");
-        return A;
+        return solution;
     }
 }
 
@@ -209,7 +178,7 @@ bool remove_values(int variable, const Constraint& constraint,
             if (v != variable) copy_to(D[v], Dfake[v]);  // copying the domains.
         }
 
-        bool exists = search_small(constraint, Dfake, 0);
+        bool exists = search_single_constraint(constraint, Dfake, 0);
 
         if (exists == false) {
             domain_tmp.remove(i);
@@ -298,16 +267,13 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
     return true;
 }
 
-bool search_small(Constraint c, const array<Domain>& D_, int depth) {
+bool search_single_constraint(const Constraint& c, const array<Domain>& D_,
+                              int depth) {
     stack_frame();
     auto D = copy(D_);
 
     // Naive search that just check if there's a possible assignment that
     // satisfy only ONE constraint. Used by remove_values().
-
-#ifdef PRINT_SEARCH_GAC
-    print_state(D, depth);
-#endif
 
     // If assignment is complete, return true. Only admissible assignments
     // arrive here.
@@ -332,11 +298,11 @@ bool search_small(Constraint c, const array<Domain>& D_, int depth) {
         // If new assignment does not satisfies constraints, continue.
         if (not eval(c, D)) continue;
 
-        // @Speed: We should propagate also in search_small, but copying D seems
-        // to slow down. array<Domain> D_new = D; if(not c->propagate(D_new))
-        // continue;
+        // @Speed: We should propagate also in search_single_constraint, but
+        // copying D seems to slow down. array<Domain> D_new = D; if(not
+        // c->propagate(D_new)) continue;
 
-        if (search_small(c, D, depth + 1)) {
+        if (search_single_constraint(c, D, depth + 1)) {
             return true;
         }
     }
