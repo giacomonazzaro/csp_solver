@@ -30,13 +30,14 @@ CSP make_pipes(int N) {
         csp.domains[x * N + (N - 1)] = {0};
         csp.domains[x + (N - 1) * N] = {0};
     }
+    csp.domains[N * N / 2] = {15};
 
     for (int x = 1; x < N - 1; ++x) {
         for (int y = 1; y < N - 1; ++y) {
-            int var     = N * y + x;
+            int var     = N * x + y;
             int right   = var + 1;
             int up      = var - N;
-            int left    = var + 1;
+            int left    = var - 1;
             int down    = var + N;
             int ruld[4] = {right, up, left, down};
             for (int k = 0; k < 4; ++k) {
@@ -99,25 +100,34 @@ inline void print_nqueens(const array<Domain>& D) {
     printf("\n");
 }
 
-inline void print_pipes(const Assignment& A) {
-    auto N = (int)sqrt(A.size());
+inline void print_pipes(int N, const Assignment& A) {
     for (int x = 0; x < N; x++) {
         for (int k = 0; k < N; k++) {
-            int i = k * N + x;
+            int i = x * N + k;
 
-            if (A.at(i) == 3) printf("L");
-            if (A.at(i) == 6) printf("⅃");
-            if (A.at(i) == 12) printf("⎤");
-            if (A.at(i) == 9) printf("Γ");
+            if (A[i] == 3)
+                printf(" L");
+            else if (A[i] == 6)
+                printf(" ⅃");
+            else if (A[i] == 12)
+                printf(" ⎤");
+            else if (A[i] == 9)
+                printf(" Γ");
 
             // | = 10
             // - = 5
             // X = 15
             //   = 0
-            if (A.at(i) == 10) printf("|");
-            if (A.at(i) == 5) printf("-");
-            if (A.at(i) == 15) printf("X");
-            if (A.at(i) == 0) printf("•");
+            else if (A[i] == 10)
+                printf(" |");
+            else if (A[i] == 5)
+                printf(" -");
+            else if (A[i] == 15)
+                printf(" X");
+            else if (A[i] == 0)
+                printf(" •");
+            else
+                printf("(%d)", A[i]);
         }
         printf("\n");
     }
@@ -139,11 +149,11 @@ int main(int argc, char const* argv[]) {
 
     CSP csp = make_pipes(N);
 
-    csp.domains[N * N / 3] = {15};
-
+    // csp.domains[8] = {3};
+    assert(satisfies(csp.constraints, csp.domains));
     search_stats stats;
     auto         solution = search(csp, {}, stats);
-    print_pipes(solution);
+    print_pipes(N, solution);
     print_stats(stats);
 
     destroy_default_stack_allocator();

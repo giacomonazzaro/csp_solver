@@ -72,8 +72,7 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
         stats.expansions += 1;
         // Copying the domains to make a temp version.
         auto D_attempt            = copy(D);
-        D_attempt[variable][0]    = val;
-        D_attempt[variable].count = 1;
+        D_attempt[variable][0]    = {val};
 
         // Check if assignment satisfies constraints.
         if (not satisfies(C, D_attempt)) continue;
