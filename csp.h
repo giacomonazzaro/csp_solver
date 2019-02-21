@@ -11,6 +11,7 @@ using Assignment = std::unordered_map<int, int>;  // Used only to interface with
 enum constraint_type {
     ALL_DIFFERENT,
     BINARY,
+    NARY,
     // DIFFERENT,
     // DIFFERENT_CONST,
     // RELATION,
@@ -234,6 +235,22 @@ inline bool propagate_binary(const Constraint& constraint, array<Domain>& D) {
     return true;
 }
 
+inline bool eval_nary(const Constraint&    constraint,
+                      const array<Domain>& domains) {
+    for (auto var : constraint.scope)
+        if (domains[var].count != 1) return true;
+
+    stack_frame();
+    auto values = allocate_array<int>(domains.count);
+    for (auto var : constraint.scope) values[var] = domains[var][0];
+
+    return constraint.eval_custom(constraint, values);
+}
+
+inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
+    return true;
+}
+
 // Constraint equal(int x, int y, const string& name = "equal") {
 //     auto result  = Constraint(EQUAL, name);
 //     result.scope = allocate_array({x, y});
@@ -318,6 +335,7 @@ inline bool eval(const Constraint& constraint, const array<Domain>& domains) {
     if (type == ALL_DIFFERENT) return eval_all_different(constraint, domains);
     // if (type == EQUAL) return eval_equal(constraint, domains);
     if (type == BINARY) return eval_binary(constraint, domains);
+    if (type == NARY) return eval_nary(constraint, domains);
     // if (type == CUSTOM) return eval_custom(constraint, domains);
     return false;
 }
@@ -328,8 +346,8 @@ inline bool propagate(const Constraint& constraint, array<Domain>& domains) {
         return propagate_all_different(constraint, domains);
     // if (type == EQUAL) return propagate_equal(constraint, domains);
     if (constraint.type == BINARY) return propagate_binary(constraint, domains);
+    if (constraint.type == NARY) return propagate_nary(constraint, domains);
     return false;
-    // if (type == CUSTOM) return propagate_custom(constraint, domains);
 }
 
 inline void print_unsatisfied(const array<Domain>&     D,

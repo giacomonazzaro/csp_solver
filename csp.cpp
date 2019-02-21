@@ -282,18 +282,19 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
 
 bool search_small(Constraint c, const array<Domain>& D_, int depth) {
     stack_frame();
-
     auto D = copy(D_);
-// Naive search that just check if there's a possible assignment that
-// satisfy only ONE constraint-> Used by remove_values()
+
+    // Naive search that just check if there's a possible assignment that
+    // satisfy only ONE constraint. Used by remove_values().
+
 #ifdef PRINT_SEARCH_GAC
     print_state(D, depth);
 #endif
 
-    // If assignment is complete, return true.
-    const array<int>& vars     = c.scope;
-    bool              complete = true;
-    for (int v : vars) {
+    // If assignment is complete, return true. Only admissible assignments
+    // arrive here.
+    bool complete = true;
+    for (int v : c.scope) {
         if (D[v].size() != 1) {
             complete = false;
             break;
@@ -302,8 +303,9 @@ bool search_small(Constraint c, const array<Domain>& D_, int depth) {
     if (complete) return true;
 
     // Still using MRV & Max Degree.
-    auto cc       = allocate_array<Constraint>(1, c);
-    int  variable = choose_variable(D, cc);
+    auto cc = allocate_array<Constraint>(1, c);
+    // auto cc       = array<Constraint>{&c, 1};
+    int variable = choose_variable(D, cc);
 
     const auto domain = copy(D[variable]);
     for (int val : domain) {
