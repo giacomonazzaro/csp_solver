@@ -10,10 +10,9 @@ using Assignment = std::unordered_map<int, int>;  // Used only to interface with
 
 enum constraint_type {
     ALL_DIFFERENT,
-    EQUAL,
-    DIFFERENT,
-    // DIFFERENT_CONST,
     BINARY,
+    // DIFFERENT,
+    // DIFFERENT_CONST,
     // RELATION,
     // CUSTOM
 };
@@ -193,24 +192,6 @@ inline bool propagate_all_different(const Constraint& constraint,
     }
     return true;
 }
-
-// Constraint binary(bool (*relation)(int, int), int x, int y,
-//                   const string& name = "binary_relation") {
-//     auto result        = Constraint(BINARY, name);
-//     result.scope       = allocate_array({x, y});
-//     result.eval_custom = [](const array<int>&    scope,
-//                             const array<Domain>& domains) {
-//         int x = scope[0];
-//         int y = scope[1];
-//         if (domains[x].count == 1 and domains[y].count == 1) {
-//             auto x_val = domains[x][0];
-//             auto y_val = domains[y][0];
-//             if (not relation(x_val, y_val)) return false;
-//         }
-//         return true;
-//     };
-//     return result;
-// }
 
 inline bool eval_binary(const Constraint&    constraint,
                         const array<Domain>& domains) {
