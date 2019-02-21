@@ -7,20 +7,20 @@ void comment(const string& c) {
 #endif
 }
 
-bool satisfies(const array<const Constraint*>& C, const array<Domain>& D) {
+bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for (auto& constraint : C) {
-        if (not constraint->eval(D)) {
+        if (not eval(constraint, D)) {
             return false;
         }
     }
     return true;
 }
 
-bool satisfies(const array<const Constraint*>& C, const Assignment& A) {
+bool satisfies(const array<Constraint>& C, const Assignment& A) {
     stack_frame();
     auto D = make_domains(A);
     for (auto& c : C) {
-        if (not c->eval(D)) {
+        if (not eval(c, D)) {
             return false;
         }
     }
@@ -34,7 +34,7 @@ bool is_assignment_complete(const array<Domain>& D) {
     return true;
 }
 
-bool do_inferences(const array<const Constraint*>& C, array<Domain>& D) {
+bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
     // Forward propagation.
     if (not constraints_propagation(C, D)) {
         comment("Propagation failure");
@@ -50,7 +50,7 @@ bool do_inferences(const array<const Constraint*>& C, array<Domain>& D) {
     return true;
 }
 
-bool search(const array<const Constraint*>& C, array<Domain>& D, int depth,
+bool search(const array<Constraint>& C, array<Domain>& D, int depth,
             search_stats& stats) {
 #ifdef PRINT_SEARCH
     print_state(D, depth);
@@ -128,7 +128,7 @@ Assignment search(const CSP& csp, Assignment A, search_stats& stats) {
     }
 }
 
-int choose_variable(const array<Domain>& D, const array<const Constraint*>& C) {
+int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // Choose following minimun remaining values heuristic.
     // Gradually update min_size and populate candidates with all
     // the variables that have domain size == min_size.
@@ -155,7 +155,7 @@ int choose_variable(const array<Domain>& D, const array<const Constraint*>& C) {
     // is probably unexpensive to compute them on the fly (@Profile it).
     auto degrees = allocate_array(D.size(), 0);
     for (auto& c : C)
-        for (int v : c->scope) degrees[v] += c->scope.size() - 1;
+        for (int v : c.scope) degrees[v] += c.scope.size() - 1;
 
     int max_degree_idx = candidates[0];
     int max_degree     = degrees[max_degree_idx];
@@ -171,16 +171,14 @@ int choose_variable(const array<Domain>& D, const array<const Constraint*>& C) {
     return max_degree_idx;
 }
 
-bool constraints_propagation(const array<const Constraint*>& C,
-                             array<Domain>&                  D) {
-    for (auto& c : C) {
-        if (not c->propagate(D)) return false;
-    }
+bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
+    for (auto& c : C)
+        if (not propagate(c, D)) return false;
+
     return true;
 }
 
-bool remove_values(int variable, const Constraint* constraint,
-                   array<Domain>& D) {
+bool remove_values(int variable, Constraint constraint, array<Domain>& D) {
     stack_frame();
     bool removed_value = false;
     int  i             = 0;
@@ -196,7 +194,7 @@ bool remove_values(int variable, const Constraint* constraint,
         auto Dfake = allocate_arrays<int>(ones);
         for (auto& d : Dfake) d.count = 0;
         Dfake[variable] = {domain_tmp[i]};
-        for (auto v : constraint->scope)
+        for (auto v : constraint.scope)
             if (v != variable) copy_to(D[v], Dfake[v]);  // copying the domains.
 
         bool exists = search_small(constraint, Dfake, 0);
@@ -216,7 +214,7 @@ bool remove_values(int variable, const Constraint* constraint,
     }
 }
 
-bool gac3(const array<const Constraint*>& C, array<Domain>& D_result) {
+bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
     array<Domain> D = D_result;  // copying the domains.
     array<int>    var_queue;
     array<int>    const_queue;
@@ -224,7 +222,7 @@ bool gac3(const array<const Constraint*>& C, array<Domain>& D_result) {
     // For each constraint c, for each variable v in the scope of c,
     // add the pair (v, c) to the queue.
     for (int i = 0; i < C.size(); ++i) {
-        for (int v : C[i]->scope) {
+        for (int v : C[i].scope) {
             if (D[v].size() == 1) continue;
             var_queue.push_back(v);
             const_queue.push_back(i);
@@ -253,9 +251,9 @@ bool gac3(const array<const Constraint*>& C, array<Domain>& D_result) {
             for (int i = 0; i < C.size(); ++i) {
                 if (i == c) continue;
 
-                if (not contains(C[i]->scope, v)) continue;
+                if (not contains(C[i].scope, v)) continue;
 
-                for (int w : C[i]->scope) {
+                for (int w : C[i].scope) {
                     if (w == v) continue;
                     if (D[w].size() == 1) continue;
 
@@ -282,7 +280,7 @@ bool gac3(const array<const Constraint*>& C, array<Domain>& D_result) {
     return true;
 }
 
-bool search_small(const Constraint* c, const array<Domain>& D_, int depth) {
+bool search_small(Constraint c, const array<Domain>& D_, int depth) {
     stack_frame();
 
     auto D = copy(D_);
@@ -293,7 +291,7 @@ bool search_small(const Constraint* c, const array<Domain>& D_, int depth) {
 #endif
 
     // If assignment is complete, return true.
-    const array<int>& vars     = c->scope;
+    const array<int>& vars     = c.scope;
     bool              complete = true;
     for (int v : vars) {
         if (D[v].size() != 1) {
@@ -304,7 +302,7 @@ bool search_small(const Constraint* c, const array<Domain>& D_, int depth) {
     if (complete) return true;
 
     // Still using MRV & Max Degree.
-    auto cc       = allocate_array<const Constraint*>(1, c);
+    auto cc       = allocate_array<Constraint>(1, c);
     int  variable = choose_variable(D, cc);
 
     const auto domain = copy(D[variable]);
@@ -312,7 +310,7 @@ bool search_small(const Constraint* c, const array<Domain>& D_, int depth) {
         D[variable] = {val};
 
         // If new assignment does not satisfies constraints, continue.
-        if (not c->eval(D)) continue;
+        if (not eval(c, D)) continue;
 
         // @Speed: We should propagate also in search_small, but copying D seems
         // to slow down. array<Domain> D_new = D; if(not c->propagate(D_new))

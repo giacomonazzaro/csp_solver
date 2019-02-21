@@ -5,23 +5,26 @@ CSP make_nqueens(int N = 8) {
     auto counts  = allocate_array(N, N);
     auto domains = allocate_arrays<int>(counts, range);
 
-    auto num_constraints = N * N * N;
+    auto num_constraints = N * N;
     CSP  csp             = make_csp("N-Queens", domains, num_constraints);
-    add_constraint(csp, new AllDifferent(range, "one_per_column"));
+
+    auto one_per_column = all_different(range, "one_per_column");
+    csp.constraints.push_back(one_per_column);
 
     // Diagonal attack constraints.
     for (int i = 0; i < N - 1; ++i) {
         for (int j = i + 1; j < N; ++j) {
-            add_constraint(csp, new Binary(i, j,
-                                           [i, j](int x, int y) {
-                                               return x + i != y + j;
-                                           },
-                                           "diag+"));
-            add_constraint(csp, new Binary(i, j,
-                                           [i, j](int x, int y) {
-                                               return x - i != y - j;
-                                           },
-                                           "diag-"));
+            auto scope       = allocate_array({i, j});
+            auto diag        = Constraint(BINARY, scope, "diag+");
+            diag.constants   = allocate_array({j - i});
+            diag.eval_custom = [](const Constraint& c,
+                                  const array<int>& values) {
+                auto x = values[0];
+                auto y = values[1];
+                return abs(x - y) != abs(c.constants[0]);
+            };
+
+            csp.constraints.push_back(diag);
         }
     }
     return csp;
@@ -67,7 +70,7 @@ Assignment make_assignment_from_list(const array<int>& D,
 }
 
 int main(int argc, char const* argv[]) {
-    int N = 10;
+    int N = 80;
     if (argc == 2) N = atoi(argv[1]);
 
     init_default_stack_allocator(10e8);
