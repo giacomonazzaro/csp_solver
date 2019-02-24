@@ -48,14 +48,15 @@ struct search_stats {
 bool satisfies(const array<Constraint>& C, const array<Domain>& A);
 
 // Search satisfying assignment.
-bool       search(const array<Constraint>& C, array<Domain>& D, int depth);
+bool       search(const array<Constraint>& C, array<Domain>& D, int depth,
+                  search_stats& stats);
 Assignment search(const CSP& csp, const Assignment& assignment,
                   search_stats& stats);
 bool       search_single_constraint(const Constraint& c, const array<Domain>& D,
                                     int depth);
 
-    // Choose next variable to assign (MRV & MaxDegree heuristics).
-    int choose_variable(const array<Domain>& D, const array<Constraint>& C);
+// Choose next variable to assign (MRV & MaxDegree heuristics).
+int choose_variable(const array<Domain>& D, const array<Constraint>& C);
 
 // Propagate consequences after assignment in order to reduce domains.
 bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);

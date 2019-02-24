@@ -16,9 +16,10 @@ inline int get_bit(int number, int i) { return (number >> i) & 1; }
 //   = 0
 
 CSP make_pipes(int N) {
-    auto range = allocate_array({3, 6, 12, 9, 10, 5, 15, 0});
-    // auto counts  = allocate_array(N * N, range.count);
-    auto domains = allocate_arrays<int>(N * N, range);
+    auto domains = allocate_arrays<array<int>>(N * N);
+    for (auto& d  : domains) {
+        d = allocate_array({3, 6, 12, 9, 10, 5, 15, 0});
+    }
 
     auto num_constraints = N * N * 4;
     CSP  csp             = make_csp("pipes", domains, num_constraints);

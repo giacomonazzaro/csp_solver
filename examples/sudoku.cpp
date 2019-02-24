@@ -1,10 +1,11 @@
 #include "../csp.h"
 
 CSP make_sudoku(int N) {
-    auto range   = make_range(1, N * N + 1);
-    auto counts  = allocate_array(N * N * N * N, N * N);  // N=3 -> 81 times 9
-    auto domains = allocate_arrays<int>(counts, range);
-    CSP  sudoku  = make_csp("Sudoku", domains, N * N * 3);
+    auto domains = allocate_array<array<int>>(N * N * N * N);
+    for (auto& d : domains) {
+        d = make_range(1, N * N + 1);
+    }
+    CSP sudoku = make_csp("Sudoku", domains, N * N * 3);
 
     auto row   = allocate_array<int>(N * N);
     auto col   = allocate_array<int>(N * N);
@@ -25,10 +26,13 @@ CSP make_sudoku(int N) {
 }
 
 array<Domain> parse_sudoku(const string& s, int N) {
-    auto A = allocate_arrays<int>(N * N * N * N, make_range(1, N * N + 1));
+    auto A = allocate_array<array<int>>(N * N * N * N);
     for (int i = 0; i < N * N * N * N; i++) {
         int idx = i * 2 + 1;
-        if (s[idx] != '-') A[i] = {s[idx] - '0'};
+        if (s[idx] != '-')
+            A[i] = allocate_array({s[idx] - '0'});
+        else
+            A[i] = make_range(1, N * N + 1);
     }
 
     return A;
@@ -61,15 +65,14 @@ array<Domain> make_sudoku_hard() {
 
 int main(int argc, char const* argv[]) {
     int N = 3;
-    init_default_stack_allocator(10e7);
+    init_default_stack_allocator(10e5);
     CSP  csp  = make_sudoku(N);
     auto init = make_sudoku_hard();
     print_sudoku(init, N);
 
     search_stats stats;
-    auto         solution = search(csp, init, stats);
-    apply_assignment(csp.domains, solution);
-    print_sudoku(csp.domains, N);
+    auto         success = search(csp.constraints, init, 0, stats);
+    print_sudoku(init, N);
     print_stats(stats);
 
     destroy_default_stack_allocator();

@@ -1,15 +1,14 @@
 #include "../csp.h"
 
 CSP make_nqueens(int N = 8) {
-    auto range   = make_range(N);
-    auto counts  = allocate_array(N, N);
-    auto domains = allocate_arrays<int>(counts, range);
+    auto domains = allocate_array<array<int>>(N);
+    for (auto& d : domains) d = make_range(N);
 
     auto num_constraints = N * N;
     CSP  csp             = make_csp("N-Queens", domains, num_constraints);
 
     // constraint: One queen per column.
-    auto one_per_column = all_different(range, "one_per_column");
+    auto one_per_column = all_different(make_range(N), "one_per_column");
     csp.constraints.push_back(one_per_column);
 
     // constraint: No diagonal threats.
