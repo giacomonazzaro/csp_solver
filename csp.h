@@ -1,43 +1,42 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <cassert>
-#include <unordered_map>
-#include <set>
+#include "utils/stack_allocator.h"
+#include "utils/string.h"
 
-#define Array std::vector
-using Domain = Array<int>;
-using Assignment = std::unordered_map<int, int>; // Used only to interface with outside world.
+struct assignment {
+    int variable;
+    int value;
+};
+using Assignment = array<assignment>;
+using Domain     = array<int>;
 
-/***** Data definitions *****/
 enum constraint_type {
-    RELATION, ALL_DIFFERENT, EQUAL, BINARY, UNKNOWN
+    ALL_DIFFERENT,
+    BINARY,
+    NARY,
+    // DIFFERENT,
+    // DIFFERENT_CONST,
+    // RELATION,
+    // CUSTOM
 };
 
 struct Constraint {
-    std::string name;
-    Array<int> scope;
-    
-    Constraint(Array<int> vars, std::string s): scope(vars), name(s) {
-        name += "(";
-        for (int i = 0; i < scope.size()-1; ++i)
-            name += std::to_string(scope[i]) + ", ";
-        name += std::to_string(scope.back()) + ")";
-    }
+    string     name;
+    array<int> scope;
+    array<int> constants;
+    bool (*eval_custom)(const Constraint&, const array<int>&) = nullptr;
+    constraint_type type;
 
-    virtual bool eval(const Array<Domain>&) const = 0;
-    virtual bool propagate(Array<Domain>&) const = 0;
+    inline Constraint(constraint_type t, const array<int>& vars,
+                      const string& s);
 };
 
+inline bool eval(const Constraint& constraint, const array<Domain>& domains);
+inline bool propagate(const Constraint& constraint, array<Domain>& domains);
 
 struct CSP {
-    std::string name;
-    Array<Domain> domains;
-    Array<const Constraint*> constraints;
-
-    void all_different(const Array<int>& scope, std::string name);
-    void binary(int i, int k, std::function<bool(int, int)> r, std::string name);
-    void equal(int i, int k, std::string name);
+    string            name;
+    array<Domain>     domains;
+    array<Constraint> constraints;
 };
 
 struct search_stats {
@@ -45,109 +44,88 @@ struct search_stats {
     int expansions = 0;
 };
 
-/***** Solving functions *****/
 // Check if assignment satisfies the constraints.
-bool satisfies(const Array<const Constraint*>& C, const Array<Domain>& A);
-bool satisfies(const Array<const Constraint*>& C, const Assignment& A);
+bool satisfies(const array<Constraint>& C, const array<Domain>& A);
 
 // Search satisfying assignment.
-bool search(const Array<const Constraint*>& C, Array<Domain>& D, int depth);
-Assignment search(const CSP& csp, Assignment A, search_stats& stats);
+bool       search(const array<Constraint>& C, array<Domain>& D, int depth);
+Assignment search(const CSP& csp, const Assignment& assignment,
+                  search_stats& stats);
+bool       search_single_constraint(const Constraint& c, const array<Domain>& D,
+                                    int depth);
 
-// Choose next variable (MRV & MaxDegree heuristics).
-int choose_variable(const Array<Domain>& D, const Array<const Constraint*>& C);
+    // Choose next variable to assign (MRV & MaxDegree heuristics).
+    int choose_variable(const array<Domain>& D, const array<Constraint>& C);
 
-// Make inferences after assignment (Genrealized Arc Consistency).
-bool constraints_propagation(const Array<const Constraint*>& C, Array<Domain>& D);
-bool gac3(const Array<const Constraint*>& C, Array<Domain>& D);
-bool remove_values(int variable, const Constraint& constraint, Array<Domain>& D, Array<Domain> A);
-bool search_small(const Constraint* c, Array<Domain> D, int depth);
+// Propagate consequences after assignment in order to reduce domains.
+bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);
+bool gac3(const array<Constraint>& C, array<Domain>& D);
+bool remove_values(int variable, const Constraint& constraint, array<Domain>& D,
+                   array<Domain> A);
 
-/***** CSP intialization functions. *****/
-inline CSP make_csp(const std::string& s, const Array<Domain>& d, const Array<const Constraint*>& c = {}) {
+// Initialize CSP.
+inline CSP make_csp(const string& s, const array<Domain>& d,
+                    int num_constraints) {
     CSP csp;
-    csp.name = s;
-    csp.domains = d;
-    csp.constraints = c;
+    csp.name              = s;
+    csp.domains           = d;
+    csp.constraints       = allocate_array<Constraint>(num_constraints);
+    csp.constraints.count = 0;
     return csp;
 }
 
-inline void add_constraint(CSP& csp, Constraint* c) {
-    csp.constraints.push_back(c);
-}
-
-// inline void add_constraint(CSP& csp, Constraint c) {
-//     Constraint* cp = new Constraint();
-//     cp->name = c.name;
-//     cp->scope = c.scope;
-//     cp->eval = c.eval;
-//     cp->type = c.type;
-//     csp.constraints.push_back(cp);
-// }
-
-// Constraint definitions.
-// Constraint all_different(const Array<int>& vars, const std::string& name);
-// Constraint binary(int i, int k, const std::function<bool(int, int)>& rel, const std::string& name);
-// Constraint relation(const Array<int>, const std::function<bool(const Array<Domain>&)>, const std::string&);
-// Constraint equal(int i, int k, const std::string& name);
-
-
-// Utilities functions.
-#define add(v, x) v.push_back(x)
-#define remove(v, i) v.erase(v.begin() + i)
-#define contains(v, x) (std::find(v.begin(),v.end(),x) != v.end())
-#define min(v) *std::min_element(v.begin(),v.end());
-#define append(v, w) v.reserve(v.size()+w.size()); v.insert( v.end(), w.begin(), w.end() )
-
-inline Array<int> make_range(int from, int to) {
-    Array<int> result (to - from);
-    for(int i = 0; i < to-from; i++) result[i] = from + i;
+// Useful functions to initialize domains.
+inline array<int> make_range(int from, int to) {
+    auto result = allocate_array<int>(to - from);
+    for (int i = 0; i < to - from; i++) result[i] = from + i;
     return result;
 }
 
-inline Array<int> make_range(int to) { return make_range(0, to); }
-
-
-
-
+inline array<int> make_range(int to) { return make_range(0, to); }
 
 // Printing functions.
-inline void print_Array(const Domain& d) {
-    printf("{ "); for(int val : d) printf("%d ", val); printf("}\n");
+inline void print_array(const array<int>& d) {
+    printf("[");
+    for (int i = 0; i < d.count - 1; ++i) printf("%d, ", d[i]);
+    printf("%d]\n", d.back());
 }
 
-inline void print_times(const char* s, int times) { for (int i = 0; i < times; ++i) printf("%s", s); }
-
-inline void print_state(const Array<Domain>& D, int depth = 0) {
-    for (int i = 0; i < D.size(); ++i) {
-        print_times("-", depth);
-        printf(" %d = ", i);
-        print_Array(D[i]);
+inline void print_domains(const array<Domain>& domains) {
+    printf("\ndomains:\n");
+    for (int i = 0; i < domains.count; ++i) {
+        printf("%d: ", i);
+        print_array(domains[i]);
     }
 }
 
-inline void print_constraints(const CSP& csp) {
-    for(auto c : csp.constraints)
-        printf("%s\n", c->name.c_str());
+inline void print_state(const array<Domain>& D, int depth = 0) {
+    for (int i = 0; i < D.size(); ++i) {
+        for (int k = 0; k < depth; ++k) printf("-");
+        printf(" %d = ", i);
+        print_array(D[i]);
+    }
 }
 
-inline Assignment make_assignment(const Array<Domain>& D) {
-    Assignment A = {};
-    for(int i=0; i<D.size(); i++) {
-        if(D[i].size() == 1)
-            A[i] = D[i][0];
+inline void print_constraints(const array<Constraint>& constraints) {
+    for (auto& c : constraints) {
+        write(c.name);
+        // print_array(c.scope);
+        write("");
+    }
+    write("\n");
+}
+
+inline Assignment make_assignment(const array<Domain>& D) {
+    auto A  = allocate_array<assignment>(D.count);
+    A.count = 0;
+    for (int i = 0; i < D.size(); i++) {
+        if (D[i].size() == 1) A.push_back({i, D[i][0]});
     }
     return A;
 }
 
-inline Array<Domain> make_domains(const Assignment& A) {
-    Array<Domain> D (A.size());
-    for(auto& kv : A)  D[kv.first] = {kv.second};
-    return D;
-}
-
-inline void apply_assignment(Domain& D, const Assignment& A) {
-    for(auto& kv : A)  D[kv.first] = kv.second;
+inline void apply_assignment(array<Domain>& D, const Assignment& A) {
+    for (auto& a : A) D[a.variable] = {a.value};
 }
 
 inline void print_stats(const search_stats& stats) {
@@ -156,124 +134,228 @@ inline void print_stats(const search_stats& stats) {
     printf("   num_expansions = %d\n\n", stats.expansions);
 }
 
-inline void print_unsatisfied(const Array<Domain> D, const Array<const Constraint*>& C) {
-    printf("unsatisfied constraints: ");
-    //for(auto& d : D) assert(d.size() == 1);
-    bool found = false;
-    for (int i = 0; i < C.size(); ++i)
-    {
-        if(not C[i]->eval(D)) {
-            found = true;
-            printf("\n%d: %s\n", i, C[i]->name.c_str());
-        }
+inline Constraint::Constraint(constraint_type t, const array<int>& vars,
+                              const string& s) {
+    type  = t;
+    scope = copy(vars);
+    name  = s;
+    name += "(";
+
+    for (int i = 0; i < scope.size() - 1; ++i) {
+        name += string(scope[i]);
+        name += ", ";
     }
-    if(not found) printf("nothing\n");
-    printf("\n");
+    name += string(scope.back());
+    name += ")";
 }
 
+// Constraint all_different
+inline Constraint all_different(const array<int>& scope,
+                                const string&     name = "all_different") {
+    auto result = Constraint(ALL_DIFFERENT, scope, name);
+    return result;
+}
 
-
-
-struct AllDifferent : Constraint {
-     AllDifferent(const Array<int>& vars, std::string n = "all_different"):
-        Constraint(vars, n) {}
-
-    bool eval(const Array<Domain>& D) const {
-        for (int i = 0; i < scope.size()-1; ++i) {
-            int v = scope[i];
-            if(D[v].size() != 1) continue;
-            for (int k = i+1; k < scope.size(); ++k) {
-                int w = scope[k];
-                if(D[w].size() == 1 and D[v][0] == D[w][0])
-                    return false;
-            }
+inline bool eval_all_different(const Constraint&    constraint,
+                               const array<Domain>& D) {
+    for (int i = 0; i < constraint.scope.size() - 1; ++i) {
+        int v = constraint.scope[i];
+        if (D[v].size() != 1) continue;
+        for (int k = i + 1; k < constraint.scope.size(); ++k) {
+            int w = constraint.scope[k];
+            if (D[w].size() == 1)
+                if (D[v][0] == D[w][0]) return false;
         }
-        
-        return true;
     }
+    return true;
+}
 
-    bool propagate(Array<Domain>& D) const {
-        for(int v : scope) {
-            if(D[v].size() != 1) continue;
-            for(int w : scope) {
-                if(w == v) continue;
-                for (int i = 0; i < D[w].size(); ++i)
-                    if(D[w][i] == D[v][0]) {
-                        remove(D[w], i);
-                        if(D[w].size() == 0) return false;
-                        break;
-                    }
-            }
-        }
-        return true;
-    }
-};
-
-struct Binary : Constraint {
-    std::function<bool(int, int)> rel;
-
-    Binary(int i, int k, std::function<bool(int, int)> r, std::string n = "binary") :
-        Constraint({i,k}, n), rel(r) {}
-
-    bool eval(const Array<Domain>& D) const {
-        int i = scope[0];
-        int k = scope[1];
-        if(D[i].size() == 1 and D[k].size() == 1) {
-            if(not rel(D[i][0], D[k][0]))
-                return false;
-        }
-
-        return true;
-    };
-
-    bool propagate(Array<Domain>& D) const {
-        int x0 = scope[0];
-        int x1 = scope[1];
-        Domain d0, d1;
-        // std::set d0, d1; // @Try with std::set, code will be simpler.
-        for(int v0 : D[x0]) {
-            bool found = false;
-            for(int v1 : D[x1]) {
-                if(rel(v0, v1)) {
-                    if(not contains(d1, v1))
-                        d1.push_back(v1);
-                    found = true;
+inline bool propagate_all_different(const Constraint& constraint,
+                                    array<Domain>&    D) {
+    for (int v : constraint.scope) {
+        if (D[v].size() != 1) continue;
+        for (int w : constraint.scope) {
+            if (w == v) continue;
+            for (int i = 0; i < D[w].size(); ++i)
+                if (D[w][i] == D[v][0]) {
+                    D[w].remove(i);
+                    if (D[w].size() == 0) return false;
+                    break;
                 }
+        }
+    }
+    return true;
+}
+
+inline bool eval_binary(const Constraint&    constraint,
+                        const array<Domain>& domains) {
+    int x = constraint.scope[0];
+    int y = constraint.scope[1];
+    if (domains[x].count == 1 and domains[y].count == 1) {
+        stack_frame();
+        auto xy = allocate_array({domains[x][0], domains[y][0]});
+        if (not constraint.eval_custom(constraint, xy)) return false;
+    }
+    return true;
+}
+
+inline bool propagate_binary(const Constraint& constraint, array<Domain>& D) {
+    stack_frame();
+    int x0 = constraint.scope[0];
+    int x1 = constraint.scope[1];
+    // Domain d0, d1;
+    auto d0  = allocate_array<int>(D[x0].size() * D[x1].size());
+    auto d1  = allocate_array<int>(D[x0].size() * D[x1].size());
+    d0.count = 0;
+    d1.count = 0;
+    // std::set d0, d1; // @Try with std::set, code will be simpler.
+    for (int v0 : D[x0]) {
+        bool found = false;
+        for (int v1 : D[x1]) {
+            stack_frame();
+            auto xy = allocate_array({v0, v1});
+            if (constraint.eval_custom(constraint, xy)) {
+                if (not contains(d1, v1)) d1.push_back(v1);
+                found = true;
             }
-            if(found) d0.push_back(v0);
         }
-        if(d0.size() == 0) return false;
-        if(d1.size() == 0) return false;
-        D[x0] = d0;
-        D[x1] = d1;
-        return true;
+        if (found) d0.push_back(v0);
     }
-};
+    if (d0.size() == 0) return false;
+    if (d1.size() == 0) return false;
+    copy_to(d0, D[x0]);
+    copy_to(d1, D[x1]);
+    return true;
+}
 
+inline bool eval_nary(const Constraint&    constraint,
+                      const array<Domain>& domains) {
+    for (auto var : constraint.scope)
+        if (domains[var].count != 1) return true;
 
-struct Equal : Constraint {
-    Equal(int i, int k, std::string name = "equal"):
-        Constraint({i,k}, name) {}
+    stack_frame();
+    auto values = allocate_array<int>(constraint.scope.count);
+    for (int i = 0; i < constraint.scope.count; ++i) {
+        values[i] = domains[constraint.scope[i]][0];
+    }
 
-    bool eval(const Array<Domain>& D) const {
-        int i = scope[0];
-        int k = scope[1];
-        if(D[i].size() == 1 and D[k].size() == 1) {
-            if(D[i][0] != D[k][0]) return false;
+    return constraint.eval_custom(constraint, values);
+}
+
+inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
+    return true;
+}
+
+// Constraint equal(int x, int y, const string& name = "equal") {
+//     auto result  = Constraint(EQUAL, name);
+//     result.scope = allocate_array({x, y});
+//     return result;
+// }
+
+// bool eval_equal(const Constraint& constraint, const array<Domain>& D) {
+//     int i = constraint.scope[0];
+//     int k = constraint.scope[1];
+//     if (D[i].size() == 1 and D[k].size() == 1) {
+//         if (D[i][0] != D[k][0]) return false;
+//     }
+//     return true;
+// }
+
+// bool propagate_equal(const Constraint& constraint, array<Domain>& D) {
+//     stack_frame();
+//     auto& scope        = constraint.scope;
+//     auto  intersection = allocate_array<int>(D[scope[0]].size());
+//     intersection.count = 0;
+//     for (int v0 : D[scope[0]]) {
+//         if (contains(D[scope[1]], v0)) intersection.push_back(v0);
+//     }
+//     if (intersection.size() == 0) return false;
+//     copy_to(intersection, D[scope[0]]);
+//     copy_to(intersection, D[scope[1]]);
+//     return true;
+// }
+
+// Constraint different(int x, int y, const string& name = "different") {
+//     auto result  = Constraint(DIFFERENT, name);
+//     result.scope = allocate_array({x, y});
+//     return result;
+// }
+
+// bool eval_different(const Constraint& constraint, const array<Domain>& D) {
+//     int i = constraint.scope[0];
+//     int k = constraint.scope[1];
+//     if (D[i].size() == 1 and D[k].size() == 1) {
+//         if (D[i][0] == D[k][0]) return false;
+//     }
+//     return true;
+// }
+
+// bool propagate_different(const Constraint& constraint, array<Domain>& D) {
+//     return true;
+// }
+
+// Constraint equal_const(int x, int val, const string& name = "equal_const") {
+//     auto result      = Constraint(EQUAL_CONST, name);
+//     result.scope     = allocate_array({x});
+//     result.constants = allocate_array({val});
+//     return result;
+// }
+
+// bool eval_equal_const(const Constraint& constraint, const array<Domain>& D) {
+//     int i = constraint.scope[0];
+//     if (D[i].size() == 1) {
+//         if (D[i][0] != constraint.constants[0]) return false;
+//     }
+//     return true;
+// }
+
+// bool propagate_equal_const(const Constraint& constraint, array<Domain>& D) {
+//     stack_frame();
+//     auto& scope        = constraint.scope;
+//     auto  intersection = allocate_array<int>(D[scope[0]].size());
+//     intersection.count = 0;
+//     for (int v0 : D[scope[0]]) {
+//         if (contains(D[scope[1]], v0)) intersection.push_back(v0);
+//     }
+//     if (intersection.size() == 0) return false;
+//     copy_to(intersection, D[scope[0]]);
+//     copy_to(intersection, D[scope[1]]);
+//     return true;
+// }
+
+inline bool eval(const Constraint& constraint, const array<Domain>& domains) {
+    auto type = constraint.type;
+    // if (type == RELATION)assert(0);  // return eval_relation(constraint,
+    // domains);
+    if (type == ALL_DIFFERENT) return eval_all_different(constraint, domains);
+    // if (type == EQUAL) return eval_equal(constraint, domains);
+    if (type == BINARY) return eval_binary(constraint, domains);
+    if (type == NARY) return eval_nary(constraint, domains);
+    // if (type == CUSTOM) return eval_custom(constraint, domains);
+    return false;
+}
+
+inline bool propagate(const Constraint& constraint, array<Domain>& domains) {
+    // if (type == RELATION) return propagate_relation(constraint, domains);
+    if (constraint.type == ALL_DIFFERENT)
+        return propagate_all_different(constraint, domains);
+    // if (type == EQUAL) return propagate_equal(constraint, domains);
+    if (constraint.type == BINARY) return propagate_binary(constraint, domains);
+    if (constraint.type == NARY) return propagate_nary(constraint, domains);
+    return false;
+}
+
+inline void print_unsatisfied(const array<Domain>&     D,
+                              const array<Constraint>& C) {
+    printf("unsatisfied constraints: ");
+    // for(auto& d : D) assert(d.size() == 1);
+    bool found = false;
+    for (int i = 0; i < C.size(); ++i) {
+        if (not eval(C[i], D)) {
+            found = true;
+            printf("\n%d: %s\n", i, (const char*)C[i].name);
         }
-        return true;
     }
-    
-    bool propagate(Array<Domain>& D) const {
-        Domain intersection;
-        intersection.reserve(D[scope[0]].size());
-        for(int v0 : D[scope[0]]) {
-            if(contains(D[scope[1]], v0))
-                intersection.push_back(v0); 
-        }
-        if(intersection.size() == 0) return false;
-        D[scope[0]] = intersection;
-        D[scope[1]] = intersection;
-        return true;
-    }
-};
+    if (not found) printf("nothing\n");
+    printf("\n");
+}

@@ -1,5 +1,6 @@
-COMPILE = g++ -std=c++11 -O3
+COMPILE = g++ -std=c++17 -O2
 N = 20
+
 all: nqueens
 
 nqueens: build/csp.o
@@ -9,6 +10,10 @@ nqueens: build/csp.o
 sudoku: build/csp.o
 	$(COMPILE) -o bin/sudoku sudoku.cpp build/csp.o
 	time ./bin/sudoku
+
+pipes: build/csp.o
+	$(COMPILE) -o bin/pipes pipes.cpp build/csp.o 
+	time ./bin/pipes $(N)
 
 test: sudoku nqueens
 
