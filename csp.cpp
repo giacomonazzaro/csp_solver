@@ -1,5 +1,5 @@
 #include "csp.h"
-stack_allocator default_allocator;
+stack_allocator default_stack_allocator::default_allocator;
 
 bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for (auto& constraint : C) {

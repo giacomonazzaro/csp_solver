@@ -93,8 +93,11 @@ inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
 }
 
 // Using default_allocator as hidden parameter (@Design: namespace?)
+namespace default_stack_allocator {
+
 extern stack_allocator default_allocator;
-inline void            init_default_stack_allocator(int size) {
+
+inline void init_default_stack_allocator(int size) {
     init_stack_allocator(default_allocator, size);
 }
 
@@ -126,7 +129,20 @@ inline array<Type> allocate_array(const std::initializer_list<Type>& list) {
     return allocate_array(default_allocator, list);
 }
 
-// Used to temporarly allocate local data in stack frames.
-#define stack_frame() auto _frame = make_stack_frame(&default_allocator);
+template <typename Type>
+inline array<Type> copy(const array<Type>& arr) {
+    return copy(default_allocator, arr);
+}
 
-#define copy(a) copy(default_allocator, a);
+template <typename Type>
+inline array<array<Type>> copy(const array<array<Type>>& arr) {
+    return copy(default_allocator, arr);
+}
+
+// Used to temporarly allocate local data in stack frames.
+#define stack_frame() \
+    auto _frame = make_stack_frame(&default_stack_allocator::default_allocator);
+
+// #define copy(a) copy(default_allocator, a);
+
+}  // namespace default_stack_allocator
