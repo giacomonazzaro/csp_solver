@@ -13,9 +13,10 @@ inline int literal_length(const char* literal) {
 struct string : array<char> {
     char buffer[STRING_SIZE];
 
-    string() : array<char>() {
+    string() {
         for (int i = 0; i < STRING_SIZE; i++) buffer[i] = '\0';
-        data = &buffer[0];
+        data  = &buffer[0];
+        count = 0;
     }
 
     string(const string& s) : string() {

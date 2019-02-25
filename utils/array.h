@@ -16,9 +16,16 @@ struct array {
     inline void        push_back(const Type& val) { data[count++] = val; }
     inline void        add(const Type& val) { data[count++] = val; }
 
-    inline void fill(const Type& val) {
-        for (int i = 0; i < count; ++i) data[i] = val;
-    }
+    // array() {
+    //     data  = nullptr;
+    //     count = 0;
+    // }
+
+    // template <class T, class... T2>
+    // array(T n, T2... rest) {
+    //     data[count++] = n;
+    //     array(rest...);
+    // }
 
     inline void insert(const Type& element, int index) {
         for (int i = count; i > index; i--) {
@@ -47,11 +54,11 @@ struct array {
         count -= 1;
     }
 
-    void operator=(const std::initializer_list<Type>& list) {
-        count = (int)list.size();
-        int i = 0;
-        for (auto& v : list) data[i++] = v;
-    }
+    // void operator=(const std::initializer_list<Type>& list) {
+    //     count = (int)list.size();
+    //     int i = 0;
+    //     for (auto& v : list) data[i++] = v;
+    // }
 
     array<Type> slice(int from, int to) {
         assert(from >= 0 and from <= count);
@@ -98,6 +105,16 @@ struct array {
     inline nonconst_iterator begin() { return nonconst_iterator{data, 0}; }
     inline nonconst_iterator end() { return nonconst_iterator{data, count}; }
 };
+
+template <typename Type>
+inline void fill(array<Type>& arr, const Type& val) {
+    for (int i = 0; i < arr.count; ++i) arr.data[i] = val;
+}
+
+template <typename Type, typename Function>
+inline void fill(array<Type>& arr, Function f) {
+    for (int i = 0; i < arr.count; ++i) arr.data[i] = f(i);
+}
 
 template <typename Type>
 inline void copy_to(const array<Type>& from, array<Type>& to) {

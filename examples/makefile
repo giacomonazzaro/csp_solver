@@ -15,6 +15,13 @@ pipes: build/csp.o
 	$(COMPILE) -o bin/pipes pipes.cpp build/csp.o 
 	time ./bin/pipes $(N)
 
+table: build/table.o
+	$(COMPILE) -o bin/table main.cpp build/table.o 
+	time ./bin/table
+
+build/table.o: table.cpp
+	$(COMPILE) -o build/table.o table.cpp -c
+
 test: sudoku nqueens
 
 build/csp.o: ../csp.cpp ../csp.h

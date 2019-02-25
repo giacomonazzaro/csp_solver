@@ -22,7 +22,32 @@ inline void destroy_stack_allocator(stack_allocator& stack) {
     stack.offset   = 0;
 }
 
-inline unsigned char* allocate(stack_allocator& stack, int bytes) {
+#if 1
+extern stack_allocator default_allocator;
+
+template <typename Type>
+inline array<Type> allocate(int count, stack_allocator& = default_allocator);
+
+template <typename Type, typename Filler>
+inline array<Type> allocate(int count, const Filler& filler,
+                            stack_allocator& = default_allocator);
+
+template <typename Type>
+inline array<Type> allocate(const std::initializer_list<Type>& list,
+                            stack_allocator& = default_allocator);
+
+template <typename Type>
+inline array<Type> copy(const array<Type>& arr,
+                        stack_allocator& = default_allocator);
+
+template <typename Type>
+inline array<array<Type>> copy(const array<array<Type>>& arr,
+                               stack_allocator& = default_allocator);
+
+#define stack_frame() auto _frame = make_stack_frame(default_allocator);
+#endif
+
+inline unsigned char* allocate_bytes(int bytes, stack_allocator& stack) {
     assert(stack.data != nullptr);
     auto ptr = (stack.offset + bytes >= stack.capacity) ?
                    nullptr :
@@ -33,50 +58,58 @@ inline unsigned char* allocate(stack_allocator& stack, int bytes) {
     return ptr;
 }
 
-template <typename Type>
-inline Type& allocate(stack_allocator& stack) {
-    return *((Type*)allocate(stack, sizeof(Type)));
-}
+// template <typename Type>
+// inline Type* allocate(stack_allocator& stack) {
+//     return (Type*)allocate(stack, sizeof(Type));
+// }
 
 template <typename Type>
-inline array<Type> allocate_array(stack_allocator& stack, int count) {
-    int  bytes  = sizeof(Type) * count;
-    auto result = array<Type>{nullptr, count};
-    result.data = (Type*)allocate(stack, bytes);
+inline array<Type> allocate(int count, stack_allocator& stack) {
+    int         bytes = sizeof(Type) * count;
+    array<Type> result;
+    result.data = (Type*)allocate_bytes(bytes, stack);
+    return result;
+}
+
+template <typename Type, typename Filler>
+inline array<Type> allocate(int count, const Filler& filler,
+                            stack_allocator& stack) {
+    auto result = allocate<Type>(count, stack);
+    fill(result, filler);
     return result;
 }
 
 template <typename Type>
-inline array<Type> allocate_array(stack_allocator& stack, int count,
-                                  const Type& def) {
-    auto result = allocate_array<Type>(stack, count);
-    for (int i = 0; i < count; ++i) result[i] = def;
-    return result;
-}
-
-template <typename Type>
-inline array<Type> allocate_array(stack_allocator&                   stack,
-                                  const std::initializer_list<Type>& list) {
-    auto result = allocate_array<Type>(stack, (int)list.size());
+inline array<Type> allocate(const std::initializer_list<Type>& list,
+                            stack_allocator&                   stack) {
+    auto result = allocate<Type>((int)list.size(), stack);
     int  i      = 0;
     for (auto& v : list) result[i++] = v;
     return result;
 }
 
 template <typename Type>
-inline array<Type> copy(stack_allocator& stack, const array<Type>& arr) {
-    auto result = allocate_array<Type>(stack, arr.count);
+inline array<Type> copy(const array<Type>& arr, stack_allocator& stack) {
+    auto result = allocate<Type>(arr.count, stack);
     copy_to(arr, result);
     return result;
 }
 
 template <typename Type>
-inline array<array<Type>> copy(stack_allocator&          stack,
-                               const array<array<Type>>& arr) {
-    auto result = allocate_array<array<Type>>(stack, arr.count);
-    for (int i = 0; i < result.count; i++) result[i] = copy(stack, arr[i]);
+inline array<array<Type>> copy(const array<array<Type>>& arr,
+                               stack_allocator&          stack) {
+    auto result = allocate<array<Type>>(arr.count, stack);
+    for (int i = 0; i < result.count; i++) result[i] = copy(arr[i], stack);
     return result;
 }
+
+// template <typename Type, typename CopyableBuffer>
+// inline array<array<Type>> copy(stack_allocator&      stack,
+//                                const CopyableBuffer& arr) {
+//     auto result = allocate<array<Type>>(stack, arr.count);
+//     for (int i = 0; i < result.count; i++) result[i] = copy(stack, arr[i]);
+//     return result;
+// }
 
 struct stack_frame_cleaner {
     stack_allocator* stack = nullptr;
@@ -92,6 +125,7 @@ inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
     return result;
 }
 
+#if 0
 // Using default_allocator as hidden parameter (@Design: namespace?)
 namespace default_stack_allocator {
 
@@ -105,8 +139,8 @@ inline void destroy_default_stack_allocator() {
     destroy_stack_allocator(default_allocator);
 }
 
-inline unsigned char* allocate(int bytes) {
-    return allocate(default_allocator, bytes);
+inline unsigned char* allocate_bytes(int bytes) {
+    return allocate_bytes(bytes, default_allocator);
 }
 
 template <typename Type>
@@ -115,30 +149,31 @@ inline Type& allocate() {
 }
 
 template <typename Type>
-inline array<Type> allocate_array(int count) {
-    return allocate_array<Type>(default_allocator, count);
+inline array<Type> allocate(int count) {
+    return allocate<Type>(count, default_allocator);
+}
+
+template <typename Type, typename Filler>
+inline array<Type> allocate(int count, const Filler& filler) {
+    auto result = allocate<Type>(count);
+    fill(result, filler);
+    return result;
 }
 
 template <typename Type>
-inline array<Type> allocate_array(int count, const Type& def) {
-    return allocate_array(default_allocator, count, def);
-}
-
-template <typename Type>
-inline array<Type> allocate_array(const std::initializer_list<Type>& list) {
-    return allocate_array(default_allocator, list);
+inline array<Type> allocate(const std::initializer_list<Type>& list) {
+    return allocate(list, default_allocator);
 }
 
 template <typename Type>
 inline array<Type> copy(const array<Type>& arr) {
-    return copy(default_allocator, arr);
+    return copy(arr, default_allocator);
 }
 
 template <typename Type>
 inline array<array<Type>> copy(const array<array<Type>>& arr) {
-    return copy(default_allocator, arr);
+    return copy(arr, default_allocator);
 }
-
 // Used to temporarly allocate local data in stack frames.
 #define stack_frame() \
     auto _frame = make_stack_frame(&default_stack_allocator::default_allocator);
@@ -146,3 +181,29 @@ inline array<array<Type>> copy(const array<array<Type>>& arr) {
 // #define copy(a) copy(default_allocator, a);
 
 }  // namespace default_stack_allocator
+
+// #else
+
+stack_allocator default_allocator;
+
+template <typename Type>
+inline array<Type> allocate(int count, stack_allocator& = default_allocator);
+
+template <typename Type, typename Filler>
+inline array<Type> allocate(int count, const Filler& filler,
+                            stack_allocator& stack);
+
+template <typename Type>
+inline array<Type> allocate(const std::initializer_list<Type>& list,
+                            stack_allocator& = default_allocator);
+
+template <typename Type>
+inline array<Type> copy(const array<Type>& arr,
+                        stack_allocator& = default_allocator);
+
+template <typename Type>
+inline array<array<Type>> copy(const array<array<Type>>& arr,
+                               stack_allocator& = default_allocator);
+
+#define stack_frame() auto _frame = make_stack_frame(default_allocator);
+#endif
