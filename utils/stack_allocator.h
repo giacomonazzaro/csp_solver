@@ -7,7 +7,12 @@ struct stack_allocator {
     int            offset   = 0;
 };
 
-inline void init_stack_allocator(stack_allocator& stack, int size) {
+extern stack_allocator default_allocator;
+inline void            init_stack_allocator(int size,
+                                            stack_allocator& = default_allocator);
+inline void destroy_stack_allocator(stack_allocator& = default_allocator);
+
+inline void init_stack_allocator(int size, stack_allocator& stack) {
     assert(stack.data == nullptr);
     stack.data     = new unsigned char[size];
     stack.capacity = size;
@@ -23,7 +28,6 @@ inline void destroy_stack_allocator(stack_allocator& stack) {
 }
 
 #if 1
-extern stack_allocator default_allocator;
 
 template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& = default_allocator);
@@ -43,9 +47,6 @@ inline array<Type> copy(const array<Type>& arr,
 template <typename Type>
 inline array<array<Type>> copy(const array<array<Type>>& arr,
                                stack_allocator& = default_allocator);
-
-#define stack_frame() auto _frame = make_stack_frame(default_allocator);
-#endif
 
 inline unsigned char* allocate_bytes(int bytes, stack_allocator& stack) {
     assert(stack.data != nullptr);
@@ -125,6 +126,9 @@ inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
     result.start = stack->offset;
     return result;
 }
+
+#define stack_frame() auto _frame = make_stack_frame(&default_allocator);
+#endif
 
 #if 0
 // Using default_allocator as hidden parameter (@Design: namespace?)

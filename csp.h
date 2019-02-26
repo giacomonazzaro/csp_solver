@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
-using namespace default_stack_allocator;
+// using namespace default_stack_allocator;
 
 struct assignment {
     int variable;
@@ -71,14 +71,14 @@ inline CSP make_csp(const string& s, const array<Domain>& d,
     CSP csp;
     csp.name              = s;
     csp.domains           = d;
-    csp.constraints       = allocate_array<Constraint>(num_constraints);
+    csp.constraints       = allocate<Constraint>(num_constraints);
     csp.constraints.count = 0;
     return csp;
 }
 
 // Useful functions to initialize domains.
 inline array<int> make_range(int from, int to) {
-    auto result = allocate_array<int>(to - from);
+    auto result = allocate<int>(to - from);
     for (int i = 0; i < to - from; i++) result[i] = from + i;
     return result;
 }
@@ -118,7 +118,7 @@ inline void print_constraints(const array<Constraint>& constraints) {
 }
 
 inline Assignment make_assignment(const array<Domain>& D) {
-    auto A  = allocate_array<assignment>(D.count);
+    auto A  = allocate<assignment>(D.count);
     A.count = 0;
     for (int i = 0; i < D.size(); i++) {
         if (D[i].size() == 1) A.push_back({i, D[i][0]});
@@ -195,7 +195,7 @@ inline bool eval_binary(const Constraint&    constraint,
     int y = constraint.scope[1];
     if (domains[x].count == 1 and domains[y].count == 1) {
         stack_frame();
-        auto xy = allocate_array({domains[x][0], domains[y][0]});
+        auto xy = allocate({domains[x][0], domains[y][0]});
         if (not constraint.eval_custom(constraint, xy)) return false;
     }
     return true;
@@ -206,8 +206,8 @@ inline bool propagate_binary(const Constraint& constraint, array<Domain>& D) {
     int x0 = constraint.scope[0];
     int x1 = constraint.scope[1];
     // Domain d0, d1;
-    auto d0  = allocate_array<int>(D[x0].size() * D[x1].size());
-    auto d1  = allocate_array<int>(D[x0].size() * D[x1].size());
+    auto d0  = allocate<int>(D[x0].size() * D[x1].size());
+    auto d1  = allocate<int>(D[x0].size() * D[x1].size());
     d0.count = 0;
     d1.count = 0;
     // std::set d0, d1; // @Try with std::set, code will be simpler.
@@ -215,7 +215,7 @@ inline bool propagate_binary(const Constraint& constraint, array<Domain>& D) {
         bool found = false;
         for (int v1 : D[x1]) {
             stack_frame();
-            auto xy = allocate_array({v0, v1});
+            auto xy = allocate({v0, v1});
             if (constraint.eval_custom(constraint, xy)) {
                 if (not contains(d1, v1)) d1.push_back(v1);
                 found = true;
@@ -236,7 +236,7 @@ inline bool eval_nary(const Constraint&    constraint,
         if (domains[var].count != 1) return true;
 
     stack_frame();
-    auto values = allocate_array<int>(constraint.scope.count);
+    auto values = allocate<int>(constraint.scope.count);
     for (int i = 0; i < constraint.scope.count; ++i) {
         values[i] = domains[constraint.scope[i]][0];
     }
@@ -250,7 +250,7 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 
 // Constraint equal(int x, int y, const string& name = "equal") {
 //     auto result  = Constraint(EQUAL, name);
-//     result.scope = allocate_array({x, y});
+//     result.scope = allocate({x, y});
 //     return result;
 // }
 
@@ -266,7 +266,7 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 // bool propagate_equal(const Constraint& constraint, array<Domain>& D) {
 //     stack_frame();
 //     auto& scope        = constraint.scope;
-//     auto  intersection = allocate_array<int>(D[scope[0]].size());
+//     auto  intersection = allocate<int>(D[scope[0]].size());
 //     intersection.count = 0;
 //     for (int v0 : D[scope[0]]) {
 //         if (contains(D[scope[1]], v0)) intersection.push_back(v0);
@@ -279,7 +279,7 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 
 // Constraint different(int x, int y, const string& name = "different") {
 //     auto result  = Constraint(DIFFERENT, name);
-//     result.scope = allocate_array({x, y});
+//     result.scope = allocate({x, y});
 //     return result;
 // }
 
@@ -298,8 +298,8 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 
 // Constraint equal_const(int x, int val, const string& name = "equal_const") {
 //     auto result      = Constraint(EQUAL_CONST, name);
-//     result.scope     = allocate_array({x});
-//     result.constants = allocate_array({val});
+//     result.scope     = allocate({x});
+//     result.constants = allocate({val});
 //     return result;
 // }
 
@@ -314,7 +314,7 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 // bool propagate_equal_const(const Constraint& constraint, array<Domain>& D) {
 //     stack_frame();
 //     auto& scope        = constraint.scope;
-//     auto  intersection = allocate_array<int>(D[scope[0]].size());
+//     auto  intersection = allocate<int>(D[scope[0]].size());
 //     intersection.count = 0;
 //     for (int v0 : D[scope[0]]) {
 //         if (contains(D[scope[1]], v0)) intersection.push_back(v0);

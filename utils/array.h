@@ -1,6 +1,6 @@
 #pragma once
 #include <cassert>
-// #include <initializer_list>
+#include <initializer_list>
 
 #include <stdio.h>
 template <typename Type>
@@ -24,13 +24,13 @@ struct array {
 
     // array(const array<Type>& a) = delete;
 
-    template <int N>
-    void operator=(Type (&list)[N]) {
-        count = N;
-        for (int i = 0; i < N; ++i) {
-            data[i] = list[i];
-        }
-    }
+    // template <int N>
+    // void operator=(Type (&list)[N]) {
+    //     count = N;
+    //     for (int i = 0; i < N; ++i) {
+    //         data[i] = list[i];
+    //     }
+    // }
 
     // template <class... T2>
     // void array_rec(const Type& n, T2... rest) {
@@ -66,12 +66,13 @@ struct array {
         count -= 1;
     }
 
-    // void operator=(const std::initializer_list<Type>& list) {
-    //     count = (int)list.size();
-    //     int i = 0;
-    //     for (auto& v : list) {data[i++] = v;
-    //     }
-    // }
+    void operator=(const std::initializer_list<Type>& list) {
+        count = (int)list.size();
+        int i = 0;
+        for (auto& v : list) {
+            data[i++] = v;
+        }
+    }
 
     array<Type> slice(int from, int to) {
         assert(from >= 0 and from <= count);

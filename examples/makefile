@@ -1,4 +1,4 @@
-COMPILE = g++ -std=c++17 -O2
+COMPILE = g++ -std=c++1z -O2
 N = 20
 
 all: nqueens
