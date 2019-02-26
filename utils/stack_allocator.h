@@ -67,7 +67,8 @@ template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& stack) {
     int         bytes = sizeof(Type) * count;
     array<Type> result;
-    result.data = (Type*)allocate_bytes(bytes, stack);
+    result.count = count;
+    result.data  = (Type*)allocate_bytes(bytes, stack);
     return result;
 }
 

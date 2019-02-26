@@ -1,7 +1,8 @@
 #pragma once
 #include <cassert>
-#include <initializer_list>
+// #include <initializer_list>
 
+#include <stdio.h>
 template <typename Type>
 struct array {
     Type* data  = nullptr;
@@ -16,15 +17,26 @@ struct array {
     inline void        push_back(const Type& val) { data[count++] = val; }
     inline void        add(const Type& val) { data[count++] = val; }
 
-    // array() {
-    //     data  = nullptr;
-    //     count = 0;
-    // }
+    array() {
+        data  = nullptr;
+        count = 0;
+    }
 
-    // template <class T, class... T2>
-    // array(T n, T2... rest) {
-    //     data[count++] = n;
-    //     array(rest...);
+    // array(const array<Type>& a) = delete;
+
+    template <int N>
+    void operator=(Type (&list)[N]) {
+        count = N;
+        for (int i = 0; i < N; ++i) {
+            data[i] = list[i];
+        }
+    }
+
+    // template <class... T2>
+    // void array_rec(const Type& n, T2... rest) {
+    //     data[count] = n;
+    //     count += 1;
+    //     array_rec(rest...);
     // }
 
     inline void insert(const Type& element, int index) {
@@ -57,7 +69,8 @@ struct array {
     // void operator=(const std::initializer_list<Type>& list) {
     //     count = (int)list.size();
     //     int i = 0;
-    //     for (auto& v : list) data[i++] = v;
+    //     for (auto& v : list) {data[i++] = v;
+    //     }
     // }
 
     array<Type> slice(int from, int to) {
