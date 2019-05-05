@@ -1,50 +1,53 @@
 #pragma once
 #include "array.h"
+#include "memory_arena.h"
 
 struct stack_allocator {
-    unsigned char* data     = nullptr;
-    int            capacity = 0;
-    int            offset   = 0;
+    //    unsigned char* bytes.data     = nullptr;
+    //    int            bytes.capacity = 0;
+    memory_arena bytes;
+    int          offset = 0;
 };
 
 extern stack_allocator default_allocator;
-inline void            init_stack_allocator(int size,
-                                            stack_allocator& = default_allocator);
-inline void destroy_stack_allocator(stack_allocator& = default_allocator);
 
-inline void init_stack_allocator(int size, stack_allocator& stack) {
-    assert(stack.data == nullptr);
-    stack.data     = new unsigned char[size];
-    stack.capacity = size;
-    stack.offset   = 0;
+inline bool init_stack_allocator(int size,
+                                 stack_allocator& = default_allocator);
+inline bool destroy_stack_allocator(stack_allocator& = default_allocator);
+
+inline bool init_stack_allocator(int size, stack_allocator& stack) {
+    assert(stack.bytes.data == nullptr);
+    stack.offset = 0;
+    return init_memory_arena(stack.bytes, size);
 }
 
-inline void destroy_stack_allocator(stack_allocator& stack) {
-    assert(stack.data != nullptr);
-    delete[] stack.data;
-    stack.data     = nullptr;
-    stack.capacity = 0;
-    stack.offset   = 0;
-}
-
-inline bool grow_stack_allocator(int size, stack_allocator& stack) {
-    if (size <= stack.capacity) return true;
-
-    // allocate new memory
-    auto new_data = new unsigned char[size];
-    if (new_data == nullptr) return false;
-
-    // copy from old location to new one
-    for (int i = 0; i < stack.offset; ++i) new_data[i] = stack.data[i];
-
-    // free old memory
-    delete[] stack.data;
-
-    // update stack allocator
-    stack.data     = new_data;
-    stack.capacity = size;
+inline bool destroy_stack_allocator(stack_allocator& stack) {
+    assert(stack.bytes.data != nullptr);
+    delete[] stack.bytes.data;
+    stack.bytes.data     = nullptr;
+    stack.bytes.capacity = 0;
+    stack.offset         = 0;
     return true;
 }
+
+// inline bool grow_stack_allocator(int size, stack_allocator& stack) {
+//     if (size <= stack.bytes.capacity) return true;
+
+//     // allocate new memory
+//     auto new_data = new unsigned char[size];
+//     if (new_data == nullptr) return false;
+
+//     // copy from old location to new one
+//     for (int i = 0; i < stack.offset; ++i) new_data[i] = stack.bytes.data[i];
+
+//     // free old memory
+//     if (stack.bytes.data) delete[] stack.bytes.data;
+
+//     // update stack allocator
+//     stack.bytes.data     = new_data;
+//     stack.bytes.capacity = size;
+//     return true;
+// }
 
 #if 1
 
@@ -68,15 +71,16 @@ inline array<array<Type>> copy(const array<array<Type>>& arr,
                                stack_allocator& = default_allocator);
 
 inline unsigned char* allocate_bytes(int bytes, stack_allocator& stack) {
-    assert(stack.data != nullptr);
-    if(stack.offset + bytes >= stack.capacity) {
-        auto size = stack.offset + bytes;
-        if (size < (stack.capacity + 8) * 2)
-            size = (stack.capacity + 8) * 2;
-        grow_stack_allocator(size, stack);
+    assert(stack.bytes.data != nullptr);
+    if (stack.offset + bytes >= stack.bytes.capacity) {
+        auto capacity = stack.offset + bytes;
+        if (capacity < (stack.bytes.capacity + 8) * 2)
+            capacity = (stack.bytes.capacity + 8) * 2;
+        // grow_stack_allocator(capacity, stack);
+        grow_memory_arena(stack.bytes, capacity);
     }
 
-    auto ptr = stack.data + stack.offset;
+    auto ptr = stack.bytes.data + stack.offset;
 
     // assert(ptr != nullptr);  // resize stack? Not for now.
 
