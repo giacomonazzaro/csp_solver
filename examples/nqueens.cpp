@@ -47,7 +47,7 @@ int main(int argc, char const* argv[]) {
     int N = 8;
     if (argc == 2) N = atoi(argv[1]);
 
-    init_stack_allocator(10e8);
+    init_stack_allocator(8);
 
     CSP          csp = make_nqueens(N);
     search_stats stats;

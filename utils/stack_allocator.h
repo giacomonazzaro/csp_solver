@@ -27,6 +27,25 @@ inline void destroy_stack_allocator(stack_allocator& stack) {
     stack.offset   = 0;
 }
 
+inline bool grow_stack_allocator(int size, stack_allocator& stack) {
+    if (size <= stack.capacity) return true;
+
+    // allocate new memory
+    auto new_data = new unsigned char[size];
+    if (new_data == nullptr) return false;
+
+    // copy from old location to new one
+    for (int i = 0; i < stack.offset; ++i) new_data[i] = stack.data[i];
+
+    // free old memory
+    delete[] stack.data;
+
+    // update stack allocator
+    stack.data     = new_data;
+    stack.capacity = size;
+    return true;
+}
+
 #if 1
 
 template <typename Type>
@@ -50,11 +69,17 @@ inline array<array<Type>> copy(const array<array<Type>>& arr,
 
 inline unsigned char* allocate_bytes(int bytes, stack_allocator& stack) {
     assert(stack.data != nullptr);
-    auto ptr = (stack.offset + bytes >= stack.capacity) ?
-                   nullptr :
-                   stack.data + stack.offset;
+    if(stack.offset + bytes >= stack.capacity) {
+        auto size = stack.offset + bytes;
+        if (size < (stack.capacity + 8) * 2)
+            size = (stack.capacity + 8) * 2;
+        grow_stack_allocator(size, stack);
+    }
 
-    assert(ptr != nullptr);  // Resize stack? Not for now.
+    auto ptr = stack.data + stack.offset;
+
+    // assert(ptr != nullptr);  // resize stack? Not for now.
+
     stack.offset += bytes;
     return ptr;
 }
