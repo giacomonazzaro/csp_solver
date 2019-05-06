@@ -144,10 +144,10 @@ inline Constraint::Constraint(constraint_type t, const array<int>& vars,
     name += "(";
 
     for (int i = 0; i < scope.size() - 1; ++i) {
-        name += string(scope[i]);
+        name += to_string(scope[i]);
         name += ", ";
     }
-    name += string(scope.back());
+    name += to_string(scope.back());
     name += ")";
 }
 

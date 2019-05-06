@@ -1,8 +1,10 @@
-#pragma once
+#ifndef GIACOMO_ARRAY
+#define GIACOMO_ARRAY
+
+#include <stdio.h>
 #include <cassert>
 #include <initializer_list>
 
-#include <stdio.h>
 template <typename Type>
 struct array {
     Type* data  = nullptr;
@@ -13,9 +15,10 @@ struct array {
     inline Type&       operator[](int i) { return data[i]; }
     inline const Type& back() const { return data[count - 1]; }
     inline Type&       back() { return data[count - 1]; }
-    inline int         size() const { return count; }
-    inline void        push_back(const Type& val) { data[count++] = val; }
     inline void        add(const Type& val) { data[count++] = val; }
+
+    inline int  size() const { return count; }
+    inline void push_back(const Type& val) { data[count++] = val; }
 
     array() {
         data  = nullptr;
@@ -23,21 +26,6 @@ struct array {
     }
 
     // array(const array<Type>& a) = delete;
-
-    // template <int N>
-    // void operator=(Type (&list)[N]) {
-    //     count = N;
-    //     for (int i = 0; i < N; ++i) {
-    //         data[i] = list[i];
-    //     }
-    // }
-
-    // template <class... T2>
-    // void array_rec(const Type& n, T2... rest) {
-    //     data[count] = n;
-    //     count += 1;
-    //     array_rec(rest...);
-    // }
 
     inline void insert(const Type& element, int index) {
         for (int i = count; i > index; i--) {
@@ -122,12 +110,12 @@ struct array {
 
 template <typename Type>
 inline void fill(array<Type>& arr, const Type& val) {
-    for (int i = 0; i < arr.count; ++i) arr.data[i] = val;
+    for (auto& x : arr) x = val;
 }
 
 template <typename Type, typename Function>
 inline void fill(array<Type>& arr, Function f) {
-    for (int i = 0; i < arr.count; ++i) arr.data[i] = f(i);
+    for (int i = 0; i < arr.count; ++i) arr[i] = f(i);
 }
 
 template <typename Type>
@@ -183,3 +171,5 @@ inline bool contains(const array<Type>& vec, const Type& val) {
 //         }
 //     }
 // }
+
+#endif

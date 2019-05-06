@@ -2,26 +2,24 @@
 #define GIACOMO_MEMORY_ARENA
 
 struct memory_arena {
-    unsigned char* data     = nullptr;
-    int            capacity = 0;
+    unsigned char* data;
+    size_t         capacity;
 
+    memory_arena(size_t n) {
+        this->data = new unsigned char[n];
+        if (data == nullptr)
+            this->capacity = 0;
+        else
+            this->capacity = n;
+    }
     ~memory_arena() {
-        printf("memory_arena destructor call!\n");
         if (data != nullptr) delete[] data;
-
         data     = nullptr;
         capacity = 0;
     }
 };
 
-inline bool init_memory_arena(memory_arena& arena, int capacity) {
-    if (arena.data != nullptr) return false;
-    arena.data     = new unsigned char[capacity];
-    arena.capacity = capacity;
-    return true;
-}
-
-inline bool grow_memory_arena(memory_arena& arena, int capacity) {
+inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
     if (capacity <= arena.capacity) return true;
 
     // allocate new memory
