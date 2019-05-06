@@ -6,12 +6,6 @@
 
 #define STRING_SIZE (4096)
 
-inline int literal_length(const char* literal) {
-    int len = 0;
-    while (literal[len] != '\0') len += 1;
-    return len;
-}
-
 struct string : array<char> {
     char buffer[STRING_SIZE];
 

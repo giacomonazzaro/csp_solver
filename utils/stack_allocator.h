@@ -3,25 +3,25 @@
 #include "memory_arena.h"
 
 struct stack_allocator {
-    memory_arena* _arena;
-    int           offset;
+    memory_arena* arena;
+    int           head;
 };
 
 extern stack_allocator default_allocator;
 
 inline byte* allocate_bytes(int bytes, stack_allocator& stack) {
-    assert(stack._arena->data != nullptr);
-    if (stack.offset + bytes >= stack._arena->capacity) {
-        auto capacity = stack.offset + bytes;
-        if (capacity < (stack._arena->capacity + 8) * 2)
-            capacity = (stack._arena->capacity + 8) * 2;
+    assert(stack.arena->data != nullptr);
+    if (stack.head + bytes >= stack.arena->capacity) {
+        auto capacity = stack.head + bytes;
+        if (capacity < (stack.arena->capacity + 8) * 2)
+            capacity = (stack.arena->capacity + 8) * 2;
 
-        auto success = grow_memory_arena(*stack._arena, capacity);
+        auto success = grow_memory_arena(*stack.arena, capacity);
         if (not success) return nullptr;
     }
 
-    auto ptr = stack._arena->data + stack.offset;
-    stack.offset += bytes;
+    auto ptr = stack.arena->data + stack.head;
+    stack.head += bytes;
     return ptr;
 }
 
@@ -101,13 +101,13 @@ struct stack_frame_cleaner {
     stack_allocator* stack = nullptr;
     int              start = 0;
 
-    ~stack_frame_cleaner() { stack->offset = start; }
+    ~stack_frame_cleaner() { stack->head = start; }
 };
 
 inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
     auto result  = stack_frame_cleaner{};
     result.stack = stack;
-    result.start = stack->offset;
+    result.start = stack->head;
     return result;
 }
 

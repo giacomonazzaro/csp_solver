@@ -19,6 +19,8 @@ struct memory_arena {
         data     = nullptr;
         capacity = 0;
     }
+
+    operator void*() const { return data; }
 };
 
 inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
