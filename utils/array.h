@@ -5,6 +5,7 @@
 #include <cassert>
 #include <initializer_list>
 
+namespace giacomo {
 template <typename Type>
 struct array {
     Type* data  = nullptr;
@@ -143,6 +144,8 @@ template <typename Type>
 inline bool contains(const array<Type>& vec, const Type& val) {
     return find(vec, val) != -1;
 }
+
+}  // namespace giacomo
 
 // template <typename Container>
 // inline void print(const char* name, Container&& a, int line_size = 32,

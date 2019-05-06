@@ -2,6 +2,8 @@
 #include "array.h"
 #include "memory_arena.h"
 
+namespace giacomo {
+
 struct stack_allocator {
     memory_arena* arena;
     int           head;
@@ -110,5 +112,7 @@ inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
     result.start = stack->head;
     return result;
 }
+}  // namespace giacomo
 
-#define stack_frame() auto _frame = make_stack_frame(&default_allocator);
+#define stack_frame() \
+    auto _frame = make_stack_frame(&giacomo::default_allocator);

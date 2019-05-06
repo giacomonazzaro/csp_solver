@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
-// using namespace default_stack_allocator;
+using namespace giacomo;
 
 struct assignment {
     int variable;

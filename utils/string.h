@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "array.h"
 
+namespace giacomo {
+
 #define STRING_SIZE (4096)
 
 struct string : array<char> {
@@ -59,10 +61,8 @@ inline string to_string(Type val) {
     return result;
 }
 
-template <typename Type>
-inline void write(const Type& s, FILE* file = stdout) {
-    write_inline(s, file);
-    fprintf(file, "\n");
+inline void write_inline(const string& s, FILE* file) {
+    fprintf(file, "%.*s", s.count, s.buffer);
 }
 
 template <typename Type>
@@ -71,8 +71,11 @@ inline void write_inline(const Type& x) {
     write_inline(s);
 }
 
-inline void write_inline(const string& s, FILE* file) {
-    fprintf(file, "%.*s", s.count, s.buffer);
+template <typename Type>
+inline void write(const Type& s, FILE* file = stdout) {
+    write_inline(s, file);
+    fprintf(file, "\n");
 }
 
+}  // namespace giacomo
 #endif

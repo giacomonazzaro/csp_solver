@@ -1,5 +1,6 @@
 #ifndef GIACOMO_MEMORY_ARENA
 #define GIACOMO_MEMORY_ARENA
+namespace giacomo {
 
 enum class byte : unsigned char {};
 
@@ -41,5 +42,7 @@ inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
     arena.capacity = capacity;
     return true;
 }
+
+}  // namespace giacomo
 
 #endif
