@@ -1,12 +1,14 @@
 #ifndef GIACOMO_MEMORY_ARENA
 #define GIACOMO_MEMORY_ARENA
 
+enum class byte : unsigned char {};
+
 struct memory_arena {
-    unsigned char* data;
-    size_t         capacity;
+    byte*  data;
+    size_t capacity;
 
     memory_arena(size_t n) {
-        this->data = new unsigned char[n];
+        this->data = new byte[n];
         if (data == nullptr)
             this->capacity = 0;
         else
@@ -23,7 +25,7 @@ inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
     if (capacity <= arena.capacity) return true;
 
     // allocate new memory
-    auto new_data = new unsigned char[capacity];
+    auto new_data = new byte[capacity];
     if (new_data == nullptr) return false;
 
     // copy from old location to new one

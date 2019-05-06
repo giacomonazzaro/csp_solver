@@ -9,7 +9,7 @@ struct stack_allocator {
 
 extern stack_allocator default_allocator;
 
-inline unsigned char* _allocate_bytes(int bytes, stack_allocator& stack) {
+inline byte* allocate_bytes(int bytes, stack_allocator& stack) {
     assert(stack._arena->data != nullptr);
     if (stack.offset + bytes >= stack._arena->capacity) {
         auto capacity = stack.offset + bytes;
@@ -53,7 +53,7 @@ inline array<Type> allocate(int count, stack_allocator& stack) {
     int         bytes = sizeof(Type) * count;
     array<Type> result;
     result.count = count;
-    result.data  = (Type*)_allocate_bytes(bytes, stack);
+    result.data  = (Type*)allocate_bytes(bytes, stack);
     return result;
 }
 
