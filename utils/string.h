@@ -44,6 +44,23 @@ inline string operator+(const string& a, const string& b) {
     return result;
 }
 
+inline int find(const array<char>& text, const array<char>& token) {
+    auto index = -1;
+
+here:
+    for (int i = index + 1; i < text.count; ++i) {
+        if (text[i] == token[0]) {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) return -1;
+    for (int i = 1; i < token.count; ++i) {
+        if (text[index + i] != token[i]) goto here;
+    }
+    return index;
+}
+
 inline const char* get_format(unsigned char) { return "%X"; }
 inline const char* get_format(char) { return "%s"; }
 inline const char* get_format(int) { return "%d"; }

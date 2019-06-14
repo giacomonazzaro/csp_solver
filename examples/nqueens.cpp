@@ -43,6 +43,21 @@ inline void print_nqueens(int N, const Assignment& A) {
     printf("\n");
 }
 
+inline void print_nqueens(int N, const array<Domain>& D) {
+    for (int i = 0; i < N; i++) {
+        for (int k = 0; k < N; k++) {
+            if (contains(D[i], k))
+                if (D[i].count == 1)
+                    printf(" Q");  // There's a queen.
+                else
+                    printf(" -");  // There's a queen.
+            else
+                printf("  ");  // Empty cell.
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
 int main(int argc, char const* argv[]) {
     int N = 8;
     if (argc == 2) N = atoi(argv[1]);

@@ -6,7 +6,7 @@ namespace giacomo {
 
 struct stack_allocator {
     memory_arena* arena;
-    int           head;
+    size_t        head;
 };
 
 extern stack_allocator default_allocator;
@@ -112,6 +112,7 @@ inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
     result.start = stack->head;
     return result;
 }
+
 }  // namespace giacomo
 
 #define stack_frame() \

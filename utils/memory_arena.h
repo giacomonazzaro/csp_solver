@@ -28,17 +28,17 @@ inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
     if (capacity <= arena.capacity) return true;
 
     // allocate new memory
-    auto new_data = new byte[capacity];
-    if (new_data == nullptr) return false;
+    auto data = new byte[capacity];
+    if (data == nullptr) return false;
 
     // copy from old location to new one
-    for (int i = 0; i < arena.capacity; ++i) new_data[i] = arena.data[i];
+    for (int i = 0; i < arena.capacity; ++i) data[i] = arena.data[i];
 
     // free old memory
     if (arena.data) delete[] arena.data;
 
     // update stack allocator
-    arena.data     = new_data;
+    arena.data     = data;
     arena.capacity = capacity;
     return true;
 }

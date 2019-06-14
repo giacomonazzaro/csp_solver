@@ -46,8 +46,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
 
     for (int val : D[variable]) {
         stack_frame();
-
         stats.expansions += 1;
+
         // Copying the domains to make a temp version.
         auto D_attempt      = copy(D);
         D_attempt[variable] = {val};
@@ -269,11 +269,11 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
 
 bool search_single_constraint(const Constraint& c, const array<Domain>& D_,
                               int depth) {
-    stack_frame();
-    auto D = copy(D_);
-
     // Naive search that just check if there's a possible assignment that
     // satisfy only ONE constraint. Used by remove_values().
+
+    stack_frame();
+    auto D = copy(D_);
 
     // If assignment is complete, return true. Only admissible assignments
     // arrive here.
@@ -287,9 +287,8 @@ bool search_single_constraint(const Constraint& c, const array<Domain>& D_,
     if (complete) return true;
 
     // Still using MRV & Max Degree.
-    auto cc = allocate<Constraint>(1, c);
-    // auto cc       = array<Constraint>{&c, 1};
-    int variable = choose_variable(D, cc);
+    auto cc       = allocate<Constraint>(1, c);
+    int  variable = choose_variable(D, cc);
 
     const auto domain = copy(D[variable]);
     for (int val : domain) {

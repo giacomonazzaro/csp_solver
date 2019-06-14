@@ -175,15 +175,16 @@ inline bool eval_all_different(const Constraint&    constraint,
 inline bool propagate_all_different(const Constraint& constraint,
                                     array<Domain>&    D) {
     for (int v : constraint.scope) {
-        if (D[v].size() != 1) continue;
+        if (D[v].count != 1) continue;
         for (int w : constraint.scope) {
             if (w == v) continue;
-            for (int i = 0; i < D[w].size(); ++i)
+            for (int i = 0; i < D[w].count; ++i) {
                 if (D[w][i] == D[v][0]) {
                     D[w].remove(i);
-                    if (D[w].size() == 0) return false;
+                    if (D[w].count == 0) return false;
                     break;
                 }
+            }
         }
     }
     return true;
