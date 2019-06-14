@@ -1,15 +1,15 @@
 #include "../csp.h"
 
 CSP make_sudoku(int N) {
-    auto domains = allocate_array<array<int>>(N * N * N * N);
-    for (auto& d : domains) {
-        d = make_range(1, N * N + 1);
-    }
-    CSP sudoku = make_csp("Sudoku", domains, N * N * 3);
+    auto domains = allocate<array<int>>(N * N * N * N);
+    for (auto& d : domains) d = make_range(1, N * N + 1);
 
-    auto row   = allocate_array<int>(N * N);
-    auto col   = allocate_array<int>(N * N);
-    auto block = allocate_array<int>(N * N);
+    auto num_constraints = 3 * N * N;
+    CSP  sudoku          = make_csp("Sudoku", domains, num_constraints);
+
+    auto row   = allocate<int>(N * N);
+    auto col   = allocate<int>(N * N);
+    auto block = allocate<int>(N * N);
     for (int k = 0; k < N * N; ++k) {
         int block_start = (k / N) * (N * N * N) + (k % N) * N;
         for (int i = 0; i < N * N; ++i) {
@@ -26,11 +26,11 @@ CSP make_sudoku(int N) {
 }
 
 array<Domain> parse_sudoku(const string& s, int N) {
-    auto A = allocate_array<array<int>>(N * N * N * N);
+    auto A = allocate<array<int>>(N * N * N * N);
     for (int i = 0; i < N * N * N * N; i++) {
         int idx = i * 2 + 1;
         if (s[idx] != '-')
-            A[i] = allocate_array({s[idx] - '0'});
+            A[i] = allocate({s[idx] - '0'});
         else
             A[i] = make_range(1, N * N + 1);
     }
@@ -64,8 +64,10 @@ array<Domain> make_sudoku_hard() {
 }
 
 int main(int argc, char const* argv[]) {
-    int N = 3;
-    init_default_stack_allocator(10e5);
+    int  N            = 3;
+    auto arena        = memory_arena(1e6);
+    default_allocator = stack_allocator{&arena, 0};
+
     CSP  csp  = make_sudoku(N);
     auto init = make_sudoku_hard();
     print_sudoku(init, N);
@@ -74,6 +76,4 @@ int main(int argc, char const* argv[]) {
     auto         success = search(csp.constraints, init, 0, stats);
     print_sudoku(init, N);
     print_stats(stats);
-
-    destroy_default_stack_allocator();
 }
