@@ -14,7 +14,7 @@ The only data structures used are arrays, implemented in `utils/array.h`. Memory
 Demo applications can be compiled with `make`.
 
 ### N-queens
-Goal: find an arrangement of N queens on a N by N chessboard so that no two queens threaten each other. This is a [classic toy problem](https://en.wikipedia.org/wiki/Eight_queens_puzzle) in artificial intelligence.  
+The goal is to find an arrangement of N queens on a N by N chessboard so that no two queens threaten each other. This is a [classic toy problem](https://en.wikipedia.org/wiki/Eight_queens_puzzle) in artificial intelligence.  
 Example solution for `N = 20`. Solve in less than 0.01 seconds.
 ```
 Q • • • • • • • • • • • • • • • • • • •  

@@ -3,33 +3,19 @@
 #include "utils/string.h"
 using namespace giacomo;
 
-struct assignment {
-    int variable;
-    int value;
-};
-using Assignment = array<assignment>;
-using Domain     = array<int>;
-
-enum constraint_type {
-    ALL_DIFFERENT,
-    BINARY,
-    NARY,
-    // DIFFERENT,
-    // DIFFERENT_CONST,
-    // RELATION,
-    // CUSTOM
-};
-
 struct Constraint {
+    enum type { ALL_DIFFERENT, BINARY, NARY };
+
     string     name;
     array<int> scope;
     array<int> constants;
+    type       type;
     bool (*eval_custom)(const Constraint&, const array<int>&) = nullptr;
-    constraint_type type;
 
-    inline Constraint(constraint_type t, const array<int>& vars,
-                      const string& s);
+    inline Constraint(enum type t, const array<int>& vars, const string& s);
 };
+
+using Domain = array<int>;
 
 inline bool eval(const Constraint& constraint, const array<Domain>& domains);
 inline bool propagate(const Constraint& constraint, array<Domain>& domains);
@@ -45,16 +31,24 @@ struct search_stats {
     int expansions = 0;
 };
 
+struct assignment {
+    int variable;
+    int value;
+};
+using Assignment = array<assignment>;
+
 // Check if assignment satisfies the constraints.
 bool satisfies(const array<Constraint>& C, const array<Domain>& A);
 
 // Search satisfying assignment.
-bool       search(const array<Constraint>& C, array<Domain>& D, int depth,
-                  search_stats& stats);
+bool search(const array<Constraint>& C, array<Domain>& D, int depth,
+            search_stats& stats);
+
 Assignment search(const CSP& csp, const Assignment& assignment,
                   search_stats& stats);
-bool       search_single_constraint(const Constraint& c, const array<Domain>& D,
-                                    int depth);
+
+bool search_single_constraint(const Constraint& c, const array<Domain>& D,
+                              int depth);
 
 // Choose next variable to assign (MRV & MaxDegree heuristics).
 int choose_variable(const array<Domain>& D, const array<Constraint>& C);
@@ -66,11 +60,11 @@ bool remove_values(int variable, const Constraint& constraint, array<Domain>& D,
                    array<Domain> A);
 
 // Initialize CSP.
-inline CSP make_csp(const string& s, const array<Domain>& d,
+inline CSP make_csp(const string& name, const array<Domain>& domains,
                     int num_constraints) {
     CSP csp;
-    csp.name              = s;
-    csp.domains           = d;
+    csp.name              = name;
+    csp.domains           = domains;
     csp.constraints       = allocate<Constraint>(num_constraints);
     csp.constraints.count = 0;
     return csp;
@@ -136,7 +130,7 @@ inline void print_stats(const search_stats& stats) {
     printf("   num_expansions = %d\n\n", stats.expansions);
 }
 
-inline Constraint::Constraint(constraint_type t, const array<int>& vars,
+inline Constraint::Constraint(enum type t, const array<int>& vars,
                               const string& s) {
     type  = t;
     scope = copy(vars);
@@ -154,7 +148,7 @@ inline Constraint::Constraint(constraint_type t, const array<int>& vars,
 // Constraint all_different
 inline Constraint all_different(const array<int>& scope,
                                 const string&     name = "all_different") {
-    auto result = Constraint(ALL_DIFFERENT, scope, name);
+    auto result = Constraint(Constraint::ALL_DIFFERENT, scope, name);
     return result;
 }
 
@@ -250,7 +244,7 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 }
 
 // Constraint equal(int x, int y, const string& name = "equal") {
-//     auto result  = Constraint(EQUAL, name);
+//     auto result  = Constraint(Constraint::EQUAL, name);
 //     result.scope = allocate({x, y});
 //     return result;
 // }
@@ -330,21 +324,25 @@ inline bool eval(const Constraint& constraint, const array<Domain>& domains) {
     auto type = constraint.type;
     // if (type == RELATION)assert(0);  // return eval_relation(constraint,
     // domains);
-    if (type == ALL_DIFFERENT) return eval_all_different(constraint, domains);
-    // if (type == EQUAL) return eval_equal(constraint, domains);
-    if (type == BINARY) return eval_binary(constraint, domains);
-    if (type == NARY) return eval_nary(constraint, domains);
-    // if (type == CUSTOM) return eval_custom(constraint, domains);
+    if (type == Constraint::ALL_DIFFERENT)
+        return eval_all_different(constraint, domains);
+    // if (type == Constraint::EQUAL) return eval_equal(constraint, domains);
+    if (type == Constraint::BINARY) return eval_binary(constraint, domains);
+    if (type == Constraint::NARY) return eval_nary(constraint, domains);
+    // if (type == Constraint::CUSTOM) return eval_custom(constraint, domains);
     return false;
 }
 
 inline bool propagate(const Constraint& constraint, array<Domain>& domains) {
     // if (type == RELATION) return propagate_relation(constraint, domains);
-    if (constraint.type == ALL_DIFFERENT)
+    if (constraint.type == Constraint::ALL_DIFFERENT)
         return propagate_all_different(constraint, domains);
-    // if (type == EQUAL) return propagate_equal(constraint, domains);
-    if (constraint.type == BINARY) return propagate_binary(constraint, domains);
-    if (constraint.type == NARY) return propagate_nary(constraint, domains);
+    // if (type == Constraint::EQUAL) return propagate_equal(constraint,
+    // domains);
+    if (constraint.type == Constraint::BINARY)
+        return propagate_binary(constraint, domains);
+    if (constraint.type == Constraint::NARY)
+        return propagate_nary(constraint, domains);
     return false;
 }
 
