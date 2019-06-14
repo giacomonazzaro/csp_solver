@@ -1,23 +1,29 @@
-#pragma once
+#ifndef GIACOMO_ARRAY
+#define GIACOMO_ARRAY
+
+#include <stdio.h>
 #include <cassert>
 #include <initializer_list>
 
+namespace giacomo {
+
 template <typename Type>
 struct array {
-    Type* data  = nullptr;
-    int   count = 0;
+    Type* data;
+    int   count;
 
-    inline             operator bool() const { return data == nullptr; }
     inline const Type& operator[](int i) const { return data[i]; }
     inline Type&       operator[](int i) { return data[i]; }
     inline const Type& back() const { return data[count - 1]; }
     inline Type&       back() { return data[count - 1]; }
-    inline int         size() const { return count; }
-    inline void        push_back(const Type& val) { data[count++] = val; }
     inline void        add(const Type& val) { data[count++] = val; }
 
-    inline void fill(const Type& val) {
-        for (int i = 0; i < count; ++i) data[i] = val;
+    inline int  size() const { return count; }
+    inline void push_back(const Type& val) { data[count++] = val; }
+
+    array() {
+        data  = nullptr;
+        count = 0;
     }
 
     inline void insert(const Type& element, int index) {
@@ -50,7 +56,9 @@ struct array {
     void operator=(const std::initializer_list<Type>& list) {
         count = (int)list.size();
         int i = 0;
-        for (auto& v : list) data[i++] = v;
+        for (auto& v : list) {
+            data[i++] = v;
+        }
     }
 
     array<Type> slice(int from, int to) {
@@ -67,7 +75,7 @@ struct array {
         return {data + from, to - from};
     }
 
-    // Iterators
+    // iterators
     struct const_iterator {
         const Type* data;
         int         i;
@@ -84,21 +92,34 @@ struct array {
     inline const_iterator begin() const { return const_iterator{data, 0}; }
     inline const_iterator end() const { return const_iterator{data, count}; }
 
-    struct nonconst_iterator {
+    struct mutable_iterator {
         Type* data;
         int   i;
 
-        nonconst_iterator& operator++() {
+        mutable_iterator& operator++() {
             i += 1;
             return *this;
         }
-        bool operator!=(nonconst_iterator& other) const { return i != other.i; }
+        bool  operator!=(mutable_iterator& other) const { return i != other.i; }
         Type& operator*() const { return *(data + i); }
     };
-    inline nonconst_iterator begin() { return nonconst_iterator{data, 0}; }
-    inline nonconst_iterator end() { return nonconst_iterator{data, count}; }
+    inline mutable_iterator begin() { return mutable_iterator{data, 0}; }
+    inline mutable_iterator end() { return mutable_iterator{data, count}; }
 };
 
+// fill array with a constant value
+template <typename Type>
+inline void fill(array<Type>& arr, const Type& val) {
+    for (auto& x : arr) x = val;
+}
+
+// fill array with values returned by a function f: (int) -> Type
+template <typename Type, typename Function>
+inline void fill(array<Type>& arr, Function f) {
+    for (int i = 0; i < arr.count; ++i) arr[i] = f(i);
+}
+
+// copy content of array to another array
 template <typename Type>
 inline void copy_to(const array<Type>& from, array<Type>& to) {
     assert(from.count <= to.count);
@@ -106,6 +127,7 @@ inline void copy_to(const array<Type>& from, array<Type>& to) {
     to.count = from.count;
 }
 
+// copy content of array of array to another array of arrays
 template <typename Type>
 inline void copy_to(const array<array<Type>>& from, array<array<Type>>& to) {
     assert(from.count <= to.count);
@@ -113,17 +135,21 @@ inline void copy_to(const array<array<Type>>& from, array<array<Type>>& to) {
     to.count = from.count;
 }
 
+// get index of fisrt occurrence of some value
 template <typename Type>
-inline int find(const array<Type>& vec, const Type& val) {
-    for (int i = 0; i < vec.count; ++i)
-        if (vec[i] == val) return i;
+inline int find(const array<Type>& arr, const Type& value) {
+    for (int i = 0; i < arr.count; ++i)
+        if (arr[i] == value) return i;
     return -1;
 }
 
+// check if array contains some value
 template <typename Type>
-inline bool contains(const array<Type>& vec, const Type& val) {
-    return find(vec, val) != -1;
+inline bool contains(const array<Type>& arr, const Type& value) {
+    return find(arr, value) != -1;
 }
+
+}  // namespace giacomo
 
 // template <typename Container>
 // inline void print(const char* name, Container&& a, int line_size = 32,
@@ -152,3 +178,5 @@ inline bool contains(const array<Type>& vec, const Type& val) {
 //         }
 //     }
 // }
+
+#endif

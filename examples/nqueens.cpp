@@ -1,7 +1,7 @@
 #include "../csp.h"
 
 CSP make_nqueens(int N = 8) {
-    auto domains = allocate_array<array<int>>(N);
+    auto domains = allocate<array<int>>(N);
     for (auto& d : domains) d = make_range(N);
 
     auto num_constraints = N * N;
@@ -14,9 +14,9 @@ CSP make_nqueens(int N = 8) {
     // constraint: No diagonal threats.
     for (int i = 0; i < N - 1; ++i) {
         for (int j = i + 1; j < N; ++j) {
-            auto scope       = allocate_array({i, j});
+            auto scope       = allocate({i, j});
             auto diag        = Constraint(BINARY, scope, "diag+");
-            diag.constants   = allocate_array({j - i});
+            diag.constants   = allocate({j - i});
             diag.eval_custom = [](const Constraint& c,
                                   const array<int>& values) {
                 auto x = values[0];
@@ -43,17 +43,32 @@ inline void print_nqueens(int N, const Assignment& A) {
     printf("\n");
 }
 
+inline void print_nqueens(int N, const array<Domain>& D) {
+    for (int i = 0; i < N; i++) {
+        for (int k = 0; k < N; k++) {
+            if (contains(D[i], k))
+                if (D[i].count == 1)
+                    printf(" Q");  // There's a queen.
+                else
+                    printf(" -");  // There's a queen.
+            else
+                printf("  ");  // Empty cell.
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
 int main(int argc, char const* argv[]) {
     int N = 8;
     if (argc == 2) N = atoi(argv[1]);
 
-    init_default_stack_allocator(10e8);
+    auto arena = memory_arena(1e8);
+
+    default_allocator = stack_allocator{&arena, 0};
 
     CSP          csp = make_nqueens(N);
     search_stats stats;
     auto         solution = search(csp, {}, stats);
     print_nqueens(N, solution);
     print_stats(stats);
-
-    destroy_default_stack_allocator();
 }

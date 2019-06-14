@@ -1,5 +1,5 @@
 #include "csp.h"
-stack_allocator default_stack_allocator::default_allocator;
+stack_allocator giacomo::default_allocator;
 
 bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for (auto& constraint : C) {
@@ -46,8 +46,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
 
     for (int val : D[variable]) {
         stack_frame();
-
         stats.expansions += 1;
+
         // Copying the domains to make a temp version.
         auto D_attempt      = copy(D);
         D_attempt[variable] = {val};
@@ -107,7 +107,7 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // Gradually update min_size and populate candidates with all
     // the variables that have domain size == min_size.
     stack_frame();
-    auto candidates  = allocate_array<int>(D.size());
+    auto candidates  = allocate<int>(D.size());
     candidates.count = 0;
     int min_size     = 9999999;  // @Hack.
     for (int i = 0; i < D.size(); i++) {
@@ -127,7 +127,7 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // If there's a tie, use Max Degree heuristic.
     // Start with computing degrees. We could cache that, but it
     // is probably unexpensive to compute them on the fly (@Profile it).
-    auto degrees = allocate_array(D.size(), 0);
+    auto degrees = allocate<int>(D.size(), 0);
     for (auto& c : C)
         for (int v : c.scope) degrees[v] += c.scope.size() - 1;
 
@@ -158,7 +158,7 @@ bool remove_values(int variable, const Constraint& constraint,
     bool removed_value = false;
     int  i             = 0;
     auto domain_tmp    = copy(D[variable]);  // copying the domain.
-    auto ones          = allocate_array<int>(D.size(), 1);
+    auto ones          = allocate<int>(D.size(), 1);
 
     while (true) {
         stack_frame();
@@ -166,9 +166,9 @@ bool remove_values(int variable, const Constraint& constraint,
         // variables.
         // array<Domain> Dfake = array<Domain>(D.size(), {-1});
 
-        auto Dfake = allocate_array<array<int>>(D.size());
+        auto Dfake = allocate<array<int>>(D.size());
         for (int k = 0; k < Dfake.count; ++k) {
-            Dfake[k]       = allocate_array<int>(D[k].count);
+            Dfake[k]       = allocate<int>(D[k].count);
             Dfake[k].count = 0;
         }
 
@@ -201,8 +201,8 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
 
     int size = 0;
     for (auto& c : C) size += c.scope.count;
-    auto var_queue    = allocate_array<int>(size);
-    auto const_queue  = allocate_array<int>(size);
+    auto var_queue    = allocate<int>(size);
+    auto const_queue  = allocate<int>(size);
     var_queue.count   = 0;
     const_queue.count = 0;
 
@@ -269,11 +269,11 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
 
 bool search_single_constraint(const Constraint& c, const array<Domain>& D_,
                               int depth) {
-    stack_frame();
-    auto D = copy(D_);
-
     // Naive search that just check if there's a possible assignment that
     // satisfy only ONE constraint. Used by remove_values().
+
+    stack_frame();
+    auto D = copy(D_);
 
     // If assignment is complete, return true. Only admissible assignments
     // arrive here.
@@ -287,9 +287,8 @@ bool search_single_constraint(const Constraint& c, const array<Domain>& D_,
     if (complete) return true;
 
     // Still using MRV & Max Degree.
-    auto cc = allocate_array<Constraint>(1, c);
-    // auto cc       = array<Constraint>{&c, 1};
-    int variable = choose_variable(D, cc);
+    auto cc       = allocate<Constraint>(1, c);
+    int  variable = choose_variable(D, cc);
 
     const auto domain = copy(D[variable]);
     for (int val : domain) {

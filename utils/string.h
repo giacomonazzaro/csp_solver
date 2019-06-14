@@ -1,21 +1,20 @@
-#pragma once
+#ifndef GIACOMO_STRING
+#define GIACOMO_STRING
+
 #include <stdio.h>
 #include "array.h"
 
-#define STRING_SIZE (4096)
+namespace giacomo {
 
-inline int literal_length(const char* literal) {
-    int len = 0;
-    while (literal[len] != '\0') len += 1;
-    return len;
-}
+#define STRING_SIZE (4096)
 
 struct string : array<char> {
     char buffer[STRING_SIZE];
 
-    string() : array<char>() {
+    string() {
         for (int i = 0; i < STRING_SIZE; i++) buffer[i] = '\0';
-        data = &buffer[0];
+        data  = &buffer[0];
+        count = 0;
     }
 
     string(const string& s) : string() {
@@ -24,15 +23,11 @@ struct string : array<char> {
     }
 
     string(const char* literal) : string() {
-        count = literal_length(literal);
-        for (int i = 0; i < count; ++i) buffer[i] = literal[i];
+        while (literal[count] != '\0') {
+            buffer[count] = literal[count];
+            count += 1;
+        }
         buffer[count] = '\0';
-    }
-
-    string(int i) : string() {
-        count = 100;
-        sprintf(buffer, "%d", i);
-        count = literal_length(buffer);
     }
 
     void operator+=(const string& s) {
@@ -49,6 +44,55 @@ inline string operator+(const string& a, const string& b) {
     return result;
 }
 
-inline void write(const string& s) { printf("%.*s\n", s.count, s.buffer); }
+inline int find(const array<char>& text, const array<char>& token) {
+    auto index = -1;
 
-inline void write_inline(const string& s) { printf("%.*s", s.count, s.buffer); }
+here:
+    for (int i = index + 1; i < text.count; ++i) {
+        if (text[i] == token[0]) {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) return -1;
+    for (int i = 1; i < token.count; ++i) {
+        if (text[index + i] != token[i]) goto here;
+    }
+    return index;
+}
+
+inline const char* get_format(unsigned char) { return "%X"; }
+inline const char* get_format(char) { return "%s"; }
+inline const char* get_format(int) { return "%d"; }
+inline const char* get_format(long int) { return "%ld"; }
+inline const char* get_format(float) { return "%f"; }
+inline const char* get_format(double) { return "%lf"; }
+inline const char* get_format(void*) { return "%p"; }
+inline const char* get_format(const char*) { return "%s"; }
+
+template <typename Type>
+inline string to_string(Type val) {
+    auto result  = string();
+    auto format  = get_format(val);
+    result.count = sprintf(result.buffer, format, val);
+    return result;
+}
+
+inline void write_inline(const string& s, FILE* file) {
+    fprintf(file, "%.*s", s.count, s.buffer);
+}
+
+template <typename Type>
+inline void write_inline(const Type& x) {
+    auto s = to_string(x);
+    write_inline(s);
+}
+
+template <typename Type>
+inline void write(const Type& s, FILE* file = stdout) {
+    write_inline(s, file);
+    fprintf(file, "\n");
+}
+
+}  // namespace giacomo
+#endif
