@@ -3,6 +3,9 @@
 #include "memory_arena.h"
 
 namespace giacomo {
+/* stack_allocator handles memory allocation. It allows to allocate data
+ * incrementally on a stack (a pre-allocated memory arena). By using the helper
+ * struct stack_frame_cleaner, memory deallocation is automatic */
 
 struct stack_allocator {
     memory_arena* arena;
@@ -11,6 +14,7 @@ struct stack_allocator {
 
 extern stack_allocator default_allocator;
 
+// allocate chosen amount of bytes
 inline byte* allocate_bytes(int bytes, stack_allocator& stack) {
     assert(stack.arena->data != nullptr);
     if (stack.head + bytes >= stack.arena->capacity) {
@@ -27,21 +31,26 @@ inline byte* allocate_bytes(int bytes, stack_allocator& stack) {
     return ptr;
 }
 
+// allocate array
 template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& = default_allocator);
 
+// allocate array with initialized elements
 template <typename Type, typename Filler>
 inline array<Type> allocate(int count, const Filler& filler,
                             stack_allocator& = default_allocator);
 
+// allocate array with initialized elements by initializer_list
 template <typename Type>
 inline array<Type> allocate(const std::initializer_list<Type>& list,
                             stack_allocator& = default_allocator);
 
+// allocate array with elements copied from another array
 template <typename Type>
 inline array<Type> copy(const array<Type>& arr,
                         stack_allocator& = default_allocator);
 
+// allocate array of array with elements copied from another array of array
 template <typename Type>
 inline array<array<Type>> copy(const array<array<Type>>& arr,
                                stack_allocator& = default_allocator);

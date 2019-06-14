@@ -9,11 +9,11 @@ struct memory_arena {
     size_t capacity;
 
     memory_arena(size_t n) {
-        this->data = new byte[n];
+        data = new byte[n];
         if (data == nullptr)
-            this->capacity = 0;
+            capacity = 0;
         else
-            this->capacity = n;
+            capacity = n;
     }
     ~memory_arena() {
         if (data != nullptr) delete[] data;
@@ -21,6 +21,7 @@ struct memory_arena {
         capacity = 0;
     }
 
+    // implicit conversion to raw pointer
     operator void*() const { return data; }
 };
 
@@ -31,13 +32,13 @@ inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
     auto data = new byte[capacity];
     if (data == nullptr) return false;
 
-    // copy from old location to new one
+    // copy data from old location to new one
     for (int i = 0; i < arena.capacity; ++i) data[i] = arena.data[i];
 
     // free old memory
     if (arena.data) delete[] arena.data;
 
-    // update stack allocator
+    // update members
     arena.data     = data;
     arena.capacity = capacity;
     return true;
