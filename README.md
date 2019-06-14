@@ -5,13 +5,13 @@ The library is minimal, it only includes `<stdio.h>` for printing, `<cassert>` f
 The only data structures used are arrays, implemented in `utils/array.h`. Memory managment is implemented in `utils/stack_allocator.h`.
 
 ## Features and heuristics
-- Backtrack search.
-- Minimum remaining values + max degree heuristics.
-- Generalized Arc Consistency.
-- Forward propagation.
+- Backtrack search
+- Minimum remaining values + max degree heuristics
+- Generalized Arc Consistency
+- Forward propagation
 
 ## Examples
-Demo applications can be compiled with using `make`.
+Demo applications can be compiled with `make`.
 
 ### N-queens
 Goal: find an arrangement of N queens on a N by N chessboard so that no two queens threaten each other. This is a [classic toy problem](https://en.wikipedia.org/wiki/Eight_queens_puzzle) in artificial intelligence.  
