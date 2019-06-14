@@ -1,5 +1,5 @@
 # A simple CSP solver
-The code implements a simple [constraint satisfaction problem](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem) solver.
+Implementation of a simple solver for [constraint satisfaction problems](https://en.wikipedia.org/wiki/Constraint_satisfaction_problem).
 
 The library is minimal, it only includes `<stdio.h>` for printing, `<cassert>` for debugging and `<initializer_list>` as array utiliy.  
 The only data structures used are arrays, implemented in `utils/array.h`. Memory managment is implemented in `utils/stack_allocator.h`.
@@ -7,7 +7,7 @@ The only data structures used are arrays, implemented in `utils/array.h`. Memory
 ## Features and heuristics
 - Backtrack search
 - Minimum remaining values + max degree heuristics
-- Generalized Arc Consistency
+- Generalized arc consistency
 - Forward propagation
 
 ## Examples
