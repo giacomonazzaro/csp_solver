@@ -9,13 +9,16 @@ struct memory_arena {
     size_t capacity;
 
     memory_arena(size_t n) {
+        // allocate memory on initialization
         data = new byte[n];
         if (data == nullptr)
             capacity = 0;
         else
             capacity = n;
     }
+
     ~memory_arena() {
+        // free memory on destruction
         if (data != nullptr) delete[] data;
         data     = nullptr;
         capacity = 0;
@@ -26,9 +29,10 @@ struct memory_arena {
 };
 
 inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
+    // If there is no need to grow, return success
     if (capacity <= arena.capacity) return true;
 
-    // allocate new memory
+    // allocate new memory, if something goes wrong return failure
     auto data = new byte[capacity];
     if (data == nullptr) return false;
 
@@ -41,6 +45,8 @@ inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
     // update members
     arena.data     = data;
     arena.capacity = capacity;
+
+    // return success
     return true;
 }
 

@@ -110,16 +110,13 @@ inline array<array<Type>> copy(const array<array<Type>>& arr,
 
 struct stack_frame_cleaner {
     stack_allocator* stack = nullptr;
-    int              start = 0;
+    size_t           start = 0;
 
     ~stack_frame_cleaner() { stack->head = start; }
 };
 
 inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
-    auto result  = stack_frame_cleaner{};
-    result.stack = stack;
-    result.start = stack->head;
-    return result;
+    return stack_frame_cleaner{stack, stack->head};
 }
 
 }  // namespace giacomo
