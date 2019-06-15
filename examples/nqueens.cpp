@@ -15,7 +15,7 @@ CSP make_nqueens(int N = 8) {
     for (int i = 0; i < N - 1; ++i) {
         for (int j = i + 1; j < N; ++j) {
             auto scope       = allocate({i, j});
-            auto diag        = Constraint(BINARY, scope, "diag+");
+            auto diag        = Constraint(Constraint::BINARY, scope, "diag+");
             diag.constants   = allocate({j - i});
             diag.eval_custom = [](const Constraint& c,
                                   const array<int>& values) {
