@@ -4,31 +4,38 @@
 
 namespace giacomo {
 /* stack_allocator handles memory allocation. It allows to allocate data
- * incrementally on a stack (a pre-allocated memory arena). By using the helper
- * struct stack_frame_cleaner, memory deallocation is automatic */
+ * incrementally on a stack, which is a pre-allocated memory arena. By using the
+ * helper struct stack_frame, memory deallocation is automatic */
 
 struct stack_allocator {
     memory_arena* arena;
     size_t        head;
 };
 
+struct stack_frame {
+    stack_allocator& stack;
+    size_t           start;
+
+    stack_frame(stack_allocator& s) : stack(s), start(stack.head) {}
+    ~stack_frame() { stack.head = start; }
+};
+
 extern stack_allocator default_allocator;
 
 // allocate chosen amount of bytes
-inline byte* allocate_bytes(int bytes, stack_allocator& stack) {
+inline byte* allocate_bytes(size_t bytes, stack_allocator& stack) {
     assert(stack.arena->data != nullptr);
-    if (stack.head + bytes >= stack.arena->capacity) {
-        auto capacity = stack.head + bytes;
-        if (capacity < (stack.arena->capacity + 8) * 2)
-            capacity = (stack.arena->capacity + 8) * 2;
 
-        auto success = grow_memory_arena(*stack.arena, capacity);
-        if (not success) return nullptr;
+    auto capacity = stack.arena->capacity;
+    while (stack.head + bytes > capacity) {
+        capacity = 2 * (capacity + 8);
     }
+    auto success = grow_memory_arena(*stack.arena, capacity);
+    assert(success);
 
-    auto ptr = stack.arena->data + stack.head;
+    auto pointer = stack.arena->data + stack.head;
     stack.head += bytes;
-    return ptr;
+    return pointer;
 }
 
 // allocate array
@@ -104,22 +111,10 @@ inline array<array<Type>> copy(const array<array<Type>>& arr,
 // inline array<array<Type>> copy(stack_allocator&      stack,
 //                                const CopyableBuffer& arr) {
 //     auto result = allocate<array<Type>>(stack, arr.count);
-//     for (int i = 0; i < result.count; i++) result[i] = copy(stack, arr[i]);
-//     return result;
+//     for (int i = 0; i < result.count; i++) result[i] = copy(stack,
+//     arr[i]); return result;
 // }
-
-struct stack_frame_cleaner {
-    stack_allocator* stack = nullptr;
-    size_t           start = 0;
-
-    ~stack_frame_cleaner() { stack->head = start; }
-};
-
-inline stack_frame_cleaner make_stack_frame(stack_allocator* stack) {
-    return stack_frame_cleaner{stack, stack->head};
-}
 
 }  // namespace giacomo
 
-#define stack_frame() \
-    auto _frame = make_stack_frame(&giacomo::default_allocator);
+#define stack_frame() auto _frame = stack_frame(giacomo::default_allocator);
