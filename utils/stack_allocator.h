@@ -38,6 +38,10 @@ inline byte* allocate_bytes(size_t bytes, stack_allocator& stack) {
     return pointer;
 }
 
+// allocate struct
+template <typename Type>
+inline Type& allocate(stack_allocator& = default_allocator);
+
 // allocate array
 template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& = default_allocator);
@@ -65,6 +69,11 @@ inline array<array<Type>> copy(const array<array<Type>>& arr,
 /*
  * IMPLEMENTATION
  */
+
+template <typename Type>
+inline Type& allocate(stack_allocator& stack) {
+    return *(Type*)allocate_bytes(sizeof(Type), stack);
+}
 
 template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& stack) {
