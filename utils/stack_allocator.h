@@ -20,7 +20,10 @@ struct stack_frame {
     ~stack_frame() { stack.head = start; }
 };
 
-extern stack_allocator default_allocator;
+inline stack_allocator& default_allocator() {
+    static stack_allocator _default_allocator;
+    return _default_allocator;
+}
 
 // allocate chosen amount of bytes
 inline byte* allocate_bytes(size_t bytes, stack_allocator& stack) {
@@ -40,31 +43,31 @@ inline byte* allocate_bytes(size_t bytes, stack_allocator& stack) {
 
 // allocate struct
 template <typename Type>
-inline Type& allocate(stack_allocator& = default_allocator);
+inline Type& allocate(stack_allocator& = default_allocator());
 
 // allocate array
 template <typename Type>
-inline array<Type> allocate(int count, stack_allocator& = default_allocator);
+inline array<Type> allocate(int count, stack_allocator& = default_allocator());
 
 // allocate array with initialized elements
 template <typename Type, typename Filler>
 inline array<Type> allocate(int count, const Filler& filler,
-                            stack_allocator& = default_allocator);
+                            stack_allocator& = default_allocator());
 
 // allocate array with initialized elements by initializer_list
 template <typename Type>
 inline array<Type> allocate(const std::initializer_list<Type>& list,
-                            stack_allocator& = default_allocator);
+                            stack_allocator& = default_allocator());
 
 // allocate array with elements copied from another array
 template <typename Type>
 inline array<Type> copy(const array<Type>& arr,
-                        stack_allocator& = default_allocator);
+                        stack_allocator& = default_allocator());
 
 // allocate array of array with elements copied from another array of array
 template <typename Type>
 inline array<array<Type>> copy(const array<array<Type>>& arr,
-                               stack_allocator& = default_allocator);
+                               stack_allocator& = default_allocator());
 
 /*
  * IMPLEMENTATION
@@ -126,4 +129,4 @@ inline array<array<Type>> copy(const array<array<Type>>& arr,
 
 }  // namespace giacomo
 
-#define stack_frame() auto _frame = stack_frame(giacomo::default_allocator);
+#define stack_frame() auto _frame = stack_frame(default_allocator());

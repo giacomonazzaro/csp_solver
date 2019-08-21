@@ -64,7 +64,7 @@ int main(int argc, char const* argv[]) {
 
     auto arena = memory_arena(1e8);
 
-    default_allocator = stack_allocator{&arena, 0};
+    default_allocator() = stack_allocator{&arena, 0};
 
     CSP          csp = make_nqueens(N);
     search_stats stats;

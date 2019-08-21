@@ -1,5 +1,4 @@
 #include "csp.h"
-stack_allocator giacomo::default_allocator;
 
 bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for (auto& constraint : C) {

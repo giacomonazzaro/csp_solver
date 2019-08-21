@@ -64,9 +64,9 @@ array<Domain> make_sudoku_hard() {
 }
 
 int main(int argc, char const* argv[]) {
-    int  N            = 3;
-    auto arena        = memory_arena(1e6);
-    default_allocator = stack_allocator{&arena, 0};
+    int  N              = 3;
+    auto arena          = memory_arena(1e6);
+    default_allocator() = stack_allocator{&arena, 0};
 
     CSP  csp  = make_sudoku(N);
     auto init = make_sudoku_hard();
