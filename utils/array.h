@@ -26,6 +26,8 @@ struct array {
         count = 0;
     }
 
+    array(Type* p, int c) : data(p), count(c) {}
+
     inline void insert(const Type& element, int index) {
         for (int i = count; i > index; i--) {
             data[i] = data[i - 1];
@@ -147,6 +149,15 @@ inline int find(const array<Type>& arr, const Type& value) {
 template <typename Type>
 inline bool contains(const array<Type>& arr, const Type& value) {
     return find(arr, value) != -1;
+}
+
+template <typename Type>
+inline bool operator==(const array<Type>& a, const array<Type>& b) {
+    if (a.count != b.count) return false;
+    for (int i = 0; i < a.count; i++) {
+        if (a[i] != b[i]) return false;
+    }
+    return true;
 }
 
 }  // namespace giacomo
