@@ -2,7 +2,7 @@
 #define GIACOMO_MEMORY_ARENA
 namespace giacomo {
 
-enum class byte : unsigned char {};
+using byte = unsigned char;
 
 struct memory_arena {
     byte*  data;
@@ -26,7 +26,15 @@ struct memory_arena {
 
     // implicit conversion to raw pointer
     operator void*() const { return data; }
+
+   private:
+    memory_arena(const memory_arena& rhs) : memory_arena(rhs.capacity) {
+        for (int i = 0; i < rhs.capacity; i++) data[i] = rhs.data[i];
+    }
+    friend inline memory_arena copy(memory_arena& rhs);
 };
+
+inline memory_arena copy(memory_arena& rhs) { return memory_arena(rhs); }
 
 inline bool grow_memory_arena(memory_arena& arena, size_t capacity) {
     // If there is no need to grow, return success

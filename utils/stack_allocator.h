@@ -10,6 +10,9 @@ namespace giacomo {
 struct stack_allocator {
     memory_arena* arena;
     size_t        head;
+
+    byte*       data() { return arena->data; }
+    const byte* data() const { return arena->data; }
 };
 
 struct stack_frame {
