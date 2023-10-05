@@ -68,7 +68,12 @@ int main(int argc, char const* argv[]) {
 
     CSP          csp = make_nqueens(N);
     search_stats stats;
-    auto         solution = search(csp, {}, stats);
+    auto a = allocate<assignment>({{0,0}});
+    auto         solution = search(csp, a, stats);
+    
+    for(auto node: stats.search_nodes) {
+        node.print();
+    }
     print_nqueens(N, solution);
     print_stats(stats);
 }

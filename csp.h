@@ -1,6 +1,10 @@
 #pragma once
+#include <vector>
+#include <string>
+
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
+
 using namespace giacomo;
 
 struct Constraint {
@@ -29,6 +33,56 @@ struct CSP {
 struct search_stats {
     int backtracks = 0;
     int expansions = 0;
+
+    struct SearchNode {
+        // Assignment assignment = {};
+        int  variable = -1;
+        int  value    = -1;
+        int depth = -1;
+        bool partial  = true;
+        bool sat      = false;
+
+        int              parent   = -1;
+        std::vector<int> children = {};
+        std::string      info = "";
+        
+        inline void print() {
+            for(int i =0; i < depth; i++) printf("|");
+
+            printf("var: %d = %d, %s\n", variable, value, info.c_str());
+        }
+    };
+
+    std::vector<SearchNode> search_nodes = {};
+    int                     current_node = -1;
+
+    inline void open_child_node(int variable, int value, int depth) {
+        expansions += 1;
+
+        int  id       = search_nodes.size();
+        auto node     = SearchNode{};
+        node.variable = variable;
+        node.value    = value;
+        node.depth    = depth;
+        node.parent   = current_node;
+        search_nodes.push_back(node);
+        if (current_node != -1) {
+            search_nodes[current_node].children.push_back(id);
+        }
+        current_node = id;
+    }
+
+    inline void fail(const string& info) {
+        if (current_node == -1) return;
+        search_nodes[current_node].sat = false;
+        search_nodes[current_node].info = info;
+        current_node                   = search_nodes[current_node].parent;
+    }
+    inline void success() {
+        if (current_node == -1) return;
+        search_nodes[current_node].sat = true;
+        search_nodes[current_node].info = "Success!";
+    }
 };
 
 struct assignment {

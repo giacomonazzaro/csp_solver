@@ -1,0 +1,1 @@
+add_executable(nqueens nqueens.cpp ../csp.cpp)

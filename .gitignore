@@ -1,4 +1,5 @@
 csp_solver*/
+build/
 examples/bin/
 examples/build/
 */update.sh

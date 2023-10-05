@@ -35,38 +35,48 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
             search_stats& stats) {
     // If assignment is complete, just check if it satisfies contraints.
     if (is_assignment_complete(D)) {
-        if (satisfies(C, D))
+        if (satisfies(C, D)) {
+            stats.success();
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
     int variable = choose_variable(D, C);
 
     for (int val : D[variable]) {
+        stats.open_child_node(variable, val, depth);
+
         stack_frame();
-        stats.expansions += 1;
 
         // Copying the domains to make a temp version.
         auto D_attempt      = copy(D);
         D_attempt[variable] = {val};
 
         // Check if assignment satisfies constraints.
-        if (not satisfies(C, D_attempt)) continue;
+        if (not satisfies(C, D_attempt)) {
+            stats.fail("Does not satisfy");
+            continue;
+        }
 
         // Propagate assignment and eventually reduce domains.
-        if (not do_inferences(C, D_attempt)) continue;
+        if (not do_inferences(C, D_attempt)) {
+            stats.fail("A domain is empty after propagation");
+            continue;
+        }
 
         // Recursive call.
         bool success = search(C, D_attempt, depth + 1, stats);
         if (success) {
             copy_to(D_attempt, D);  // update the domains.
+            stats.success();
             return true;
         }
     }
 
     // Return failure. Backtrack.
-    stats.backtracks += 1;
+    stats.fail("No admissible assignment");
     return false;
 }
 
