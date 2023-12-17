@@ -51,15 +51,15 @@ inline void print_sudoku(const array<Domain>& D, int N) {
 
 array<Domain> make_sudoku_hard() {
     return parse_sudoku(
-        " 8 - - - - - - - -"
-        " - - 3 6 - - - - -"
-        " - 7 - - 9 - 2 - -"
-        " - 5 - - - 7 - - -"
-        " - - - - 4 5 7 - -"
-        " - - - 1 - - - 3 -"
-        " - - 1 - - - - 6 8"
-        " - - 8 5 - - - 1 -"
-        " - 9 - - - - 4 - -",
+        " - - - 7 - 6 - 5 -"
+        " - - 4 - - - - - -"
+        " - - - - - - - - -"
+        " 9 - - - 5 - 2 - -"
+        " 7 - 6 4 2 - 1 - -"
+        " 8 - 1 - - - - - -"
+        " - - 7 1 - 8 6 - 2"
+        " - - - 6 - - - - 8"
+        " - - - - - 4 - 9 7",
         3);
 }
 
@@ -75,5 +75,10 @@ int main(int argc, char const* argv[]) {
     search_stats stats;
     auto         success = search(csp.constraints, init, 0, stats);
     print_sudoku(init, N);
+
+    for (auto node : stats.search_nodes) {
+        node.print();
+    }
+
     print_stats(stats);
 }

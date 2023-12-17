@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
@@ -38,18 +38,19 @@ struct search_stats {
         // Assignment assignment = {};
         int  variable = -1;
         int  value    = -1;
-        int depth = -1;
+        int  depth    = -1;
         bool partial  = true;
         bool sat      = false;
 
         int              parent   = -1;
         std::vector<int> children = {};
-        std::string      info = "";
-        
-        inline void print() {
-            for(int i =0; i < depth; i++) printf("|");
+        std::string      info     = "";
 
-            printf("var: %d = %d, %s\n", variable, value, info.c_str());
+        inline void print() {
+            for (int i = 0; i < depth; i++) printf("|");
+
+            printf("[%d, %d] = %d, %s\n", variable % 8, variable / 8, value,
+                   info.c_str());
         }
     };
 
@@ -74,13 +75,13 @@ struct search_stats {
 
     inline void fail(const string& info) {
         if (current_node == -1) return;
-        search_nodes[current_node].sat = false;
+        search_nodes[current_node].sat  = false;
         search_nodes[current_node].info = info;
-        current_node                   = search_nodes[current_node].parent;
+        current_node                    = search_nodes[current_node].parent;
     }
     inline void success() {
         if (current_node == -1) return;
-        search_nodes[current_node].sat = true;
+        search_nodes[current_node].sat  = true;
         search_nodes[current_node].info = "Success!";
     }
 };
@@ -220,16 +221,45 @@ inline bool eval_all_different(const Constraint&    constraint,
     return true;
 }
 
+inline bool propagate_permutation(const array<int>& values,
+                                  array<Domain>&    domains) {
+    auto s = 0;
+    for (int i = 0; i < constraint.scope.count - 1; ++i) {
+        auto variable = constraint.scope[i];
+        s += D[variable].count;
+    }
+    if (s)
+
+        for (int i = 0; i < constraint.scope.count - 1; ++i) {
+            auto variable = constraint.scope[i];
+            for (int value : D[variable]) {
+                auto can_be_only_here = true;
+                for (int k = i + 1; k < constraint.scope.count; ++k) {
+                    auto other_variable = constraint.scope[i];
+                    if (contains(D[other_variable], value)) {
+                        can_be_only_here = false;
+                        break;
+                    }
+                }
+                if (can_be_only_here) {
+                    D[variable] = {value};
+                }
+            }
+        }
+}
+
 inline bool propagate_all_different(const Constraint& constraint,
                                     array<Domain>&    D) {
     for (int v : constraint.scope) {
         if (D[v].count != 1) continue;
+        auto value = D[v][0];
         for (int w : constraint.scope) {
             if (w == v) continue;
-            for (int i = 0; i < D[w].count; ++i) {
-                if (D[w][i] == D[v][0]) {
-                    D[w].remove(i);
-                    if (D[w].count == 0) return false;
+            auto& domain = D[w];
+            for (int i = 0; i < domain.count; ++i) {
+                if (domain[i] == value) {
+                    domain.remove(i);
+                    if (domain.count == 0) return false;
                     break;
                 }
             }
@@ -332,7 +362,8 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 //     return result;
 // }
 
-// bool eval_different(const Constraint& constraint, const array<Domain>& D) {
+// bool eval_different(const Constraint& constraint, const array<Domain>& D)
+// {
 //     int i = constraint.scope[0];
 //     int k = constraint.scope[1];
 //     if (D[i].size() == 1 and D[k].size() == 1) {
@@ -341,18 +372,21 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 //     return true;
 // }
 
-// bool propagate_different(const Constraint& constraint, array<Domain>& D) {
+// bool propagate_different(const Constraint& constraint, array<Domain>& D)
+// {
 //     return true;
 // }
 
-// Constraint equal_const(int x, int val, const string& name = "equal_const") {
+// Constraint equal_const(int x, int val, const string& name =
+// "equal_const") {
 //     auto result      = Constraint(EQUAL_CONST, name);
 //     result.scope     = allocate({x});
 //     result.constants = allocate({val});
 //     return result;
 // }
 
-// bool eval_equal_const(const Constraint& constraint, const array<Domain>& D) {
+// bool eval_equal_const(const Constraint& constraint, const array<Domain>&
+// D) {
 //     int i = constraint.scope[0];
 //     if (D[i].size() == 1) {
 //         if (D[i][0] != constraint.constants[0]) return false;
@@ -360,7 +394,8 @@ inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
 //     return true;
 // }
 
-// bool propagate_equal_const(const Constraint& constraint, array<Domain>& D) {
+// bool propagate_equal_const(const Constraint& constraint, array<Domain>&
+// D) {
 //     stack_frame();
 //     auto& scope        = constraint.scope;
 //     auto  intersection = allocate<int>(D[scope[0]].size());
@@ -380,17 +415,20 @@ inline bool eval(const Constraint& constraint, const array<Domain>& domains) {
     // domains);
     if (type == Constraint::ALL_DIFFERENT)
         return eval_all_different(constraint, domains);
-    // if (type == Constraint::EQUAL) return eval_equal(constraint, domains);
+    // if (type == Constraint::EQUAL) return eval_equal(constraint,
+    // domains);
     if (type == Constraint::BINARY) return eval_binary(constraint, domains);
     if (type == Constraint::NARY) return eval_nary(constraint, domains);
-    // if (type == Constraint::CUSTOM) return eval_custom(constraint, domains);
+    // if (type == Constraint::CUSTOM) return eval_custom(constraint,
+    // domains);
     return false;
 }
 
 inline bool propagate(const Constraint& constraint, array<Domain>& domains) {
     // if (type == RELATION) return propagate_relation(constraint, domains);
-    if (constraint.type == Constraint::ALL_DIFFERENT)
+    if (constraint.type == Constraint::ALL_DIFFERENT) {
         return propagate_all_different(constraint, domains);
+    }
     // if (type == Constraint::EQUAL) return propagate_equal(constraint,
     // domains);
     if (constraint.type == Constraint::BINARY)

@@ -72,6 +72,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
             copy_to(D_attempt, D);  // update the domains.
             stats.success();
             return true;
+        } else {
+            stats.fail("Can't finish subsearch");
         }
     }
 
@@ -155,9 +157,9 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
 }
 
 bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
-    for (auto& c : C)
+    for (auto& c : C) {
         if (not propagate(c, D)) return false;
-
+    }
     return true;
 }
 
