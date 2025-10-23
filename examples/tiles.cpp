@@ -31,7 +31,7 @@ inline bool are_tiles_compatible(int tile_a, int tile_b, int direction) {
     return bit_a == bit_b;
 }
 
-CSP make_tiles(int N) {
+CSP make_tiles(int N, bool tileable = true) {
     auto domains = allocate<array<int>>(N * N);
     auto domain  = allocate<int>(16);
     domain.count = 0;
@@ -66,6 +66,13 @@ CSP make_tiles(int N) {
                 var - N   // up
             });
 
+            if (tileable) {
+                if (adj[0] >= N * N) adj[0] -= N * N;  // right
+                if (adj[1] >= N * N) adj[1] -= N * N;  // down
+                if (adj[2] < 0) adj[2] += N * N;       // left
+                if (adj[3] < 0) adj[3] += N * N;       // up
+            }
+
             for (int k = 0; k < 4; ++k) {
                 if (adj[k] < 0 or adj[k] >= N * N) continue;
                 auto scope  = allocate<int>({var, adj[k]});
@@ -90,19 +97,23 @@ CSP make_tiles(int N) {
     //     csp.domains[x * N + (N - 1)] = {0};
     //     csp.domains[x + (N - 1) * N] = {0};
     // }
-    for (int x = 0; x < N; ++x) {
-        csp.domains[x]               = {0};
-        csp.domains[x + N * (N - 1)] = {0};
+    if (!tileable) {
+        for (int x = 0; x < N; ++x) {
+            csp.domains[x]               = {0};
+            csp.domains[x + N * (N - 1)] = {0};
+        }
+
+        for (int y = 1; y < N - 1; ++y) {
+            csp.domains[y * N]         = {0};
+            csp.domains[y * N + N - 1] = {0};
+        }
     }
 
-    for (int y = 1; y < N - 1; ++y) {
-        csp.domains[y * N]         = {0};
-        csp.domains[y * N + N - 1] = {0};
-    }
-
-    csp.domains[(N * N) / 2]     = {15};
-    csp.domains[(N * N) / 2 + 1] = {5};
-    csp.domains[(N * N) / 2 - 1] = {5};
+    csp.domains[(N * N) / 2]         = {1 + 2 + 4};
+    csp.domains[(N * N) / 2 - N - 1] = {15};
+    csp.domains[(N * 2) - 2]         = {6};
+    csp.domains[(N * 5) + 1]         = {8 + 1};
+    // csp.domains[(N * 5) + 5] = {2 + 8};
     // csp.domains[10] = {3};
     // csp.domains[14] = {3};
     return csp;
@@ -132,9 +143,9 @@ inline void save_tiles_as_image(const array<int>& tiles, int N,
                     int img_x = x * tile_size + i;  // row
                     int idx   = (img_x * img_size + img_y) * 3;
 
-                    image[idx + 0] = 200 + rgb[0] % 50;
-                    image[idx + 1] = 200 + rgb[0] % 50;
-                    image[idx + 2] = 200 + rgb[0] % 50;
+                    image[idx + 0] = 220 + rgb[0] % 30;
+                    image[idx + 1] = 220 + rgb[0] % 30;
+                    image[idx + 2] = 220 + rgb[0] % 30;
 
                     int thickness = 2;
                     // if (i < tile_size / 2 - thickness ||
@@ -199,6 +210,7 @@ inline void save_tiles_as_image(const array<int>& tiles, int N,
     fprintf(file, "P6\n%d %d\n255\n", img_size, img_size);
     fwrite(image.data, 1, img_size * img_size * 3, file);
     fclose(file);
+    printf("Saved image to %s\n", filename.c_str());
 }
 
 inline void print_tiles(const array<int>& tiles, int N) {
@@ -246,7 +258,16 @@ int main(int argc, char const* argv[]) {
 
     default_allocator() = stack_allocator{&arena, 0};
 
-    CSP          csp = make_tiles(N);
+    CSP csp = make_tiles(N, false);
+
+    auto tiles_init = allocate<int>(N * N, 0);
+    for (int i = 0; i < N * N; ++i) {
+        if (csp.domains[i].size() == 1) {
+            tiles_init[i] = csp.domains[i][0];
+        }
+    }
+    save_tiles_as_image(tiles_init, N, "tiles_initial.ppm");
+
     search_stats stats;
     auto         assignment = search(csp, {}, stats);
     auto         tiles      = allocate<int>(N * N);
