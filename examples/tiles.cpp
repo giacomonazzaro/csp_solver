@@ -13,6 +13,7 @@ struct Tile_Ascii {
     std::string mid    = "   ";
     std::string bottom = "   ";
 };
+
 inline Tile_Ascii tile_as_ascii(int tile) {
     auto result = Tile_Ascii{};
     if (tile != 0) result.mid[1] = '+';
@@ -89,9 +90,21 @@ CSP make_tiles(int N) {
     //     csp.domains[x * N + (N - 1)] = {0};
     //     csp.domains[x + (N - 1) * N] = {0};
     // }
+    for (int x = 0; x < N; ++x) {
+        csp.domains[x]               = {0};
+        csp.domains[x + N * (N - 1)] = {0};
+    }
 
-    csp.domains[21] = {15};
-    csp.domains[10] = {15};
+    for (int y = 1; y < N - 1; ++y) {
+        csp.domains[y * N]         = {0};
+        csp.domains[y * N + N - 1] = {0};
+    }
+
+    csp.domains[(N * N) / 2]     = {15};
+    csp.domains[(N * N) / 2 + 1] = {5};
+    csp.domains[(N * N) / 2 - 1] = {5};
+    // csp.domains[10] = {3};
+    // csp.domains[14] = {3};
     return csp;
 }
 inline void print_tiles(const array<int>& tiles, int N) {
@@ -119,7 +132,7 @@ inline void print_tiles(const array<int>& tiles, int N) {
 }
 
 int main(int argc, char const* argv[]) {
-    int N = 6;
+    int N = 7;
     // if (argc == 2) N = atoi(argv[1]);
 
     // init_default_stack_allocator(10e8);
