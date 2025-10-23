@@ -147,17 +147,17 @@ inline void save_tiles_as_image(const array<int>& tiles, int N,
                     // }
 
                     // draw borders based on tile bits
-                    auto right = i > tile_size / 2;
-                    auto left  = i <= tile_size / 2;
-                    auto up    = j <= tile_size / 2;
-                    auto down  = j > tile_size / 2;
+                    auto down  = i > tile_size / 2;
+                    auto up    = i <= tile_size / 2;
+                    auto left  = j <= tile_size / 2;
+                    auto right = j > tile_size / 2;
 
-                    auto horizontal_line = (j >= tile_size / 2 - thickness &&
-                                            j <= tile_size / 2 + thickness);
-                    auto vertical_line   = (i >= tile_size / 2 - thickness &&
-                                          i < tile_size / 2 + thickness);
+                    auto vertical_line   = (j >= tile_size / 2 - thickness &&
+                                          j <= tile_size / 2 + thickness);
+                    auto horizontal_line = (i >= tile_size / 2 - thickness &&
+                                            i < tile_size / 2 + thickness);
 
-                    // if (vertical_line || horizontal_line) {
+                    // if (horizontal_line) {
                     //     image[idx + 0] = 0;
                     //     image[idx + 1] = 0;
                     //     image[idx + 2] = 0;
