@@ -75,10 +75,9 @@ CSP make_tiles(int N, bool tileable = true) {
 
             for (int k = 0; k < 4; ++k) {
                 if (adj[k] < 0 or adj[k] >= N * N) continue;
-                auto scope  = allocate<int>({var, adj[k]});
-                auto c      = Constraint(Constraint::BINARY, scope, "adj");
-                c.constants = allocate<int>({k});
-
+                auto scope    = allocate<int>({var, adj[k]});
+                auto c        = Constraint(Constraint::BINARY, scope, "adj");
+                c.constants   = allocate<int>({k});
                 c.eval_custom = [](const Constraint& c,
                                    const array<int>& values) {
                     auto x = values[0];
@@ -158,15 +157,13 @@ inline void save_tiles_as_image(const array<int>& tiles, int N,
                     // }
 
                     // draw borders based on tile bits
-                    auto down  = i > tile_size / 2;
-                    auto up    = i <= tile_size / 2;
-                    auto left  = j <= tile_size / 2;
-                    auto right = j > tile_size / 2;
+                    auto down  = i >= tile_size / 2 - thickness;
+                    auto up    = i < tile_size / 2 + thickness;
+                    auto right = j >= tile_size / 2 - thickness;
+                    auto left  = j < tile_size / 2 + thickness;
 
-                    auto vertical_line   = (j >= tile_size / 2 - thickness &&
-                                          j <= tile_size / 2 + thickness);
-                    auto horizontal_line = (i >= tile_size / 2 - thickness &&
-                                            i < tile_size / 2 + thickness);
+                    auto vertical_line   = right && left;
+                    auto horizontal_line = up & down;
 
                     // if (horizontal_line) {
                     //     image[idx + 0] = 0;

@@ -2,6 +2,7 @@
 #define GIACOMO_ARRAY
 
 #include <stdio.h>
+
 #include <cassert>
 #include <initializer_list>
 
@@ -161,6 +162,27 @@ inline bool operator==(const array<Type>& a, const array<Type>& b) {
     return true;
 }
 
+inline int argmin(const array<int>& arr) {
+    assert(arr.count > 0);
+    int min_index = 0;
+    for (int i = 1; i < arr.count; ++i) {
+        if (arr[i] < arr[min_index]) {
+            min_index = i;
+        }
+    }
+    return min_index;
+}
+
+inline int argmax(const array<int>& arr) {
+    assert(arr.count > 0);
+    int max_index = 0;
+    for (int i = 1; i < arr.count; ++i) {
+        if (arr[i] > arr[max_index]) {
+            max_index = i;
+        }
+    }
+    return max_index;
+}
 }  // namespace giacomo
 
 #endif
