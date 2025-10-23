@@ -82,33 +82,45 @@ CSP make_tiles(int N, bool tileable = true) {
             }
 
             for (int k = 0; k < 4; ++k) {
-                if (adj[k] < 0 or adj[k] >= N * N) continue;
-                auto scope    = allocate<int>({var, adj[k]});
-                auto c        = Constraint(Constraint::BINARY, scope, "adj");
-                c.constants   = allocate<int>({k});
-                c.eval_custom = [](const Constraint& c,
-                                   const array<int>& values) {
-                    auto x = values[0];
-                    auto y = values[1];
-                    int  k = c.constants[0];
-                    return are_tiles_compatible(x, y, k);
-                };
-                csp.constraints.push_back(c);
+                if (!tileable && adj[k] == -1) {
+                    auto scope = allocate<int>({var});
+                    auto c = Constraint(Constraint::UNARY, scope, "boundary");
+                    c.constants   = allocate<int>({k});
+                    c.eval_custom = [](const Constraint& c,
+                                       const array<int>& values) {
+                        auto x = values[0];
+                        int  k = c.constants[0];
+                        return get_bit(x, k) == 0;
+                    };
+                    csp.constraints.push_back(c);
+                } else {
+                    auto scope  = allocate<int>({var, adj[k]});
+                    auto c      = Constraint(Constraint::BINARY, scope, "adj");
+                    c.constants = allocate<int>({k});
+                    c.eval_custom = [](const Constraint& c,
+                                       const array<int>& values) {
+                        auto x = values[0];
+                        auto y = values[1];
+                        int  k = c.constants[0];
+                        return are_tiles_compatible(x, y, k);
+                    };
+                    csp.constraints.push_back(c);
+                }
             }
         }
     }
 
-    if (!tileable) {
-        for (int x = 0; x < N; ++x) {
-            csp.domains[x]               = {0};
-            csp.domains[x + N * (N - 1)] = {0};
-        }
+    // if (!tileable) {
+    //     for (int x = 0; x < N; ++x) {
+    //         csp.domains[x]               = {0};
+    //         csp.domains[x + N * (N - 1)] = {0};
+    //     }
 
-        for (int y = 1; y < N - 1; ++y) {
-            csp.domains[y * N]         = {0};
-            csp.domains[y * N + N - 1] = {0};
-        }
-    }
+    //     for (int y = 1; y < N - 1; ++y) {
+    //         csp.domains[y * N]         = {0};
+    //         csp.domains[y * N + N - 1] = {0};
+    //     }
+    // }
 
     csp.domains[(N * N) / 2]         = {15};
     csp.domains[(N * N) / 2 - N - 1] = {15 + 16};

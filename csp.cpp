@@ -43,7 +43,9 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
 
     int variable = choose_variable(D, C);
 
-    for (int val : D[variable]) {
+    auto values = copy(D[variable]);
+    shuffle(values);
+    for (int val : values) {
         stack_frame();
         stats.expansions += 1;
 

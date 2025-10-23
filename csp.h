@@ -4,7 +4,7 @@
 using namespace giacomo;
 
 struct Constraint {
-    enum type { ALL_DIFFERENT, BINARY, NARY };
+    enum type { ALL_DIFFERENT, BINARY, NARY, UNARY };
 
     string     name;
     array<int> scope;
@@ -184,6 +184,17 @@ inline bool propagate_all_different(const Constraint& constraint,
     return true;
 }
 
+inline bool eval_unary(const Constraint&    constraint,
+                       const array<Domain>& domains) {
+    int x = constraint.scope[0];
+    if (domains[x].count == 1) {
+        stack_frame();
+        auto value = allocate<int>({domains[x][0]});
+        if (not constraint.eval_custom(constraint, value)) return false;
+    }
+    return true;
+}
+
 inline bool eval_binary(const Constraint&    constraint,
                         const array<Domain>& domains) {
     int x = constraint.scope[0];
@@ -193,6 +204,24 @@ inline bool eval_binary(const Constraint&    constraint,
         auto xy = allocate({domains[x][0], domains[y][0]});
         if (not constraint.eval_custom(constraint, xy)) return false;
     }
+    return true;
+}
+
+inline bool propagate_unary(const Constraint& constraint, array<Domain>& D) {
+    stack_frame();
+    int x = constraint.scope[0];
+
+    auto domain_new  = allocate<int>(D[x].count);
+    domain_new.count = 0;
+    for (auto value : D[x]) {
+        stack_frame();
+        auto v = allocate({value});
+        if (constraint.eval_custom(constraint, v)) {
+            domain_new.push_back(value);
+        }
+    }
+    if (domain_new.count == 0) return false;
+    copy_to(domain_new, D[x]);
     return true;
 }
 
@@ -329,6 +358,7 @@ inline bool eval(const Constraint& constraint, const array<Domain>& domains) {
     // if (type == Constraint::EQUAL) return eval_equal(constraint, domains);
     if (type == Constraint::BINARY) return eval_binary(constraint, domains);
     if (type == Constraint::NARY) return eval_nary(constraint, domains);
+    if (type == Constraint::UNARY) return eval_unary(constraint, domains);
     // if (type == Constraint::CUSTOM) return eval_custom(constraint, domains);
     return false;
 }
@@ -343,6 +373,8 @@ inline bool propagate(const Constraint& constraint, array<Domain>& domains) {
         return propagate_binary(constraint, domains);
     if (constraint.type == Constraint::NARY)
         return propagate_nary(constraint, domains);
+    if (constraint.type == Constraint::UNARY)
+        return propagate_unary(constraint, domains);
     return false;
 }
 
