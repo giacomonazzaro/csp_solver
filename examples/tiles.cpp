@@ -107,6 +107,100 @@ CSP make_tiles(int N) {
     // csp.domains[14] = {3};
     return csp;
 }
+
+inline void save_tiles_as_image(const array<int>& tiles, int N,
+                                const std::string& filename) {
+    // each tile is 20x20 pixels
+    const int tile_size = 20;
+    const int img_size  = N * tile_size;
+
+    // create a blank image
+    auto image = allocate<byte>(img_size * img_size * 3, (byte)255);
+    // for (int i = 0; i < img_size * img_size * 3; ++i) {
+    //     image[i]     = 100 + rand() % 6;
+    //     image[i + 1] = 100 + rand() % 6;
+    //     image[i + 2] = 100 + rand() % 6;
+    // }
+
+    for (int x = 0; x < N; x++) {
+        for (int y = 0; y < N; y++) {
+            int tile   = tiles[x * N + y];
+            int rgb[3] = {rand(), rand(), rand()};
+            for (int i = 0; i < tile_size; ++i) {
+                for (int j = 0; j < tile_size; ++j) {
+                    int img_y = y * tile_size + j;  // column
+                    int img_x = x * tile_size + i;  // row
+                    int idx   = (img_x * img_size + img_y) * 3;
+
+                    image[idx + 0] = 200 + rgb[0] % 50;
+                    image[idx + 1] = 200 + rgb[0] % 50;
+                    image[idx + 2] = 200 + rgb[0] % 50;
+
+                    int thickness = 2;
+                    // if (i < tile_size / 2 - thickness ||
+                    //     i > tile_size / 2 + thickness) {
+                    //     continue;
+                    // }
+                    // if (j < tile_size / 2 - thickness ||
+                    //     j > tile_size / 2 + thickness) {
+                    //     continue;
+                    // }
+
+                    // draw borders based on tile bits
+                    auto right = i > tile_size / 2;
+                    auto left  = i <= tile_size / 2;
+                    auto up    = j <= tile_size / 2;
+                    auto down  = j > tile_size / 2;
+
+                    auto horizontal_line = (j >= tile_size / 2 - thickness &&
+                                            j <= tile_size / 2 + thickness);
+                    auto vertical_line   = (i >= tile_size / 2 - thickness &&
+                                          i < tile_size / 2 + thickness);
+
+                    // if (vertical_line || horizontal_line) {
+                    //     image[idx + 0] = 0;
+                    //     image[idx + 1] = 0;
+                    //     image[idx + 2] = 0;
+                    // }
+                    // continue;
+                    // vertical_line   = 1;
+                    // horizontal_line = 1;
+                    right &= horizontal_line;
+                    left &= horizontal_line;
+                    up &= vertical_line;
+                    down &= vertical_line;
+                    if (right && get_bit(tile, 0)) {  // right
+                        image[idx + 0] = 0;
+                        image[idx + 1] = 0;
+                        image[idx + 2] = 0;
+                    }
+                    if (down && get_bit(tile, 1)) {  // down
+                        image[idx + 0] = 0;
+                        image[idx + 1] = 0;
+                        image[idx + 2] = 0;
+                    }
+                    if (left && get_bit(tile, 2)) {  // left
+                        image[idx + 0] = 0;
+                        image[idx + 1] = 0;
+                        image[idx + 2] = 0;
+                    }
+                    if (up && get_bit(tile, 3)) {  // up
+                        image[idx + 0] = 0;
+                        image[idx + 1] = 0;
+                        image[idx + 2] = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    // save the image as PPM
+    FILE* file = fopen(filename.c_str(), "wb");
+    fprintf(file, "P6\n%d %d\n255\n", img_size, img_size);
+    fwrite(image.data, 1, img_size * img_size * 3, file);
+    fclose(file);
+}
+
 inline void print_tiles(const array<int>& tiles, int N) {
     for (int x = 0; x < N; x++) {
         for (int k = 0; k < N; k++) {
@@ -159,5 +253,6 @@ int main(int argc, char const* argv[]) {
     for (auto& t : assignment) tiles[t.variable] = t.value;
 
     print_tiles(tiles, N);
+    save_tiles_as_image(tiles, N, "tiles_output.ppm");
     print_stats(stats);
 }
