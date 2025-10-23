@@ -43,11 +43,10 @@ CSP make_tiles(int N) {
         }
         if (count != 1) {
             domain.push_back(x);
-            // printf("Added tile %d\n", x);
             auto tile = tile_as_ascii(x);
-            printf("\n %d:\n", x);
-            printf("%s\n%s\n%s\n\n", tile.top.c_str(), tile.mid.c_str(),
-                   tile.bottom.c_str());
+            // printf("\n %d:\n", x);
+            // printf("%s\n%s\n%s\n\n", tile.top.c_str(), tile.mid.c_str(),
+            //        tile.bottom.c_str());
         }
     }
     for (auto& d : domains) {
@@ -84,14 +83,15 @@ CSP make_tiles(int N) {
         }
     }
     // Set {0} as domain for all tiles at the boundary of the image grid.
-    for (int x = 0; x < N; ++x) {
-        csp.domains[x]               = {0};
-        csp.domains[x * N]           = {0};
-        csp.domains[x * N + (N - 1)] = {0};
-        csp.domains[x + (N - 1) * N] = {0};
-    }
+    // for (int x = 0; x < N; ++x) {
+    //     csp.domains[x]               = {0};
+    //     csp.domains[x * N]           = {0};
+    //     csp.domains[x * N + (N - 1)] = {0};
+    //     csp.domains[x + (N - 1) * N] = {0};
+    // }
 
     csp.domains[21] = {15};
+    csp.domains[10] = {15};
     return csp;
 }
 inline void print_tiles(const array<int>& tiles, int N) {
@@ -117,31 +117,6 @@ inline void print_tiles(const array<int>& tiles, int N) {
     }
     printf("\n");
 }
-inline void print_nqueens(const array<Domain>& D) {
-    int N = D.size();
-    for (int i = 0; i < N; i++) {
-        for (int k = 0; k < N; k++) {
-            if (not contains(D[i], k))
-                printf(" -");  // Unassigned and cannot be a queen.
-            else {
-                if (D[i].size() == 1)
-                    printf(" X");  // There's a queen.
-                else
-                    printf(" o");  // Unassigned, but can be a queen.
-            }
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
-// Assignment make_assignment_from_list(const array<int>& D,
-//                                      bool              starts_at_one = false)
-//                                      {
-//     Assignment A;
-//     for (int i = 0; i < D.size(); i++) A[i] = D[i] - int(starts_at_one);
-//     return A;
-// }
 
 int main(int argc, char const* argv[]) {
     int N = 6;
