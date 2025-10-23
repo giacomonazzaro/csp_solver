@@ -19,13 +19,14 @@ struct array {
     inline void        add(const Type& val) { data[count++] = val; }
 
     inline int  size() const { return count; }
-    inline void push_back(const Type& val) { data[count++] = val; }
+    inline void push_back(const Type& val) { add(val); }
 
     array() {
         data  = nullptr;
         count = 0;
     }
 
+    // array(const Type* p, int c) : data(p), count(c) {}
     array(Type* p, int c) : data(p), count(c) {}
 
     inline void insert(const Type& element, int index) {
@@ -46,7 +47,7 @@ struct array {
         count += arr.count;
     }
 
-    inline void append(const array<Type>& arr) { insert(arr, count); }
+    inline void operator+=(const array<Type>& arr) { insert(arr, count); }
 
     inline void remove(int index) {
         for (int i = index; i < count - 1; ++i) {
@@ -161,33 +162,5 @@ inline bool operator==(const array<Type>& a, const array<Type>& b) {
 }
 
 }  // namespace giacomo
-
-// template <typename Container>
-// inline void print(const char* name, Container&& a, int line_size = 32,
-//                   int max_elems = 300) {
-//     int count = a.count;
-//     printf("%s (count: %d)\n", name, count);  // capacity(a));
-//     if (count)
-//         printf(" ");
-//     else {
-//         printf("\n");
-//         return;
-//     }
-//     for (int i = 0; i < count; ++i) {
-//         printf("%d", a[i]);
-//         if (i == count - 1)
-//             printf("\n\n");
-
-//         else if (i % line_size == line_size - 1)
-//             printf("\n ");
-//         else
-//             printf(", ");
-
-//         if (i > max_elems) {
-//             printf("...\n\n");
-//             return;
-//         }
-//     }
-// }
 
 #endif
