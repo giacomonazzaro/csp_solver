@@ -232,7 +232,7 @@ inline void print_tiles(const array<int>& tiles, int N) {
 int main(int argc, char const* argv[]) {
     srand((unsigned int)time(0));
 
-    int N = 17;
+    int N = 9;
 
     srand(time(nullptr));
 
