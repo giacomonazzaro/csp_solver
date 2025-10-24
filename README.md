@@ -54,7 +54,7 @@ Hard sudoku problem. Solve in less than 0.01 seconds.
  ```
 
 ### Tiles
-Generate tile arragement given initial state and adjaceccy constraints.
+Generate tile arragement given initial state and adjaceccy constraints.  
 <kbd>
 <img width="180" height="180" alt="tiles_input" src="https://github.com/user-attachments/assets/d231bee0-7ff6-4055-8061-efa1e0ba4064" />
 </kbd>
