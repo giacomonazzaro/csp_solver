@@ -47,9 +47,6 @@ CSP make_tiles(int N, bool tileable = true) {
         if (count != 1) {
             domain.push_back(x);
             auto tile = tile_as_ascii(x);
-            // printf("\n %d:\n", x);
-            // printf("%s\n%s\n%s\n\n", tile.top.c_str(), tile.mid.c_str(),
-            //        tile.bottom.c_str());
         }
     }
     domain.push_back(15 + 16);
@@ -109,18 +106,6 @@ CSP make_tiles(int N, bool tileable = true) {
             }
         }
     }
-
-    // if (!tileable) {
-    //     for (int x = 0; x < N; ++x) {
-    //         csp.domains[x]               = {0};
-    //         csp.domains[x + N * (N - 1)] = {0};
-    //     }
-
-    //     for (int y = 1; y < N - 1; ++y) {
-    //         csp.domains[y * N]         = {0};
-    //         csp.domains[y * N + N - 1] = {0};
-    //     }
-    // }
 
     csp.domains[(N * N) / 2]         = {15};
     csp.domains[(N * N) / 2 - N - 1] = {15 + 16};
@@ -247,7 +232,7 @@ inline void print_tiles(const array<int>& tiles, int N) {
 int main(int argc, char const* argv[]) {
     srand((unsigned int)time(0));
 
-    int N = 7;
+    int N = 17;
 
     srand(time(nullptr));
 
