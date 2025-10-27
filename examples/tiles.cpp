@@ -109,8 +109,12 @@ CSP make_tiles(int N, bool tileable = true) {
 
     csp.domains[(N * N) / 2]         = {15};
     csp.domains[(N * N) / 2 - N - 1] = {15 + 16};
-    csp.domains[(N * 2) - 2]         = {6};
-    csp.domains[(N * 5) + 1]         = {8 + 1};
+    csp.domains[(N * 2) - 7]         = {4 + 2};
+    // csp.domains[(N * 5) + 1]         = {8 + 1};
+    csp.domains[16] = {4 + 1};
+    csp.domains[19] = {8 + 2};
+    csp.domains[20] = {8 + 1};
+    // csp.domains[50]                  = {2 + 8};
     // csp.domains[(N * 5) + 5] = {2 + 8};
     // csp.domains[10] = {3};
     // csp.domains[14] = {3};
@@ -232,7 +236,7 @@ inline void print_tiles(const array<int>& tiles, int N) {
 int main(int argc, char const* argv[]) {
     srand((unsigned int)time(0));
 
-    int N = 9;
+    int N = 5;
 
     srand(time(nullptr));
 
@@ -240,7 +244,7 @@ int main(int argc, char const* argv[]) {
 
     default_allocator() = stack_allocator{&arena, 0};
 
-    CSP csp = make_tiles(N, true);
+    CSP csp = make_tiles(N, false);
 
     auto tiles_init = allocate<int>(N * N, 0);
     for (int i = 0; i < N * N; ++i) {
