@@ -124,27 +124,40 @@ CSP make_tiles(int N, bool tileable = true) {
 inline void save_tiles_as_image(const array<int>& tiles, int N,
                                 const std::string& filename) {
     // each tile is 20x20 pixels
-    const int tile_size = 20;
+    const int tile_size = 60;
     const int img_size  = N * tile_size;
 
     // create a blank image
     auto image = allocate<byte>(img_size * img_size * 3, (byte)255);
 
-    for (int x = 0; x < N; x++) {
-        for (int y = 0; y < N; y++) {
-            int tile   = tiles[x * N + y];
+    for (int tile_x = 0; tile_x < N; tile_x++) {
+        for (int tile_y = 0; tile_y < N; tile_y++) {
+            int tile   = tiles[tile_x * N + tile_y];
             int rgb[3] = {rand(), rand(), rand()};
+
+            // for (int i = 0; i < tile_size; ++i) {
+            //     for (int j = 0; j < tile_size; ++j) {
+            //         int img_y      = tile_y * tile_size + j;  // column
+            //         int img_x      = tile_x * tile_size + i;  // row
+            //         int idx        = (img_x * img_size + img_y) * 3;
+            //         image[idx + 0] = rgb[0] % 256;  // Red channel
+            //         image[idx + 1] = rgb[0] % 256;  // Green channel
+            //         image[idx + 2] = rgb[0] % 256;  // Blue channel
+            //     }
+            // }
+
             for (int i = 0; i < tile_size; ++i) {
                 for (int j = 0; j < tile_size; ++j) {
-                    int img_y = y * tile_size + j;  // column
-                    int img_x = x * tile_size + i;  // row
-                    int idx   = (img_x * img_size + img_y) * 3;
-
+                    float img_y = tile_y * tile_size + j;  // column
+                    float img_x = tile_x * tile_size + i;  // row
+                    int   idx   = (img_x * img_size + img_y) * 3;
+                    float x     = i + 0.5f;
+                    float y     = j + 0.5f;
                     // image[idx + 0] = 220 + rgb[0] % 30;
                     // image[idx + 1] = 220 + rgb[0] % 30;
                     // image[idx + 2] = 220 + rgb[0] % 30;
 
-                    int thickness = 2;
+                    int thickness = tile_size / 10;
 
                     // draw borders based on tile bits
                     auto down  = i >= tile_size / 2 - thickness;
@@ -159,6 +172,16 @@ inline void save_tiles_as_image(const array<int>& tiles, int N,
                     left &= horizontal_line;
                     up &= vertical_line;
                     down &= vertical_line;
+
+                    // if (tile == 15 + 16) {
+                    //     if (j == tile_size / 2 + (thickness / 2 + 1) ||
+                    //         j == tile_size / 2 - (thickness / 2 + 2)) {
+                    //         image[idx + 0] = 0;
+                    //         image[idx + 1] = 0;
+                    //         image[idx + 2] = 0;
+                    //     }
+                    // }
+
                     if (right && get_bit(tile, 0)) {  // right
                         image[idx + 0] = 0;
                         image[idx + 1] = 0;
@@ -179,18 +202,14 @@ inline void save_tiles_as_image(const array<int>& tiles, int N,
                         image[idx + 1] = 0;
                         image[idx + 2] = 0;
                     }
-                    if (tile == 15) {
-                        if (i == tile_size / 2 + (thickness / 2 + 1) ||
-                            i == tile_size / 2 - (thickness / 2 + 2)) {
-                            image[idx + 0] = 255;
-                            image[idx + 1] = 255;
-                            image[idx + 2] = 255;
-                        }
-                    }
 
-                    if (tile == 15 + 16) {
-                        if (j == tile_size / 2 + (thickness / 2 + 1) ||
-                            j == tile_size / 2 - (thickness / 2 + 2)) {
+                    if (tile == 15 || tile == 15 + 16) {
+                        auto z          = tile == 15 ? x : y;
+                        auto thick_line = std::abs(z - tile_size / 2) <=
+                                          thickness * 1.5f;
+                        auto thin_line = std::abs(z - tile_size / 2) <=
+                                         thickness;
+                        if (thick_line & !thin_line) {
                             image[idx + 0] = 255;
                             image[idx + 1] = 255;
                             image[idx + 2] = 255;
