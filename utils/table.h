@@ -34,9 +34,9 @@ struct table {
     int insert(const Type& value) {
         int key = num_indices;
         if (num_indices != num_values) {
-            assert(removed_keys.count > 0);
+            assert(removed_keys.size() > 0);
             key = removed_keys.back();
-            removed_keys.count -= 1;
+            removed_keys.size() -= 1;
         } else {
             num_indices += 1;
         }
@@ -75,7 +75,7 @@ struct table {
 
         const_iterator& operator++() {
             i += 1;
-            while (i < data.count and data[i].index == -1) i += 1;
+            while (i < data.size() and data[i].index == -1) i += 1;
             return *this;
         }
         bool operator!=(const const_iterator& other) const {
@@ -85,7 +85,7 @@ struct table {
     };
     inline const_iterator begin() const { return const_iterator{data, 0}; }
     inline const_iterator end() const {
-        return const_iterator{data, data.count};
+        return const_iterator{data, data.size()};
     }
 
     struct nonconst_iterator {
@@ -98,7 +98,7 @@ struct table {
 
         nonconst_iterator& operator++() {
             i += 1;
-            while (i < data.count and data[i].index == -1) i += 1;
+            while (i < data.size() and data[i].index == -1) i += 1;
             return *this;
         }
         bool operator!=(const nonconst_iterator& other) const {
@@ -108,6 +108,6 @@ struct table {
     };
     inline nonconst_iterator begin() { return nonconst_iterator{data, 0}; }
     inline nonconst_iterator end() {
-        return nonconst_iterator{data, data.count};
+        return nonconst_iterator{data, data.size()};
     }
 };

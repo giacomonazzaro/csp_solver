@@ -5,7 +5,7 @@
 #include "../csp.h"
 
 // int& at(array<array<int>>& grid, int row, int col) {
-//     return gridgrid[0].count * col + row;
+//     return gridgrid[0].size() * col + row;
 // }
 
 inline int get_bit(int number, int i) { return (number >> i) & 1; }
@@ -34,9 +34,9 @@ inline bool are_tiles_compatible(int tile_a, int tile_b, int direction) {
 }
 
 CSP make_tiles(int N, bool tileable = true) {
-    auto domains = allocate<array<int>>(N * N);
-    auto domain  = allocate<int>(17);
-    domain.count = 0;
+    auto domains  = allocate<array<int>>(N * N);
+    auto domain   = allocate<int>(17);
+    domain.size() = 0;
     for (int x = 0; x < 16; ++x) {
         auto count = 0;
         for (int k = 0; k < 4; ++k) {

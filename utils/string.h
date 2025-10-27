@@ -18,8 +18,8 @@ struct string : array<char> {
     }
 
     string(const string& s) : string() {
-        for (int i = 0; i < s.count; i++) buffer[i] = s.buffer[i];
-        count = s.count;
+        for (int i = 0; i < s.size(); i++) buffer[i] = s.buffer[i];
+        count = s.size();
     }
 
     string(const char* literal) : string() {
@@ -41,8 +41,8 @@ struct string : array<char> {
     }
 
     void operator+=(const string& s) {
-        for (int i = 0; i < s.count; ++i) buffer[count + i] = s[i];
-        count += s.count;
+        for (int i = 0; i < s.size(); ++i) buffer[count + i] = s[i];
+        count += s.size();
     }
 
     void operator+=(char c) { add(c); }
@@ -60,14 +60,14 @@ inline int find(const array<char>& text, const array<char>& token) {
     auto index = -1;
 
 here:
-    for (int i = index + 1; i < text.count; ++i) {
+    for (int i = index + 1; i < text.size(); ++i) {
         if (text[i] == token[0]) {
             index = i;
             break;
         }
     }
     if (index == -1) return -1;
-    for (int i = 1; i < token.count; ++i) {
+    for (int i = 1; i < token.size(); ++i) {
         if (text[index + i] != token[i]) goto here;
     }
     return index;
@@ -86,54 +86,54 @@ here:
 // inline string to_string(const Type& val) {
 //     auto result  = string();
 //     auto format  = get_format(val);
-//     result.count = sprintf(result.buffer, format, val);
+//     result.size() = sprintf(result.buffer, format, val);
 //     return result;
 // }
 
 inline string to_string(unsigned char val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%X", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%X", val);
     return result;
 }
 
 inline string to_string(char val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%c", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%c", val);
     return result;
 }
 inline string to_string(int val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%d", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%d", val);
     return result;
 }
 inline string to_string(long int val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%ld", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%ld", val);
     return result;
 }
 inline string to_string(size_t val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%lu", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%lu", val);
     return result;
 }
 inline string to_string(float val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%f", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%f", val);
     return result;
 }
 inline string to_string(double val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%lf", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%lf", val);
     return result;
 }
 inline string to_string(void* val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%p", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%p", val);
     return result;
 }
 inline string to_string(const char* val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%s", val);
+    auto result   = string();
+    result.size() = sprintf(result.buffer, "%s", val);
     return result;
 }
 inline string to_string(const string& val) { return val; }
@@ -141,8 +141,8 @@ inline string to_string(const string& val) { return val; }
 template <typename Type>
 inline string to_string(const array<Type>& val) {
     auto result = string("[");
-    if (val.count == 0) return result;
-    for (int i = 0; i < val.count - 1; i++) {
+    if (val.size() == 0) return result;
+    for (int i = 0; i < val.size() - 1; i++) {
         result += to_string(val[i]) + ", ";
     }
     result += to_string(val.back()) + "]";
@@ -150,7 +150,7 @@ inline string to_string(const array<Type>& val) {
 }
 
 inline void write_inline(const string& s, FILE* file) {
-    fprintf(file, "%.*s", s.count, s.buffer);
+    fprintf(file, "%.*s", s.size(), s.buffer);
 }
 
 template <typename Type>

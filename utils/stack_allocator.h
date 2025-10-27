@@ -85,8 +85,8 @@ template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& stack) {
     int         bytes = sizeof(Type) * count;
     array<Type> result;
-    result.count = count;
-    result.data  = (Type*)allocate_bytes(bytes, stack);
+    result.size() = count;
+    result.data   = (Type*)allocate_bytes(bytes, stack);
     return result;
 }
 
@@ -109,7 +109,7 @@ inline array<Type> allocate(const std::initializer_list<Type>& list,
 
 template <typename Type>
 inline array<Type> copy(const array<Type>& arr, stack_allocator& stack) {
-    auto result = allocate<Type>(arr.count, stack);
+    auto result = allocate<Type>(arr.size(), stack);
     copy_to(arr, result);
     return result;
 }
@@ -117,16 +117,16 @@ inline array<Type> copy(const array<Type>& arr, stack_allocator& stack) {
 template <typename Type>
 inline array<array<Type>> copy(const array<array<Type>>& arr,
                                stack_allocator&          stack) {
-    auto result = allocate<array<Type>>(arr.count, stack);
-    for (int i = 0; i < result.count; i++) result[i] = copy(arr[i], stack);
+    auto result = allocate<array<Type>>(arr.size(), stack);
+    for (int i = 0; i < result.size(); i++) result[i] = copy(arr[i], stack);
     return result;
 }
 
 // template <typename Type, typename CopyableBuffer>
 // inline array<array<Type>> copy(stack_allocator&      stack,
 //                                const CopyableBuffer& arr) {
-//     auto result = allocate<array<Type>>(stack, arr.count);
-//     for (int i = 0; i < result.count; i++) result[i] = copy(stack,
+//     auto result = allocate<array<Type>>(stack, arr.size());
+//     for (int i = 0; i < result.size(); i++) result[i] = copy(stack,
 //     arr[i]); return result;
 // }
 
