@@ -55,7 +55,10 @@ Hard sudoku problem. Solve in less than 0.01 seconds.
 
 ### Tiles
 Generate tile arragement given initial state and adjacency constraints.  
-Input                      |  Output
-:-------------------------:|:-------------------------:
-![](https://github.com/user-attachments/assets/d231bee0-7ff6-4055-8061-efa1e0ba4064)  |  ![](https://github.com/user-attachments/assets/1ea03554-a972-4e30-8b97-b0c929fca584)
 
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/bc8a1fd1-0ff9-41ad-bb70-1373f1745611" style="width:300px; image-rendering: pixelated;"></td>
+    <td><img src="https://github.com/user-attachments/assets/a13446c9-feef-4342-a5bc-a14298b1d4e8" style="width:300px; image-rendering: pixelated;"</td>
+  </tr>
+</table>
