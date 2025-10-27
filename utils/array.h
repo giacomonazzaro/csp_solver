@@ -110,6 +110,13 @@ struct array {
     };
     inline mutable_iterator begin() { return mutable_iterator{data, 0}; }
     inline mutable_iterator end() { return mutable_iterator{data, count}; }
+
+    inline Type pop() {
+        assert(count > 0);
+        Type val = data[count - 1];
+        count -= 1;
+        return val;
+    }
 };
 
 // fill array with a constant value

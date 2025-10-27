@@ -41,7 +41,7 @@ array<Domain> parse_sudoku(const string& s, int N) {
 inline void print_sudoku(const array<Domain>& D, int N) {
     for (int i = 0; i < N * N * N * N; i++) {
         if (i % (N * N) == 0) printf("\n");
-        if (D[i].count == 1)
+        if (D[i].size() == 1)
             printf(" %d", D[i][0]);
         else
             printf(" -");

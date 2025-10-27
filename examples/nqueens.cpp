@@ -47,7 +47,7 @@ inline void print_nqueens(int N, const array<Domain>& D) {
     for (int i = 0; i < N; i++) {
         for (int k = 0; k < N; k++) {
             if (contains(D[i], k))
-                if (D[i].count == 1)
+                if (D[i].size() == 1)
                     printf(" Q");  // There's a queen.
                 else
                     printf(" -");  // There's a queen.

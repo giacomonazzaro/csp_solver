@@ -108,9 +108,9 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     // Gradually update min_size and populate candidates with all
     // the variables that have domain size == min_size.
     stack_frame();
-    auto candidates  = allocate<int>(D.size());
-    candidates.count = 0;
-    int min_size     = 9999999;  // @Hack.
+    auto candidates = allocate<int>(D.size());
+    candidates.resize(0);
+    int min_size = 9999999;  // @Hack.
     for (int i = 0; i < D.size(); i++) {
         auto size = D[i].size();
         if (size == 1) continue;
@@ -168,14 +168,14 @@ bool remove_values(int variable, const Constraint& constraint,
         // array<Domain> Dfake = array<Domain>(D.size(), {-1});
 
         auto Dfake = allocate<array<int>>(D.size());
-        for (int k = 0; k < Dfake.count; ++k) {
-            Dfake[k]       = allocate<int>(D[k].count);
-            Dfake[k].count = 0;
+        for (int k = 0; k < Dfake.size(); ++k) {
+            Dfake[k] = allocate<int>(D[k].size());
+            Dfake[k].resize(0);
         }
 
         Dfake[variable].push_back(domain_tmp[i]);
         for (auto v : constraint.scope) {
-            Dfake[v].count = D[v].count;
+            Dfake[v].resize(D[v].size());
             if (v != variable) copy_to(D[v], Dfake[v]);  // copying the domains.
         }
 
@@ -201,11 +201,11 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
     auto D = copy(D_result);  // copying the domains.
 
     int size = 0;
-    for (auto& c : C) size += c.scope.count;
-    auto var_queue    = allocate<int>(size);
-    auto const_queue  = allocate<int>(size);
-    var_queue.count   = 0;
-    const_queue.count = 0;
+    for (auto& c : C) size += c.scope.size();
+    auto var_queue   = allocate<int>(size);
+    auto const_queue = allocate<int>(size);
+    var_queue.resize(0);
+    const_queue.resize(0);
 
     // For each constraint c, for each variable v in the scope of c,
     // add the pair (v, c) to the queue.
@@ -223,8 +223,8 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
     while (var_queue.size() > 0) {
         int v = var_queue.back();
         int c = const_queue.back();
-        var_queue.count -= 1;
-        const_queue.count -= 1;
+        var_queue.pop();
+        const_queue.pop();
 
         bool removed_value_from_domain = remove_values(v, C[c], D);
         if (removed_value_from_domain) {
