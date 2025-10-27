@@ -55,6 +55,7 @@ Hard sudoku problem. Solve in less than 0.01 seconds.
 
 ### Tiles
 Generate tile arragement given initial state and adjacency constraints.  
+This can achive the same results of the ["wave function collapse" algorithm](https://github.com/mxgmn/WaveFunctionCollapse) used for procedural generation.
 
 <table>
   <tr>
