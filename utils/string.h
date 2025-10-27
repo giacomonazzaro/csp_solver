@@ -92,48 +92,48 @@ here:
 
 inline string to_string(unsigned char val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%X", val);
+    result.count = sprintf(result.buffer, "%X", val);
     return result;
 }
 
 inline string to_string(char val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%c", val);
+    result.count = sprintf(result.buffer, "%c", val);
     return result;
 }
 inline string to_string(int val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%d", val);
+    result.count = sprintf(result.buffer, "%d", val);
     return result;
 }
 inline string to_string(long int val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%ld", val);
+    result.count = sprintf(result.buffer, "%ld", val);
     return result;
 }
 inline string to_string(size_t val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%lu", val);
+    result.count = sprintf(result.buffer, "%lu", val);
     return result;
 }
 inline string to_string(float val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%f", val);
+    result.count = sprintf(result.buffer, "%f", val);
     return result;
 }
 inline string to_string(double val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%lf", val);
+    result.count = sprintf(result.buffer, "%lf", val);
     return result;
 }
 inline string to_string(void* val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%p", val);
+    result.count = sprintf(result.buffer, "%p", val);
     return result;
 }
 inline string to_string(const char* val) {
     auto result   = string();
-    result.size() = sprintf(result.buffer, "%s", val);
+    result.count = sprintf(result.buffer, "%s", val);
     return result;
 }
 inline string to_string(const string& val) { return val; }

@@ -20,6 +20,7 @@ struct array {
     inline void        add(const Type& val) { data[count++] = val; }
 
     inline int  size() const { return count; }
+    inline void resize(int new_size) { count = new_size; }
     inline void push_back(const Type& val) { add(val); }
 
     array() {
@@ -120,7 +121,7 @@ inline void fill(array<Type>& arr, const Type& val) {
 // fill array with values returned by a function f: (int) -> Type
 template <typename Type, typename Function>
 inline void fill(array<Type>& arr, Function f) {
-    for (int i = 0; i < arr.count; ++i) arr[i] = f(i);
+    for (int i = 0; i < arr.size(); ++i) arr[i] = f(i);
 }
 
 // copy content of array to another array

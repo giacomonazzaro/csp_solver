@@ -34,9 +34,9 @@ inline bool are_tiles_compatible(int tile_a, int tile_b, int direction) {
 }
 
 CSP make_tiles(int N, bool tileable = true) {
-    auto domains  = allocate<array<int>>(N * N);
-    auto domain   = allocate<int>(17);
-    domain.size() = 0;
+    auto domains = allocate<array<int>>(N * N);
+    auto domain  = allocate<int>(17);
+    domain.resize(0);
     for (int x = 0; x < 16; ++x) {
         auto count = 0;
         for (int k = 0; k < 4; ++k) {

@@ -53,8 +53,8 @@ template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& = default_allocator());
 
 // allocate array with initialized elements
-template <typename Type, typename Filler>
-inline array<Type> allocate(int count, const Filler& filler,
+template <typename Type>
+inline array<Type> allocate(int count, const Type& value,
                             stack_allocator& = default_allocator());
 
 // allocate array with initialized elements by initializer_list
@@ -85,16 +85,18 @@ template <typename Type>
 inline array<Type> allocate(int count, stack_allocator& stack) {
     int         bytes = sizeof(Type) * count;
     array<Type> result;
-    result.size() = count;
-    result.data   = (Type*)allocate_bytes(bytes, stack);
+    result.count = count;
+    result.data  = (Type*)allocate_bytes(bytes, stack);
     return result;
 }
 
-template <typename Type, typename Filler>
-inline array<Type> allocate(int count, const Filler& filler,
+template <typename Type>
+inline array<Type> allocate(int count, const Type& value,
                             stack_allocator& stack) {
     auto result = allocate<Type>(count, stack);
-    fill(result, filler);
+    for (size_t i = 0; i < count; i++) {
+        result[i] = value;
+    }
     return result;
 }
 
