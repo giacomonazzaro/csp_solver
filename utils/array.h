@@ -1,17 +1,22 @@
-#ifndef GIACOMO_ARRAY
-#define GIACOMO_ARRAY
+#pragma once
 
 #include <stdio.h>
 
 #include <cassert>
 #include <initializer_list>
 
+#define STD_ARRAY 0
+
+#if STD_ARRAY
+#include "array_std_interface.h"
+#else
+
 namespace giacomo {
 
 template <typename Type>
 struct array {
-    Type* data;
-    int   count;
+    Type* data  = nullptr;
+    int   count = 0;
 
     inline const Type& operator[](int i) const { return data[i]; }
     inline Type&       operator[](int i) { return data[i]; }

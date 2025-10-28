@@ -2,6 +2,10 @@
 #include "array.h"
 #include "memory_arena.h"
 
+#if STD_ARRAY
+#include "array_std_interface.h"
+#endif
+
 namespace giacomo {
 /* stack_allocator handles memory allocation. It allows to allocate data
  * incrementally on a stack, which is a pre-allocated memory arena. By using the
@@ -28,6 +32,7 @@ inline stack_allocator& default_allocator() {
     return _default_allocator;
 }
 
+#if !STD_ARRAY
 // allocate chosen amount of bytes
 inline byte* allocate_bytes(size_t bytes, stack_allocator& stack) {
     assert(stack.arena->data != nullptr);
@@ -131,6 +136,8 @@ inline array<array<Type>> copy(const array<array<Type>>& arr,
 //     for (int i = 0; i < result.size(); i++) result[i] = copy(stack,
 //     arr[i]); return result;
 // }
+
+#endif
 
 }  // namespace giacomo
 

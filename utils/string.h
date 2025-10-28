@@ -1,8 +1,24 @@
-#ifndef GIACOMO_STRING
-#define GIACOMO_STRING
+#pragma once
 
-#include <stdio.h>
+#if STD_ARRAY
+// #include <string>
+// #include <stdio.h>
+
+#else
 #include "array.h"
+//
+// #include <string>
+
+// #if STD_ARRAY
+//
+// namespace giacomo {
+// using string = std::string;
+//
+// inline void   write(const string& s) { printf("%s\n", s.c_str()); }
+// inline string to_string(int v) { return std::to_string(v); }
+//
+// }  // namespace giacomo
+// #else
 
 namespace giacomo {
 
@@ -91,48 +107,48 @@ here:
 // }
 
 inline string to_string(unsigned char val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%X", val);
     return result;
 }
 
 inline string to_string(char val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%c", val);
     return result;
 }
 inline string to_string(int val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%d", val);
     return result;
 }
 inline string to_string(long int val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%ld", val);
     return result;
 }
 inline string to_string(size_t val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%lu", val);
     return result;
 }
 inline string to_string(float val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%f", val);
     return result;
 }
 inline string to_string(double val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%lf", val);
     return result;
 }
 inline string to_string(void* val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%p", val);
     return result;
 }
 inline string to_string(const char* val) {
-    auto result   = string();
+    auto result  = string();
     result.count = sprintf(result.buffer, "%s", val);
     return result;
 }
@@ -164,5 +180,6 @@ inline void write(const Type& s, FILE* file = stdout) {
     write_inline(s, file);
     fprintf(file, "\n");
 }
+
 }  // namespace giacomo
 #endif

@@ -6,13 +6,16 @@ using namespace giacomo;
 struct Constraint {
     enum type { ALL_DIFFERENT, BINARY, NARY, UNARY };
 
-    string     name;
-    array<int> scope;
-    array<int> constants;
-    type       type;
+    // string     name;
+    string     name      = {};
+    array<int> scope     = {};
+    array<int> constants = {};
+    type       type      = UNARY;
+
     bool (*eval_custom)(const Constraint&, const array<int>&) = nullptr;
 
-    inline Constraint(enum type t, const array<int>& vars, const string& s);
+    inline Constraint() {}
+    inline Constraint(enum type t, const array<int>& vars, string s);
 };
 
 using Domain = array<int>;
@@ -130,20 +133,19 @@ inline void print_stats(const search_stats& stats) {
     printf("   num_expansions = %d\n\n", stats.expansions);
 }
 
-inline Constraint::Constraint(enum type t, const array<int>& vars,
-                              const string& s)
+inline Constraint::Constraint(enum type t, const array<int>& vars, string s)
     : type(t), scope(copy(vars)), name(s), constants({}) {
     //    type  = t;
     //    scope = copy(vars);
     //    name  = s;
-    name += "(";
+    // name += "(";
 
-    for (int i = 0; i < scope.size() - 1; ++i) {
-        name += to_string(scope[i]);
-        name += ", ";
-    }
-    name += to_string(scope.back());
-    name += ")";
+    // for (int i = 0; i < scope.size() - 1; ++i) {
+    //     name += to_string(scope[i]);
+    //     name += ", ";
+    // }
+    // name += to_string(scope.back());
+    // name += ")";
 }
 
 // Constraint all_different
