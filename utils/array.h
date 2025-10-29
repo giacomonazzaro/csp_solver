@@ -5,12 +5,6 @@
 #include <cassert>
 #include <initializer_list>
 
-#define STD_ARRAY 0
-
-#if STD_ARRAY
-#include "array_std_interface.h"
-#else
-
 namespace giacomo {
 
 template <typename Type>
@@ -206,5 +200,3 @@ inline void shuffle(array<int>& arr) {
     }
 }
 }  // namespace giacomo
-
-#endif

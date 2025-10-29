@@ -1,11 +1,14 @@
 #pragma once
 
-#if STD_ARRAY
-// #include <string>
-// #include <stdio.h>
+#include <string>
+using string = std::string;
 
-#else
-#include "array.h"
+// #if STD_ARRAY
+// #include "array_std_interface.h"
+// #else
+// #include "array.h"
+// #endif
+
 //
 // #include <string>
 
@@ -22,55 +25,55 @@
 
 namespace giacomo {
 
-#define STRING_SIZE (4096)
+// #define STRING_SIZE (4096)
 
-struct string : array<char> {
-    char buffer[STRING_SIZE];
+// struct string : array<char> {
+//     char buffer[STRING_SIZE];
 
-    string() {
-        for (int i = 0; i < STRING_SIZE; i++) buffer[i] = '\0';
-        data  = &buffer[0];
-        count = 0;
-    }
+//     string() {
+//         for (int i = 0; i < STRING_SIZE; i++) buffer[i] = '\0';
+//         data  = &buffer[0];
+//         count = 0;
+//     }
 
-    string(const string& s) : string() {
-        for (int i = 0; i < s.size(); i++) buffer[i] = s.buffer[i];
-        count = s.size();
-    }
+//     string(const string& s) : string() {
+//         for (int i = 0; i < s.size(); i++) buffer[i] = s.buffer[i];
+//         count = s.size();
+//     }
 
-    string(const char* literal) : string() {
-        while (literal[count] != '\0') {
-            buffer[count] = literal[count];
-            count += 1;
-        }
-        buffer[count] = '\0';
-    }
+//     string(const char* literal) : string() {
+//         while (literal[count] != '\0') {
+//             buffer[count] = literal[count];
+//             count += 1;
+//         }
+//         buffer[count] = '\0';
+//     }
 
-    string(char c) : string() { add(c); }
+//     string(char c) : string() { add(c); }
 
-    string(char* literal) : string() {
-        while (literal[count] != '\0') {
-            buffer[count] = literal[count];
-            count += 1;
-        }
-        buffer[count] = '\0';
-    }
+//     string(char* literal) : string() {
+//         while (literal[count] != '\0') {
+//             buffer[count] = literal[count];
+//             count += 1;
+//         }
+//         buffer[count] = '\0';
+//     }
 
-    void operator+=(const string& s) {
-        for (int i = 0; i < s.size(); ++i) buffer[count + i] = s[i];
-        count += s.size();
-    }
+//     void operator+=(const string& s) {
+//         for (int i = 0; i < s.size(); ++i) buffer[count + i] = s[i];
+//         count += s.size();
+//     }
 
-    void operator+=(char c) { add(c); }
+//     void operator+=(char c) { add(c); }
 
-    operator const char*() const { return &buffer[0]; }
-};
+//     operator const char*() const { return &buffer[0]; }
+// };
 
-inline string operator+(const string& a, const string& b) {
-    auto result = a;
-    result += b;
-    return result;
-}
+// inline string operator+(const string& a, const string& b) {
+//     auto result = a;
+//     result += b;
+//     return result;
+// }
 
 inline int find(const array<char>& text, const array<char>& token) {
     auto index = -1;
@@ -106,52 +109,52 @@ here:
 //     return result;
 // }
 
-inline string to_string(unsigned char val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%X", val);
-    return result;
-}
+// inline string to_string(unsigned char val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%X", val);
+//     return result;
+// }
 
-inline string to_string(char val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%c", val);
-    return result;
-}
-inline string to_string(int val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%d", val);
-    return result;
-}
-inline string to_string(long int val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%ld", val);
-    return result;
-}
-inline string to_string(size_t val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%lu", val);
-    return result;
-}
-inline string to_string(float val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%f", val);
-    return result;
-}
-inline string to_string(double val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%lf", val);
-    return result;
-}
-inline string to_string(void* val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%p", val);
-    return result;
-}
-inline string to_string(const char* val) {
-    auto result  = string();
-    result.count = sprintf(result.buffer, "%s", val);
-    return result;
-}
+// inline string to_string(char val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%c", val);
+//     return result;
+// }
+// inline string to_string(int val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%d", val);
+//     return result;
+// }
+// inline string to_string(long int val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%ld", val);
+//     return result;
+// }
+// inline string to_string(size_t val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%lu", val);
+//     return result;
+// }
+// inline string to_string(float val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%f", val);
+//     return result;
+// }
+// inline string to_string(double val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%lf", val);
+//     return result;
+// }
+// inline string to_string(void* val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%p", val);
+//     return result;
+// }
+// inline string to_string(const char* val) {
+//     auto result  = string();
+//     result.count = sprintf(result.buffer, "%s", val);
+//     return result;
+// }
 inline string to_string(const string& val) { return val; }
 
 template <typename Type>
@@ -166,7 +169,8 @@ inline string to_string(const array<Type>& val) {
 }
 
 inline void write_inline(const string& s, FILE* file) {
-    fprintf(file, "%.*s", s.size(), s.buffer);
+    // fprintf(file, "%.*s", s.size(), s.buffer);
+    fprintf(file, "%.*s", s.size(), s.c_str());
 }
 
 template <typename Type>
@@ -182,4 +186,3 @@ inline void write(const Type& s, FILE* file = stdout) {
 }
 
 }  // namespace giacomo
-#endif

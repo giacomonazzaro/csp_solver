@@ -389,7 +389,7 @@ inline void print_unsatisfied(const array<Domain>&     D,
     for (int i = 0; i < C.size(); ++i) {
         if (not eval(C[i], D)) {
             found = true;
-            printf("\n%d: %s\n", i, (const char*)C[i].name);
+            printf("\n%d: %s\n", i, C[i].name.c_str());
         }
     }
     if (not found) printf("nothing\n");
