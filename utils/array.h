@@ -118,6 +118,11 @@ struct array {
     }
 };
 
+template <typename Type>
+inline const Type* data(const array<Type>& arr) {
+    return arr.data;
+}
+
 // fill array with a constant value
 template <typename Type>
 inline void fill(array<Type>& arr, const Type& val) {

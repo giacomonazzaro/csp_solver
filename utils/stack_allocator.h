@@ -9,10 +9,6 @@
 
 #include "memory_arena.h"
 
-#if STD_ARRAY
-#include "array_std_interface.h"
-#endif
-
 namespace giacomo {
 /* stack_allocator handles memory allocation. It allows to allocate data
  * incrementally on a stack, which is a pre-allocated memory arena. By using the
