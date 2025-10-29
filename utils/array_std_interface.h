@@ -10,6 +10,7 @@ struct array : std::vector<Type> {
     array(size_t capacity) : std::vector<Type>(capacity) {}
     array(size_t capacity, const Type& value)
         : std::vector<Type>(capacity, value) {}
+    array(const std::vector<Type>& vec) : std::vector<Type>(vec) {}
     ~array() {}
 
     inline void add(const Type& val) { push_back(val); }
@@ -31,7 +32,7 @@ struct array : std::vector<Type> {
         std::vector<Type>::insert(this->end(), arr.data, arr.data + arr.size());
     }
 
-    inline void remove(int index) { erase(this->begin() + index); }
+    inline void remove(int index) { this->erase(this->begin() + index); }
 
     void operator=(const std::initializer_list<Type>& list) {
         *this = std::vector<Type>(list);
@@ -93,7 +94,7 @@ template <typename Type>
 inline void copy_to(const array<array<Type>>& from, array<array<Type>>& to) {
     assert(from.size() <= to.size());
     for (int i = 0; i < from.size(); ++i) copy_to(from[i], to[i]);
-    to.size() = from.size();
+    to.resize(from.size());
 }
 
 // get index of fisrt occurrence of some value

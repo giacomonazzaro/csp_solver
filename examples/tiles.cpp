@@ -223,7 +223,7 @@ inline void save_tiles_as_image(const array<int>& tiles, int N,
     // save the image as PPM
     FILE* file = fopen(filename.c_str(), "wb");
     fprintf(file, "P6\n%d %d\n255\n", img_size, img_size);
-    fwrite(image.data, 1, img_size * img_size * 3, file);
+    fwrite(image.data(), 1, img_size * img_size * 3, file);
     fclose(file);
     printf("Saved image to %s\n", filename.c_str());
 }

@@ -44,28 +44,30 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
     int variable = choose_variable(D, C);
 
     auto values = copy(D[variable]);
-    shuffle(values);
+
+    // shuffle(values);
     for (int val : values) {
         stack_frame();
         stats.expansions += 1;
 
         // Copying the domains to make a temp version.
-        auto D_attempt      = copy(D);
-        D_attempt[variable] = {val};
+        // auto D_attempt      = copy(D);
+        D[variable] = {val};
 
         // Check if assignment satisfies constraints.
-        if (not satisfies(C, D_attempt)) continue;
+        if (not satisfies(C, D)) continue;
 
         // Propagate assignment and eventually reduce domains.
-        if (not do_inferences(C, D_attempt)) continue;
+        if (not do_inferences(C, D)) continue;
 
         // Recursive call.
-        bool success = search(C, D_attempt, depth + 1, stats);
+        bool success = search(C, D, depth + 1, stats);
         if (success) {
-            copy_to(D_attempt, D);  // update the domains.
+            // copy_to(D, D);  // update the domains.
             return true;
         }
     }
+    D[variable] = values;  // restore domain
 
     // Return failure. Backtrack.
     stats.backtracks += 1;

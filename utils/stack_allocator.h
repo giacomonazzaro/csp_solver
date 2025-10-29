@@ -1,5 +1,5 @@
 #pragma once
-#define STD_ARRAY 0
+#define STD_ARRAY 1
 
 #if STD_ARRAY
 #include "array_std_interface.h"
