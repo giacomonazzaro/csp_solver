@@ -13,7 +13,7 @@ struct array : std::vector<Type> {
     array(const std::vector<Type>& vec) : std::vector<Type>(vec) {}
     ~array() {}
 
-    inline void add(const Type& val) { push_back(val); }
+    inline void add(const Type& val) { this->push_back(val); }
 
     operator array<Type>() const {
         return array<Type>((Type*)this->data(), this->size());

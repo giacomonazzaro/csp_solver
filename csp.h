@@ -135,17 +135,17 @@ inline void print_stats(const search_stats& stats) {
 
 inline Constraint::Constraint(enum type t, const array<int>& vars, string s)
     : type(t), scope(copy(vars)), name(s), constants({}) {
-    //    type  = t;
-    //    scope = copy(vars);
-    //    name  = s;
-    // name += "(";
+    type  = t;
+    scope = copy(vars);
+    name  = s;
+    name += "(";
 
-    // for (int i = 0; i < scope.size() - 1; ++i) {
-    //     name += to_string(scope[i]);
-    //     name += ", ";
-    // }
-    // name += to_string(scope.back());
-    // name += ")";
+    for (int i = 0; i < scope.size() - 1; ++i) {
+        name += to_string(scope[i]);
+        name += ", ";
+    }
+    name += to_string(scope.back());
+    name += ")";
 }
 
 // Constraint all_different
@@ -389,7 +389,7 @@ inline void print_unsatisfied(const array<Domain>&     D,
     for (int i = 0; i < C.size(); ++i) {
         if (not eval(C[i], D)) {
             found = true;
-            printf("\n%d: %s\n", i, C[i].name.c_str());
+            printf("\n%d: %s\n", i, data(C[i].name));
         }
     }
     if (not found) printf("nothing\n");

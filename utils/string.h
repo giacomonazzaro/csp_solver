@@ -1,79 +1,100 @@
 #pragma once
 
+#if STD_ARRAY
 #include <string>
-using string = std::string;
-
-// #if STD_ARRAY
-// #include "array_std_interface.h"
-// #else
-// #include "array.h"
-// #endif
-
-//
-// #include <string>
-
-// #if STD_ARRAY
-//
-// namespace giacomo {
-// using string = std::string;
-//
-// inline void   write(const string& s) { printf("%s\n", s.c_str()); }
-// inline string to_string(int v) { return std::to_string(v); }
-//
-// }  // namespace giacomo
-// #else
+#else
+#include "array.h"
+#endif
 
 namespace giacomo {
+#if STD_ARRAY
+using string = std::string;
+using std::to_string;
+#else
 
-// #define STRING_SIZE (4096)
+struct string : array<char> {
+    string() {
+        this->data  = nullptr;
+        this->count = 0;
+    }
 
-// struct string : array<char> {
-//     char buffer[STRING_SIZE];
+    explicit string(size_t size) {
+        this->data  = new char[size];
+        this->count = size;
+    }
 
-//     string() {
-//         for (int i = 0; i < STRING_SIZE; i++) buffer[i] = '\0';
-//         data  = &buffer[0];
-//         count = 0;
-//     }
+    string(const char* literal) {
+        size_t len = 0;
+        while (literal[len] != '\0') len++;
+        this->data  = new char[len];
+        this->count = len;
+        for (size_t i = 0; i < len; ++i) this->data[i] = literal[i];
+    }
 
-//     string(const string& s) : string() {
-//         for (int i = 0; i < s.size(); i++) buffer[i] = s.buffer[i];
-//         count = s.size();
-//     }
+    // Copy constructor
+    string(const string& s) {
+        this->data  = new char[s.count];
+        this->count = s.count;
+        for (size_t i = 0; i < s.count; ++i) this->data[i] = s.data[i];
+    }
 
-//     string(const char* literal) : string() {
-//         while (literal[count] != '\0') {
-//             buffer[count] = literal[count];
-//             count += 1;
-//         }
-//         buffer[count] = '\0';
-//     }
+    // Move constructor
+    string(string&& s) noexcept {
+        this->data  = s.data;
+        this->count = s.count;
+        s.data      = nullptr;
+        s.count     = 0;
+    }
 
-//     string(char c) : string() { add(c); }
+    // Copy assignment
+    string& operator=(const string& s) {
+        if (this != &s) {
+            delete[] this->data;
+            this->data  = new char[s.count];
+            this->count = s.count;
+            for (size_t i = 0; i < s.count; ++i) this->data[i] = s.data[i];
+        }
+        return *this;
+    }
 
-//     string(char* literal) : string() {
-//         while (literal[count] != '\0') {
-//             buffer[count] = literal[count];
-//             count += 1;
-//         }
-//         buffer[count] = '\0';
-//     }
+    // Move assignment
+    string& operator=(string&& s) noexcept {
+        if (this != &s) {
+            delete[] this->data;
+            this->data  = s.data;
+            this->count = s.count;
+            s.data      = nullptr;
+            s.count     = 0;
+        }
+        return *this;
+    }
 
-//     void operator+=(const string& s) {
-//         for (int i = 0; i < s.size(); ++i) buffer[count + i] = s[i];
-//         count += s.size();
-//     }
+    ~string() {
+        delete[] this->data;
+        this->data  = nullptr;
+        this->count = 0;
+    }
 
-//     void operator+=(char c) { add(c); }
+    void operator+=(const string& s) {
+        char* data_new = new char[this->count + s.count];
+        for (size_t i = 0; i < this->count; ++i) data_new[i] = this->data[i];
+        for (size_t i = 0; i < s.count; ++i)
+            data_new[this->count + i] = s.data[i];
+        delete[] this->data;
+        this->data = data_new;
+        this->count += s.count;
+    }
 
-//     operator const char*() const { return &buffer[0]; }
-// };
+    operator const char*() const { return this->data; }
 
-// inline string operator+(const string& a, const string& b) {
-//     auto result = a;
-//     result += b;
-//     return result;
-// }
+    size_t size() const { return this->count; }
+};
+
+inline string operator+(const string& a, const string& b) {
+    auto result = a;
+    result += b;
+    return result;
+}
 
 inline int find(const array<char>& text, const array<char>& token) {
     auto index = -1;
@@ -92,69 +113,25 @@ here:
     return index;
 }
 
-// inline const char* get_format(unsigned char) { return "%X"; }
-// inline const char* get_format(char) { return "%s"; }
-// inline const char* get_format(int) { return "%d"; }
-// inline const char* get_format(long int) { return "%ld"; }
-// inline const char* get_format(float) { return "%f"; }
-// inline const char* get_format(double) { return "%lf"; }
-// inline const char* get_format(void*) { return "%p"; }
-// inline const char* get_format(const char*) { return "%s"; }
+inline const char* get_format(unsigned char) { return "%X"; }
+inline const char* get_format(char) { return "%s"; }
+inline const char* get_format(int) { return "%d"; }
+inline const char* get_format(long int) { return "%ld"; }
+inline const char* get_format(float) { return "%f"; }
+inline const char* get_format(double) { return "%lf"; }
+inline const char* get_format(void*) { return "%p"; }
+inline const char* get_format(const char*) { return "%s"; }
 
-// template <typename Type>
-// inline string to_string(const Type& val) {
-//     auto result  = string();
-//     auto format  = get_format(val);
-//     result.size() = sprintf(result.buffer, format, val);
-//     return result;
-// }
+template <typename Type>
+inline string to_string(const Type& val) {
+    auto format = get_format(val);
+    auto count  = snprintf(nullptr, 0, format, val);
+    auto result = string(count + 1);
+    sprintf(result.data, format, val);
+    result.resize(count);
+    return result;
+}
 
-// inline string to_string(unsigned char val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%X", val);
-//     return result;
-// }
-
-// inline string to_string(char val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%c", val);
-//     return result;
-// }
-// inline string to_string(int val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%d", val);
-//     return result;
-// }
-// inline string to_string(long int val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%ld", val);
-//     return result;
-// }
-// inline string to_string(size_t val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%lu", val);
-//     return result;
-// }
-// inline string to_string(float val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%f", val);
-//     return result;
-// }
-// inline string to_string(double val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%lf", val);
-//     return result;
-// }
-// inline string to_string(void* val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%p", val);
-//     return result;
-// }
-// inline string to_string(const char* val) {
-//     auto result  = string();
-//     result.count = sprintf(result.buffer, "%s", val);
-//     return result;
-// }
 inline string to_string(const string& val) { return val; }
 
 template <typename Type>
@@ -168,9 +145,10 @@ inline string to_string(const array<Type>& val) {
     return result;
 }
 
+#endif
 inline void write_inline(const string& s, FILE* file) {
-    // fprintf(file, "%.*s", s.size(), s.buffer);
-    fprintf(file, "%.*s", s.size(), s.c_str());
+    // fprintf(file, "%.*s", s.size(), s.data);
+    fprintf(file, "%.*s", s.size(), data(s));
 }
 
 template <typename Type>
