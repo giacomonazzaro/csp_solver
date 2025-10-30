@@ -9,7 +9,7 @@ CSP make_nqueens(int N = 8) {
 
     // constraint: One queen per column.
     auto one_per_column = all_different(make_range(N), "one_per_column");
-    csp.constraints.push_back(one_per_column);
+    add_constraint(csp, one_per_column);
 
     // constraint: No diagonal threats.
     for (int i = 0; i < N - 1; ++i) {
@@ -24,7 +24,7 @@ CSP make_nqueens(int N = 8) {
                 return abs(x - y) != abs(c.constants[0]);
             };
 
-            csp.constraints.push_back(diag);
+            add_constraint(csp, diag);
         }
     }
     return csp;

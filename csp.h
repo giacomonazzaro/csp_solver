@@ -27,6 +27,7 @@ struct CSP {
     string            name;
     array<Domain>     domains;
     array<Constraint> constraints;
+    array<array<int>> variable_to_constraints;
 };
 
 struct search_stats {
@@ -39,6 +40,8 @@ struct assignment {
     int value;
 };
 using Assignment = array<assignment>;
+
+void add_constraint(CSP& csp, const Constraint& constraint);
 
 // Check if assignment satisfies the constraints.
 bool satisfies(const array<Constraint>& C, const array<Domain>& A);
@@ -70,6 +73,12 @@ inline CSP make_csp(const string& name, const array<Domain>& domains,
     csp.domains     = domains;
     csp.constraints = allocate<Constraint>(num_constraints);
     csp.constraints.resize(0);
+
+    csp.variable_to_constraints = allocate<array<int>>(domains.size());
+    for (int i = 0; i < domains.size(); ++i) {
+        csp.variable_to_constraints[i] = allocate<int>(num_constraints);
+        csp.variable_to_constraints[i].resize(0);
+    }
     return csp;
 }
 

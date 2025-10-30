@@ -1,4 +1,10 @@
 #include "csp.h"
+void add_constraint(CSP& csp, const Constraint& constraint) {
+    csp.constraints.push_back(constraint);
+    for (auto var : constraint.scope) {
+        csp.variable_to_constraints[var].push_back(csp.constraints.size() - 1);
+    }
+}
 
 bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
     for (auto& constraint : C) {

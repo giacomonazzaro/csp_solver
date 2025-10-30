@@ -17,9 +17,9 @@ CSP make_sudoku(int N) {
             col[i]   = i * N * N + k;
             block[i] = block_start + (i / N) * N * N + i % N;
         }
-        sudoku.constraints.push_back(all_different(row, "row_diff"));
-        sudoku.constraints.push_back(all_different(col, "col_diff"));
-        sudoku.constraints.push_back(all_different(block, "block_diff"));
+        add_constraint(sudoku, all_different(row, "row_diff"));
+        add_constraint(sudoku, all_different(col, "col_diff"));
+        add_constraint(sudoku, all_different(block, "block_diff"));
     }
 
     return sudoku;

@@ -78,7 +78,7 @@ CSP make_tiles(int N, bool tileable = true) {
                 if (x == 0) adj[3] = -1;
             }
 
-            for (int k = 0; k < 4; ++k) {
+            for (int k = 0; k < adj.size(); ++k) {
                 if (!tileable && adj[k] == -1) {
                     auto scope = allocate<int>({var});
                     auto c = Constraint(Constraint::UNARY, scope, "boundary");
@@ -90,7 +90,7 @@ CSP make_tiles(int N, bool tileable = true) {
                         return get_bit(x, k) == 0;
                     };
                     csp.constraints.push_back(c);
-                } else {
+                } else if (var < adj[k]) {
                     auto scope  = allocate<int>({var, adj[k]});
                     auto c      = Constraint(Constraint::BINARY, scope, "adj");
                     c.constants = allocate<int>({k});
@@ -101,7 +101,7 @@ CSP make_tiles(int N, bool tileable = true) {
                         int  k = c.constants[0];
                         return are_tiles_compatible(x, y, k);
                     };
-                    csp.constraints.push_back(c);
+                    add_constraint(csp, c);
                 }
             }
         }
