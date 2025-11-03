@@ -1,6 +1,4 @@
 #include "../csp.h"
-#include <string>
-#include <fstream>
 // #include "../utils/allocate.h"
 // #include "../utils/memory_arena.h"
 
@@ -82,10 +80,10 @@ void print_solution(const Assignment& solution) {
     }
 }
 
-void save_map_graph(const CSP& csp, const std::string& filename) {
-    std::ofstream dot_file(filename);
-    if (!dot_file.is_open()) {
-        printf("Error opening %s\n", filename.c_str());
+void save_map_graph(const CSP& csp, const char* filename) {
+    FILE* dot_file = fopen(filename, "w");
+    if (!dot_file) {
+        printf("Error opening %s\n", filename);
         return;
     }
 
@@ -101,15 +99,15 @@ void save_map_graph(const CSP& csp, const std::string& filename) {
 
     const char* colors[] = {"red", "green", "blue", "yellow"};
 
-    dot_file << "graph Map {\n";
-    dot_file << "  node [style=filled];\n";
+    fprintf(dot_file, "graph Map {\n");
+    fprintf(dot_file, "  node [style=filled];\n");
 
     for (int i = 0; i < csp.domains.size(); ++i) {
         if (csp.domains[i].size() == 1) {
             int color_idx = csp.domains[i][0];
-            dot_file << "  " << region_names[i] << " [fillcolor=" << colors[color_idx] << "];\n";
+            fprintf(dot_file, "  %s [fillcolor=%s];\n", region_names[i], colors[color_idx]);
         } else {
-            dot_file << "  " << region_names[i] << " [fillcolor=white];\n";
+            fprintf(dot_file, "  %s [fillcolor=white];\n", region_names[i]);
         }
     }
 
@@ -117,13 +115,13 @@ void save_map_graph(const CSP& csp, const std::string& filename) {
         if (constraint.type == Constraint::BINARY) {
             int region1_idx = constraint.scope[0];
             int region2_idx = constraint.scope[1];
-            dot_file << "  " << region_names[region1_idx] << " -- " << region_names[region2_idx] << ";\n";
+            fprintf(dot_file, "  %s -- %s;\n", region_names[region1_idx], region_names[region2_idx]);
         }
     }
 
-    dot_file << "}\n";
-    dot_file.close();
-    printf("Saved Graphviz file to %s\n", filename.c_str());
+    fprintf(dot_file, "}\n");
+    fclose(dot_file);
+    printf("Saved Graphviz file to %s\n", filename);
 }
 
 int main() {
