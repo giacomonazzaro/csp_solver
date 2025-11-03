@@ -285,7 +285,8 @@ inline Propagation_Result propagate_binary(const Constraint& constraint,
     int original_domain_size_x1 = D[x1].size();
 
     stack_frame();
-    auto d0 = allocate_set<int>(D[x0].size());
+    auto d0 = allocate<int>(D[x0].size());
+    d0.resize(0);
     auto d1 = allocate_set<int>(D[x1].size());
 
     // This is O(n * m), no obvious way to do better for general constraints.
@@ -301,7 +302,7 @@ inline Propagation_Result propagate_binary(const Constraint& constraint,
         }
         // If at least one value in D[x1] works with v0, keep v0.
         if (found) {
-            if (not d0.contains(v0)) d0.insert(v0);
+            d0.push_back(v0);
         }
     }
 
