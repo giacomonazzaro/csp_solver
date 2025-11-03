@@ -70,6 +70,10 @@ template <typename Type>
 inline array<Type> allocate(const std::initializer_list<Type>& list,
                             stack_allocator& = default_allocator());
 
+template <typename Type>
+inline hash_set<Type>
+allocate_set(int capacity, stack_allocator& stack = default_allocator());
+
 // allocate array with elements copied from another array
 template <typename Type>
 inline array<Type> copy(const array<Type>& arr,
@@ -114,6 +118,25 @@ inline array<Type> allocate(const std::initializer_list<Type>& list,
     auto result = allocate<Type>((int)list.size(), stack);
     int  i      = 0;
     for (auto& v : list) result[i++] = v;
+    return result;
+}
+
+template <typename Type>
+inline hash_set<Type> allocate_set(int capacity, stack_allocator& stack) {
+    auto result    = hash_set<Type>{};
+    result.buckets = allocate<Type>(capacity, stack);
+    result.states  = allocate<typename hash_set<Type>::bucket_state>(
+        capacity, hash_set<Type>::bucket_state::empty, stack);
+    return result;
+}
+
+template <typename Type>
+inline hash_set<Type>
+allocate_set(const array<Type>& values, int capacity = -1,
+             stack_allocator& stack = default_allocator()) {
+    if (capacity == -1) capacity = values.size();
+    auto result = allocate_set<Type>(capacity, stack);
+    for (auto& v : values) result.insert(v);
     return result;
 }
 

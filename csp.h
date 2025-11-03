@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/hash_set.h"
 #include "utils/stack_allocator.h"
 #include "utils/string.h"
 using namespace giacomo;
@@ -283,10 +284,9 @@ inline Propagation_Result propagate_binary(const Constraint& constraint,
     int original_domain_size_x0 = D[x0].size();
     int original_domain_size_x1 = D[x1].size();
 
-    auto d0 = allocate<int>(D[x0].size() * D[x1].size());
-    auto d1 = allocate<int>(D[x0].size() * D[x1].size());
-    d0.resize(0);
-    d1.resize(0);
+    stack_frame();
+    auto d0 = allocate_set<int>(D[x0].size());
+    auto d1 = allocate_set<int>(D[x1].size());
 
     // This is O(n * m), no obvious way to do better for general constraints.
     for (int v0 : D[x0]) {
@@ -295,13 +295,13 @@ inline Propagation_Result propagate_binary(const Constraint& constraint,
             stack_frame();
             auto xy = allocate({v0, v1});
             if (constraint.eval_custom(constraint, xy)) {
-                if (not contains(d1, v1)) d1.push_back(v1);
+                if (not d1.contains(v1)) d1.insert(v1);
                 found = true;
             }
         }
         // If at least one value in D[x1] works with v0, keep v0.
         if (found) {
-            if (not contains(d0, v0)) d0.push_back(v0);
+            if (not d0.contains(v0)) d0.insert(v0);
         }
     }
 
