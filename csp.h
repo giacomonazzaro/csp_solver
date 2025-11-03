@@ -252,46 +252,31 @@ inline bool propagate_unary(const Constraint& constraint, array<Domain>& D,
 
 inline bool propagate_binary(const Constraint& constraint, array<Domain>& D,
                              array<bool>& was_variable_updated) {
-    int x0                      = constraint.scope[0];
-    int x1                      = constraint.scope[1];
-    int original_domain_size_x0 = D[x0].size();
-    int original_domain_size_x1 = D[x1].size();
-
     stack_frame();
-    auto d0 = allocate<int>(D[x0].size());
+    int x0 = constraint.scope[0];
+    int x1 = constraint.scope[1];
+    // Domain d0, d1;
+    auto d0 = allocate<int>(D[x0].size() * D[x1].size());
+    auto d1 = allocate<int>(D[x0].size() * D[x1].size());
     d0.resize(0);
-    auto d1 = allocate_set<int>(D[x1].size());
-
-    // This is O(n * m), no obvious way to do better for general constraints.
+    d1.resize(0);
+    // std::set d0, d1; // @Try with std::set, code will be simpler.
     for (int v0 : D[x0]) {
         bool found = false;
         for (int v1 : D[x1]) {
             stack_frame();
             auto xy = allocate({v0, v1});
             if (constraint.eval_custom(constraint, xy)) {
-                if (not d1.contains(v1)) d1.insert(v1);
+                if (not contains(d1, v1)) d1.push_back(v1);
                 found = true;
             }
         }
-        // If at least one value in D[x1] works with v0, keep v0.
-        if (found) {
-            d0.push_back(v0);
-        }
+        if (found) d0.push_back(v0);
     }
-
-    if (d0.size() == 0 or d1.size() == 0) {
-        return false;  // Domain wipeout.
-    }
-
+    if (d0.size() == 0) return false;
+    if (d1.size() == 0) return false;
     copy_to(d0, D[x0]);
     copy_to(d1, D[x1]);
-
-    if (D[x0].size() < original_domain_size_x0) {
-        was_variable_updated[x0] = true;
-    }
-    if (D[x1].size() < original_domain_size_x1) {
-        was_variable_updated[x1] = true;
-    }
     return true;
 }
 
