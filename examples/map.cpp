@@ -58,6 +58,9 @@ CSP make_map_coloring() {
     // Victoria (5) is adjacent to South Australia (2) and New South Wales (4)
     // Tasmania (6) is not adjacent to any other region
 
+    // Impose initial color for Western Australia to Blue
+    csp.domains[western_australia] = {2};
+
     return csp;
 }
 
@@ -79,7 +82,7 @@ void print_solution(const Assignment& solution) {
     }
 }
 
-void save_graph_for_graphviz(const CSP& csp, const Assignment& solution, const std::string& filename) {
+void save_map_graph(const CSP& csp, const std::string& filename) {
     std::ofstream dot_file(filename);
     if (!dot_file.is_open()) {
         printf("Error opening %s\n", filename.c_str());
@@ -101,10 +104,13 @@ void save_graph_for_graphviz(const CSP& csp, const Assignment& solution, const s
     dot_file << "graph Map {\n";
     dot_file << "  node [style=filled];\n";
 
-    for (const auto& assignment : solution) {
-        int region_idx = assignment.variable;
-        int color_idx = assignment.value;
-        dot_file << "  " << region_names[region_idx] << " [fillcolor=" << colors[color_idx] << "];\n";
+    for (int i = 0; i < csp.domains.size(); ++i) {
+        if (csp.domains[i].size() == 1) {
+            int color_idx = csp.domains[i][0];
+            dot_file << "  " << region_names[i] << " [fillcolor=" << colors[color_idx] << "];\n";
+        } else {
+            dot_file << "  " << region_names[i] << " [fillcolor=white];\n";
+        }
     }
 
     for (const auto& constraint : csp.constraints) {
@@ -125,18 +131,16 @@ int main() {
     default_allocator() = stack_allocator{&arena, 0};
 
     CSP csp = make_map_coloring();
+    save_map_graph(csp, "map_initial.dot");
+
     search_stats stats;
     auto solution = search(csp, {}, stats);
 
-        if (solution.size() > 0) {
-
-            printf("Solution found:\n");
-
-            print_solution(solution);
-
-            save_graph_for_graphviz(csp, solution, "map.dot");
-
-        } else {
+    if (solution.size() > 0) {
+        printf("Solution found:\n");
+        print_solution(solution);
+        save_map_graph(csp, "map_final.dot");
+    } else {
         printf("No solution found.\n");
     }
 
