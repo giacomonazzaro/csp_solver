@@ -24,3 +24,4 @@ add_executable(nqueens examples/nqueens.cpp ${SOURCES} ${HEADERS})
 add_executable(sudoku examples/sudoku.cpp ${SOURCES} ${HEADERS})
 
 add_executable(tiles examples/tiles.cpp ${SOURCES} ${HEADERS})
+add_executable(map examples/map.cpp ${SOURCES} ${HEADERS})
