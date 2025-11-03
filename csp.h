@@ -21,27 +21,8 @@ struct Constraint {
 
 using Domain = array<int>;
 
-struct Propagation_Result {
-    array<bool> was_variable_updated = {};  // if domain of variable was reduced
-    bool        valid                = true;
-
-    Propagation_Result(int num_variables) {
-        was_variable_updated = allocate<bool>(num_variables, false);
-        valid                = true;
-    }
-
-    static Propagation_Result fail() {
-        Propagation_Result result(0);
-        result.valid = false;
-        return result;
-    }
-
-    operator bool() const { return valid; }
-};
-
 inline bool eval(const Constraint& constraint, const array<Domain>& domains);
-inline Propagation_Result propagate(const Constraint& constraint,
-                                    array<Domain>&    domains);
+inline bool propagate(const Constraint& constraint, array<Domain>& domains);
 
 struct CSP {
     string            name;

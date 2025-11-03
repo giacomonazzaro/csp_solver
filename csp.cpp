@@ -72,7 +72,7 @@ Assignment search(const CSP& csp, const Assignment& assignment,
     auto D = copy(csp.domains);
 
     apply_assignment(D, assignment);
-    Propagation_Result result = constraints_propagation(csp.constraints, D);
+    constraints_propagation(csp.constraints, D);
 
     if (is_assignment_complete(D)) {
         if (not satisfies(csp.constraints, D)) {
