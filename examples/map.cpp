@@ -1,4 +1,6 @@
 #include "../csp.h"
+#include <string>
+#include <fstream>
 // #include "../utils/allocate.h"
 // #include "../utils/memory_arena.h"
 
@@ -77,6 +79,47 @@ void print_solution(const Assignment& solution) {
     }
 }
 
+void save_graph_for_graphviz(const CSP& csp, const Assignment& solution, const std::string& filename) {
+    std::ofstream dot_file(filename);
+    if (!dot_file.is_open()) {
+        printf("Error opening %s\n", filename.c_str());
+        return;
+    }
+
+    const char* region_names[] = {
+        "Western_Australia",
+        "Northern_Territory",
+        "South_Australia",
+        "Queensland",
+        "New_South_Wales",
+        "Victoria",
+        "Tasmania"
+    };
+
+    const char* colors[] = {"red", "green", "blue", "yellow"};
+
+    dot_file << "graph Map {\n";
+    dot_file << "  node [style=filled];\n";
+
+    for (const auto& assignment : solution) {
+        int region_idx = assignment.variable;
+        int color_idx = assignment.value;
+        dot_file << "  " << region_names[region_idx] << " [fillcolor=" << colors[color_idx] << "];\n";
+    }
+
+    for (const auto& constraint : csp.constraints) {
+        if (constraint.type == Constraint::BINARY) {
+            int region1_idx = constraint.scope[0];
+            int region2_idx = constraint.scope[1];
+            dot_file << "  " << region_names[region1_idx] << " -- " << region_names[region2_idx] << ";\n";
+        }
+    }
+
+    dot_file << "}\n";
+    dot_file.close();
+    printf("Saved Graphviz file to %s\n", filename.c_str());
+}
+
 int main() {
     auto arena = memory_arena(1e8);
     default_allocator() = stack_allocator{&arena, 0};
@@ -85,10 +128,15 @@ int main() {
     search_stats stats;
     auto solution = search(csp, {}, stats);
 
-    if (solution.size() > 0) {
-        printf("Solution found:\n");
-        print_solution(solution);
-    } else {
+        if (solution.size() > 0) {
+
+            printf("Solution found:\n");
+
+            print_solution(solution);
+
+            save_graph_for_graphviz(csp, solution, "map.dot");
+
+        } else {
         printf("No solution found.\n");
     }
 
