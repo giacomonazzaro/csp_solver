@@ -24,7 +24,7 @@ struct hash_set {
 
     array<Type>         buckets = {};
     array<bucket_state> states  = {};
-    int                 count   = 0;
+    size_t              count   = 0;
     Hasher              hasher;
 
     hash_set() : buckets(), states(), count(0), hasher() {}
