@@ -22,23 +22,6 @@ bool is_assignment_complete(const array<Domain>& D) {
     return true;
 }
 
-bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
-    // Forward propagation.
-    Propagation_Result result = constraints_propagation(C, D);
-    if (not result) {
-        return false;
-    }
-
-    // Generalized arc consistency.
-    // Propagation_Result gac_result = gac3(C, D);
-    // if (not gac_result) {
-    //     comment("GAC3 failure");
-    // return false;
-    // }
-
-    return true;
-}
-
 bool search(const array<Constraint>& C, array<Domain>& D, int depth,
             search_stats& stats) {
     // If assignment is complete, just check if it satisfies contraints.
@@ -65,7 +48,10 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
         if (not satisfies(C, D_attempt)) continue;
 
         // Propagate assignment and eventually reduce domains.
-        if (not do_inferences(C, D_attempt)) continue;
+        // if (not do_inferences(C, D_attempt)) continue;
+        if (not constraints_propagation(C, D_attempt)) {
+            continue;
+        }
 
         // Recursive call.
         bool success = search(C, D_attempt, depth + 1, stats);
