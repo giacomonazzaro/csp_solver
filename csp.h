@@ -20,8 +20,27 @@ struct Constraint {
 
 using Domain = array<int>;
 
+struct Propagation_Result {
+    array<bool> was_variable_updated = {};  // if domain of variable was reduced
+    bool        valid                = true;
+
+    Propagation_Result(int num_variables) {
+        was_variable_updated = allocate<bool>(num_variables, false);
+        valid                = true;
+    }
+
+    static Propagation_Result fail() {
+        Propagation_Result result(0);
+        result.valid = false;
+        return result;
+    }
+
+    operator bool() const { return valid; }
+};
+
 inline bool eval(const Constraint& constraint, const array<Domain>& domains);
-inline bool propagate(const Constraint& constraint, array<Domain>& domains);
+inline Propagation_Result propagate(const Constraint& constraint,
+                                    array<Domain>&    domains);
 
 struct CSP {
     string            name;
@@ -60,8 +79,9 @@ bool search_single_constraint(const Constraint& c, const array<Domain>& D,
 int choose_variable(const array<Domain>& D, const array<Constraint>& C);
 
 // Propagate consequences after assignment in order to reduce domains.
-bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);
-bool gac3(const array<Constraint>& C, array<Domain>& D);
+Propagation_Result constraints_propagation(const array<Constraint>& C,
+                                           array<Domain>&           D);
+Propagation_Result gac3(const array<Constraint>& C, array<Domain>& D);
 bool remove_values(int variable, const Constraint& constraint, array<Domain>& D,
                    array<Domain> A);
 
@@ -178,8 +198,10 @@ inline bool eval_all_different(const Constraint&    constraint,
     return true;
 }
 
-inline bool propagate_all_different(const Constraint& constraint,
-                                    array<Domain>&    D) {
+inline Propagation_Result propagate_all_different(const Constraint& constraint,
+                                                  array<Domain>&    D) {
+    auto result = Propagation_Result(D.size());
+
     for (int v : constraint.scope) {
         if (D[v].size() != 1) continue;
         for (int w : constraint.scope) {
@@ -187,13 +209,17 @@ inline bool propagate_all_different(const Constraint& constraint,
             for (int i = 0; i < D[w].size(); ++i) {
                 if (D[w][i] == D[v][0]) {
                     D[w].remove(i);
-                    if (D[w].size() == 0) return false;
+                    result.was_variable_updated[w] = true;
+                    if (D[w].size() == 0) {
+                        result.valid = false;
+                        return result;  // Domain wipeout
+                    }
                     break;
                 }
             }
         }
     }
-    return true;
+    return result;
 }
 
 inline bool eval_unary(const Constraint&    constraint,
@@ -219,9 +245,12 @@ inline bool eval_binary(const Constraint&    constraint,
     return true;
 }
 
-inline bool propagate_unary(const Constraint& constraint, array<Domain>& D) {
-    stack_frame();
-    int x = constraint.scope[0];
+inline Propagation_Result propagate_unary(const Constraint& constraint,
+                                          array<Domain>&    D) {
+    auto result = Propagation_Result(D.size());
+
+    int x                    = constraint.scope[0];
+    int original_domain_size = D[x].size();
 
     auto domain_new = allocate<int>(D[x].size());
     domain_new.resize(0);
@@ -232,21 +261,32 @@ inline bool propagate_unary(const Constraint& constraint, array<Domain>& D) {
             domain_new.push_back(value);
         }
     }
-    if (domain_new.size() == 0) return false;
+    if (domain_new.size() == 0) {
+        result.valid = false;
+        return result;
+    }
     copy_to(domain_new, D[x]);
-    return true;
+
+    if (D[x].size() < original_domain_size) {
+        result.was_variable_updated[x] = true;
+    }
+    return result;
 }
 
-inline bool propagate_binary(const Constraint& constraint, array<Domain>& D) {
-    stack_frame();
-    int x0 = constraint.scope[0];
-    int x1 = constraint.scope[1];
-    // Domain d0, d1;
+inline Propagation_Result propagate_binary(const Constraint& constraint,
+                                           array<Domain>&    D) {
+    auto result = Propagation_Result(D.size());
+
+    int x0                      = constraint.scope[0];
+    int x1                      = constraint.scope[1];
+    int original_domain_size_x0 = D[x0].size();
+    int original_domain_size_x1 = D[x1].size();
+
     auto d0 = allocate<int>(D[x0].size() * D[x1].size());
     auto d1 = allocate<int>(D[x0].size() * D[x1].size());
     d0.resize(0);
     d1.resize(0);
-    // std::set d0, d1; // @Try with std::set, code will be simpler.
+
     for (int v0 : D[x0]) {
         bool found = false;
         for (int v1 : D[x1]) {
@@ -257,13 +297,26 @@ inline bool propagate_binary(const Constraint& constraint, array<Domain>& D) {
                 found = true;
             }
         }
-        if (found) d0.push_back(v0);
+        if (found) {
+            if (not contains(d0, v0)) d0.push_back(v0);
+        }
     }
-    if (d0.size() == 0) return false;
-    if (d1.size() == 0) return false;
+
+    if (d0.size() == 0 or d1.size() == 0) {
+        result.valid = false;
+        return result;
+    }
+
     copy_to(d0, D[x0]);
     copy_to(d1, D[x1]);
-    return true;
+
+    if (D[x0].size() < original_domain_size_x0) {
+        result.was_variable_updated[x0] = true;
+    }
+    if (D[x1].size() < original_domain_size_x1) {
+        result.was_variable_updated[x1] = true;
+    }
+    return result;
 }
 
 inline bool eval_nary(const Constraint&    constraint,
@@ -280,36 +333,12 @@ inline bool eval_nary(const Constraint&    constraint,
     return constraint.eval_custom(constraint, values);
 }
 
-inline bool propagate_nary(const Constraint& constraint, array<Domain>& D) {
-    return true;
+inline Propagation_Result propagate_nary(const Constraint& constraint,
+                                         array<Domain>&    D) {
+    auto result = Propagation_Result(D.size());
+    return result;
 }
 
-// Constraint equal(int x, int y, const string& name = "equal") {
-//     auto result  = Constraint(Constraint::EQUAL, name);
-//     result.scope = allocate({x, y});
-//     return result;
-// }
-
-// bool eval_equal(const Constraint& constraint, const array<Domain>& D) {
-//     int i = constraint.scope[0];
-//     int k = constraint.scope[1];
-//     if (D[i].size() == 1 and D[k].size() == 1) {
-//         if (D[i][0] != D[k][0]) return false;
-//     }
-//     return true;
-// }
-
-// bool propagate_equal(const Constraint& constraint, array<Domain>& D) {
-//     stack_frame();
-//     auto& scope        = constraint.scope;
-//     auto  intersection = allocate<int>(D[scope[0]].size());
-//     intersection.size() = 0;
-//     for (int v0 : D[scope[0]]) {
-//         if (contains(D[scope[1]], v0)) intersection.push_back(v0);
-//     }
-//     if (intersection.size() == 0) return false;
-//     copy_to(intersection, D[scope[0]]);
-//     copy_to(intersection, D[scope[1]]);
 //     return true;
 // }
 
@@ -375,19 +404,20 @@ inline bool eval(const Constraint& constraint, const array<Domain>& domains) {
     return false;
 }
 
-inline bool propagate(const Constraint& constraint, array<Domain>& domains) {
-    // if (type == RELATION) return propagate_relation(constraint, domains);
-    if (constraint.type == Constraint::ALL_DIFFERENT)
+inline Propagation_Result propagate(const Constraint& constraint,
+                                    array<Domain>&    domains) {
+    if (constraint.type == Constraint::ALL_DIFFERENT) {
         return propagate_all_different(constraint, domains);
-    // if (type == Constraint::EQUAL) return propagate_equal(constraint,
-    // domains);
-    if (constraint.type == Constraint::BINARY)
+    } else if (constraint.type == Constraint::BINARY) {
         return propagate_binary(constraint, domains);
-    if (constraint.type == Constraint::NARY)
+    } else if (constraint.type == Constraint::NARY) {
         return propagate_nary(constraint, domains);
-    if (constraint.type == Constraint::UNARY)
+    } else if (constraint.type == Constraint::UNARY) {
         return propagate_unary(constraint, domains);
-    return false;
+    } else {
+        assert(0);
+        return Propagation_Result::fail();
+    }
 }
 
 inline void print_unsatisfied(const array<Domain>&     D,

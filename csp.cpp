@@ -24,12 +24,14 @@ bool is_assignment_complete(const array<Domain>& D) {
 
 bool do_inferences(const array<Constraint>& C, array<Domain>& D) {
     // Forward propagation.
-    if (not constraints_propagation(C, D)) {
+    Propagation_Result result = constraints_propagation(C, D);
+    if (not result) {
         return false;
     }
 
     // Generalized arc consistency.
-    // if (not gac3(C, D)) {
+    // Propagation_Result gac_result = gac3(C, D);
+    // if (not gac_result) {
     //     comment("GAC3 failure");
     // return false;
     // }
@@ -84,7 +86,7 @@ Assignment search(const CSP& csp, const Assignment& assignment,
     auto D = copy(csp.domains);
 
     apply_assignment(D, assignment);
-    constraints_propagation(csp.constraints, D);
+    Propagation_Result result = constraints_propagation(csp.constraints, D);
 
     if (is_assignment_complete(D)) {
         if (not satisfies(csp.constraints, D)) {
@@ -152,11 +154,25 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     return max_degree_idx;
 }
 
-bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
-    for (auto& c : C)
-        if (not propagate(c, D)) return false;
+Propagation_Result constraints_propagation(const array<Constraint>& C,
+                                           array<Domain>&           D) {
+    auto total_result = Propagation_Result(D.size());
 
-    return true;
+    for (auto& c : C) {
+        stack_frame();
+        Propagation_Result current_result = propagate(c, D);
+        if (not current_result) {   // If any propagation leads to a domain
+                                    // wipeout
+            return current_result;  // Return the failed result
+        }
+        // Merge the updated variables
+        for (int i = 0; i < D.size(); ++i) {
+            if (current_result.was_variable_updated[i]) {
+                total_result.was_variable_updated[i] = true;
+            }
+        }
+    }
+    return total_result;
 }
 
 bool remove_values(int variable, const Constraint& constraint,
@@ -202,7 +218,9 @@ bool remove_values(int variable, const Constraint& constraint,
     }
 }
 
-bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
+Propagation_Result gac3(const array<Constraint>& C, array<Domain>& D_result) {
+    auto total_result = Propagation_Result(D_result.size());
+
     stack_frame();
     auto D = copy(D_result);  // copying the domains.
 
@@ -232,12 +250,18 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
         var_queue.pop();
         const_queue.pop();
 
+        int  original_domain_size_v    = D[v].size();
         bool removed_value_from_domain = remove_values(v, C[c], D);
+
         if (removed_value_from_domain) {
+            if (D[v].size() < original_domain_size_v) {
+                total_result.was_variable_updated[v] = true;
+            }
+
             // If the domain was left empty, this assignment cannot
             // be made complete. search() will read {} as failure.
             if (D[v].size() == 0) {
-                return false;
+                return total_result;  // Domain wipeout
             }
 
             // If we shrinked its domain, we add to the queue all
@@ -271,7 +295,7 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
 
     // Return the updated domain.
     copy_to(D, D_result);  // copying the domains.
-    return true;
+    return total_result;
 }
 
 bool search_single_constraint(const Constraint& c, const array<Domain>& D_,
