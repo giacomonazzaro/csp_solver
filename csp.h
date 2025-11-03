@@ -252,6 +252,7 @@ inline Propagation_Result propagate_unary(const Constraint& constraint,
     int x                    = constraint.scope[0];
     int original_domain_size = D[x].size();
 
+    stack_frame();
     auto domain_new = allocate<int>(D[x].size());
     domain_new.resize(0);
     for (auto value : D[x]) {
@@ -287,6 +288,7 @@ inline Propagation_Result propagate_binary(const Constraint& constraint,
     d0.resize(0);
     d1.resize(0);
 
+    // This is O(n * m), no obvious way to do better for general constraints.
     for (int v0 : D[x0]) {
         bool found = false;
         for (int v1 : D[x1]) {
@@ -297,6 +299,7 @@ inline Propagation_Result propagate_binary(const Constraint& constraint,
                 found = true;
             }
         }
+        // If at least one value in D[x1] works with v0, keep v0.
         if (found) {
             if (not contains(d0, v0)) d0.push_back(v0);
         }
