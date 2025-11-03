@@ -80,9 +80,8 @@ bool search_single_constraint(const Constraint& c, const array<Domain>& D,
 int choose_variable(const array<Domain>& D, const array<Constraint>& C);
 
 // Propagate consequences after assignment in order to reduce domains.
-Propagation_Result constraints_propagation(const array<Constraint>& C,
-                                           array<Domain>&           D);
-Propagation_Result gac3(const array<Constraint>& C, array<Domain>& D);
+bool constraints_propagation(const array<Constraint>& C, array<Domain>& D);
+// Propagation_Result gac3(const array<Constraint>& C, array<Domain>& D);
 bool remove_values(int variable, const Constraint& constraint, array<Domain>& D,
                    array<Domain> A);
 
@@ -199,10 +198,9 @@ inline bool eval_all_different(const Constraint&    constraint,
     return true;
 }
 
-inline Propagation_Result propagate_all_different(const Constraint& constraint,
-                                                  array<Domain>&    D) {
-    auto result = Propagation_Result(D.size());
-
+inline bool propagate_all_different(const Constraint& constraint,
+                                    array<Domain>&    D,
+                                    array<bool>&      was_variable_updated) {
     for (int v : constraint.scope) {
         if (D[v].size() != 1) continue;
         for (int w : constraint.scope) {
@@ -210,17 +208,16 @@ inline Propagation_Result propagate_all_different(const Constraint& constraint,
             for (int i = 0; i < D[w].size(); ++i) {
                 if (D[w][i] == D[v][0]) {
                     D[w].remove(i);
-                    result.was_variable_updated[w] = true;
+                    was_variable_updated[w] = true;
                     if (D[w].size() == 0) {
-                        result.valid = false;
-                        return result;  // Domain wipeout
+                        return false;  // Domain wipeout.
                     }
                     break;
                 }
             }
         }
     }
-    return result;
+    return true;
 }
 
 inline bool eval_unary(const Constraint&    constraint,
@@ -246,10 +243,8 @@ inline bool eval_binary(const Constraint&    constraint,
     return true;
 }
 
-inline Propagation_Result propagate_unary(const Constraint& constraint,
-                                          array<Domain>&    D) {
-    auto result = Propagation_Result(D.size());
-
+inline bool propagate_unary(const Constraint& constraint, array<Domain>& D,
+                            array<bool>& was_variable_updated) {
     int x                    = constraint.scope[0];
     int original_domain_size = D[x].size();
 
@@ -264,21 +259,18 @@ inline Propagation_Result propagate_unary(const Constraint& constraint,
         }
     }
     if (domain_new.size() == 0) {
-        result.valid = false;
-        return result;
+        return false;  // Domain wipeout.
     }
     copy_to(domain_new, D[x]);
 
     if (D[x].size() < original_domain_size) {
-        result.was_variable_updated[x] = true;
+        was_variable_updated[x] = true;
     }
-    return result;
+    return true;
 }
 
-inline Propagation_Result propagate_binary(const Constraint& constraint,
-                                           array<Domain>&    D) {
-    auto result = Propagation_Result(D.size());
-
+inline bool propagate_binary(const Constraint& constraint, array<Domain>& D,
+                             array<bool>& was_variable_updated) {
     int x0                      = constraint.scope[0];
     int x1                      = constraint.scope[1];
     int original_domain_size_x0 = D[x0].size();
@@ -307,20 +299,19 @@ inline Propagation_Result propagate_binary(const Constraint& constraint,
     }
 
     if (d0.size() == 0 or d1.size() == 0) {
-        result.valid = false;
-        return result;
+        return false;  // Domain wipeout.
     }
 
     copy_to(d0, D[x0]);
     copy_to(d1, D[x1]);
 
     if (D[x0].size() < original_domain_size_x0) {
-        result.was_variable_updated[x0] = true;
+        was_variable_updated[x0] = true;
     }
     if (D[x1].size() < original_domain_size_x1) {
-        result.was_variable_updated[x1] = true;
+        was_variable_updated[x1] = true;
     }
-    return result;
+    return true;
 }
 
 inline bool eval_nary(const Constraint&    constraint,
@@ -337,10 +328,9 @@ inline bool eval_nary(const Constraint&    constraint,
     return constraint.eval_custom(constraint, values);
 }
 
-inline Propagation_Result propagate_nary(const Constraint& constraint,
-                                         array<Domain>&    D) {
-    auto result = Propagation_Result(D.size());
-    return result;
+inline bool propagate_nary(const Constraint& constraint, array<Domain>& D,
+                           array<bool>& was_variable_updated) {
+    return true;
 }
 
 //     return true;
@@ -408,19 +398,19 @@ inline bool eval(const Constraint& constraint, const array<Domain>& domains) {
     return false;
 }
 
-inline Propagation_Result propagate(const Constraint& constraint,
-                                    array<Domain>&    domains) {
+inline bool propagate(const Constraint& constraint, array<Domain>& domains,
+                      array<bool>& was_variable_updated) {
     if (constraint.type == Constraint::ALL_DIFFERENT) {
-        return propagate_all_different(constraint, domains);
+        return propagate_all_different(constraint, domains,
+                                       was_variable_updated);
     } else if (constraint.type == Constraint::BINARY) {
-        return propagate_binary(constraint, domains);
+        return propagate_binary(constraint, domains, was_variable_updated);
     } else if (constraint.type == Constraint::NARY) {
-        return propagate_nary(constraint, domains);
+        return propagate_nary(constraint, domains, was_variable_updated);
     } else if (constraint.type == Constraint::UNARY) {
-        return propagate_unary(constraint, domains);
+        return propagate_unary(constraint, domains, was_variable_updated);
     } else {
-        assert(0);
-        return Propagation_Result::fail();
+        return false;
     }
 }
 

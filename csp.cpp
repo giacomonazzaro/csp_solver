@@ -154,25 +154,17 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     return max_degree_idx;
 }
 
-Propagation_Result constraints_propagation(const array<Constraint>& C,
-                                           array<Domain>&           D) {
-    auto total_result = Propagation_Result(D.size());
+bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
+    stack_frame();
+    auto was_variable_updated = allocate<bool>(D.size(), false);
 
     for (auto& c : C) {
         stack_frame();
-        Propagation_Result current_result = propagate(c, D);
-        if (not current_result) {   // If any propagation leads to a domain
-                                    // wipeout
-            return current_result;  // Return the failed result
-        }
-        // Merge the updated variables
-        for (int i = 0; i < D.size(); ++i) {
-            if (current_result.was_variable_updated[i]) {
-                total_result.was_variable_updated[i] = true;
-            }
+        if (not propagate(c, D, was_variable_updated)) {
+            return false;
         }
     }
-    return total_result;
+    return true;
 }
 
 bool remove_values(int variable, const Constraint& constraint,
@@ -218,85 +210,86 @@ bool remove_values(int variable, const Constraint& constraint,
     }
 }
 
-Propagation_Result gac3(const array<Constraint>& C, array<Domain>& D_result) {
-    auto total_result = Propagation_Result(D_result.size());
+// bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
+//     auto total_result = Propagation_Result(D_result.size());
 
-    stack_frame();
-    auto D = copy(D_result);  // copying the domains.
+//     stack_frame();
+//     auto D = copy(D_result);  // copying the domains.
 
-    int size = 0;
-    for (auto& c : C) size += c.scope.size();
-    auto var_queue   = allocate<int>(size);
-    auto const_queue = allocate<int>(size);
-    var_queue.resize(0);
-    const_queue.resize(0);
+//     int size = 0;
+//     for (auto& c : C) size += c.scope.size();
+//     auto var_queue   = allocate<int>(size);
+//     auto const_queue = allocate<int>(size);
+//     var_queue.resize(0);
+//     const_queue.resize(0);
 
-    // For each constraint c, for each variable v in the scope of c,
-    // add the pair (v, c) to the queue.
-    for (int i = 0; i < C.size(); ++i) {
-        for (int v : C[i].scope) {
-            if (D[v].size() == 1) continue;
-            var_queue.push_back(v);
-            const_queue.push_back(i);
-        }
-    }
+//     // For each constraint c, for each variable v in the scope of c,
+//     // add the pair (v, c) to the queue.
+//     for (int i = 0; i < C.size(); ++i) {
+//         for (int v : C[i].scope) {
+//             if (D[v].size() == 1) continue;
+//             var_queue.push_back(v);
+//             const_queue.push_back(i);
+//         }
+//     }
 
-    // Consume the queue until it is empty.
-    // For each pair (v, c), look if there exist a possible assignment
-    // of the other varibles in the scope of c.
-    while (var_queue.size() > 0) {
-        int v = var_queue.back();
-        int c = const_queue.back();
-        var_queue.pop();
-        const_queue.pop();
+//     // Consume the queue until it is empty.
+//     // For each pair (v, c), look if there exist a possible assignment
+//     // of the other varibles in the scope of c.
+//     while (var_queue.size() > 0) {
+//         int v = var_queue.back();
+//         int c = const_queue.back();
+//         var_queue.pop();
+//         const_queue.pop();
 
-        int  original_domain_size_v    = D[v].size();
-        bool removed_value_from_domain = remove_values(v, C[c], D);
+//         int  original_domain_size_v    = D[v].size();
+//         bool removed_value_from_domain = remove_values(v, C[c], D);
 
-        if (removed_value_from_domain) {
-            if (D[v].size() < original_domain_size_v) {
-                total_result.was_variable_updated[v] = true;
-            }
+//         if (removed_value_from_domain) {
+//             if (D[v].size() < original_domain_size_v) {
+//                 total_result.was_variable_updated[v] = true;
+//             }
 
-            // If the domain was left empty, this assignment cannot
-            // be made complete. search() will read {} as failure.
-            if (D[v].size() == 0) {
-                return total_result;  // Domain wipeout
-            }
+//             // If the domain was left empty, this assignment cannot
+//             // be made complete. search() will read {} as failure.
+//             if (D[v].size() == 0) {
+//                 total_result.valid = false;
+//                 return total_result;  // Domain wipeout
+//             }
 
-            // If we shrinked its domain, we add to the queue all
-            // the variables that are neighbors of v through other constraints.
-            for (int i = 0; i < C.size(); ++i) {
-                if (i == c) continue;
+//             // If we shrinked its domain, we add to the queue all
+//             // the variables that are neighbors of v through other
+//             constraints. for (int i = 0; i < C.size(); ++i) {
+//                 if (i == c) continue;
 
-                if (not contains(C[i].scope, v)) continue;
+//                 if (not contains(C[i].scope, v)) continue;
 
-                for (int w : C[i].scope) {
-                    if (w == v) continue;
-                    if (D[w].size() == 1) continue;
+//                 for (int w : C[i].scope) {
+//                     if (w == v) continue;
+//                     if (D[w].size() == 1) continue;
 
-                    // Check if it is already in queue.
-                    bool already_in_queue = false;
-                    for (int k = 0; k < var_queue.size(); k++) {
-                        if (var_queue[k] == w and const_queue[k] == i) {
-                            already_in_queue = true;
-                            break;
-                        }
-                    }
+//                     // Check if it is already in queue.
+//                     bool already_in_queue = false;
+//                     for (int k = 0; k < var_queue.size(); k++) {
+//                         if (var_queue[k] == w and const_queue[k] == i) {
+//                             already_in_queue = true;
+//                             break;
+//                         }
+//                     }
 
-                    if (not already_in_queue) {
-                        var_queue.push_back(w);
-                        const_queue.push_back(i);
-                    }
-                }
-            }
-        }
-    }
+//                     if (not already_in_queue) {
+//                         var_queue.push_back(w);
+//                         const_queue.push_back(i);
+//                     }
+//                 }
+//             }
+//         }
+//     }
 
-    // Return the updated domain.
-    copy_to(D, D_result);  // copying the domains.
-    return total_result;
-}
+//     // Return the updated domain.
+//     copy_to(D, D_result);  // copying the domains.
+//     return total_result;
+// }
 
 bool search_single_constraint(const Constraint& c, const array<Domain>& D_,
                               int depth) {
