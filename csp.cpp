@@ -1,6 +1,4 @@
 #include "csp.h"
-static CSP* global_csp = nullptr;
-
 void add_constraint(CSP& csp, const Constraint& constraint) {
     csp.constraints.push_back(constraint);
     for (auto var : constraint.scope) {
@@ -20,59 +18,6 @@ bool satisfies(const array<Constraint>& C, const array<Domain>& D) {
 bool is_assignment_complete(const array<Domain>& D) {
     for (int i = 0; i < D.size(); ++i)
         if (D[i].size() != 1) return false;
-
-    return true;
-}
-
-#include <deque>
-bool constraints_propagation(const array<Constraint>& C, array<Domain>& D,
-                             int variable) {
-    stack_frame();
-
-    auto queue    = std::deque<int>();
-    auto in_queue = allocate<bool>(D.size(), false);
-    queue.push_back(variable);
-    in_queue[variable] = true;
-
-    while (queue.size() > 0) {
-        int var = queue.front();
-        queue.pop_front();
-        in_queue[var] = false;
-
-        for (auto& c_id : global_csp->variable_to_constraints[var]) {
-            stack_frame();
-            auto& c                    = global_csp->constraints[c_id];
-            auto  was_variable_updated = allocate<bool>(D.size(), false);
-            if (not propagate(c, D, was_variable_updated)) {
-                return false;
-            }
-            for (int i = 0; i < was_variable_updated.size(); ++i) {
-                if (was_variable_updated[i] and !in_queue[var]) {
-                    queue.push_back(i);
-                    in_queue[i] = true;
-                }
-            }
-        }
-    }
-    // for (auto& c : global_csp.variable_to_constraints[variable]) {
-    //     stack_frame();
-    //     auto was_variable_updated = allocate<bool>(D.size(), false);
-    //     if (not propagate(c, D, was_variable_updated)) {
-    //         return false;
-    //     }
-    // }
-    return true;
-}
-
-bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
-    stack_frame();
-    auto was_variable_updated = allocate<bool>(D.size(), false);
-
-    for (size_t i = 0; i < D.size(); i++) {
-        if (not constraints_propagation(C, D, i)) {
-            return false;
-        }
-    }
 
     return true;
 }
@@ -104,7 +49,7 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
 
         // Propagate assignment and eventually reduce domains.
         // if (not do_inferences(C, D_attempt)) continue;
-        if (not constraints_propagation(C, D_attempt, variable)) {
+        if (not constraints_propagation(C, D_attempt)) {
             continue;
         }
 
@@ -124,8 +69,6 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
 Assignment search(const CSP& csp, const Assignment& assignment,
                   search_stats& stats) {
     stack_frame();
-    global_csp = (CSP*)&csp;
-
     auto D = copy(csp.domains);
 
     apply_assignment(D, assignment);
@@ -195,6 +138,19 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
     assert(max_degree_idx < D.size());
     assert(D[max_degree_idx].size() > 1);
     return max_degree_idx;
+}
+
+bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
+    stack_frame();
+    auto was_variable_updated = allocate<bool>(D.size(), false);
+
+    for (auto& c : C) {
+        stack_frame();
+        if (not propagate(c, D, was_variable_updated)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool remove_values(int variable, const Constraint& constraint,
