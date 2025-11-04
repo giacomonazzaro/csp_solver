@@ -153,9 +153,10 @@ int choose_variable(const array<Domain>& D, const array<Constraint>& C) {
 }
 
 bool constraints_propagation(const array<Constraint>& C, array<Domain>& D) {
-    for (auto& c : C)
-        if (not propagate(c, D)) return false;
-
+    for (size_t i = 0; i < 50; i++) {
+        for (auto& c : C)
+            if (not propagate(c, D)) return false;
+    }
     return true;
 }
 
@@ -241,7 +242,8 @@ bool gac3(const array<Constraint>& C, array<Domain>& D_result) {
             }
 
             // If we shrinked its domain, we add to the queue all
-            // the variables that are neighbors of v through other constraints.
+            // the variables that are neighbors of v through other
+            // constraints.
             for (int i = 0; i < C.size(); ++i) {
                 if (i == c) continue;
 
