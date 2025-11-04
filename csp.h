@@ -198,6 +198,48 @@ inline bool propagate_all_different(const Constraint& constraint,
             }
         }
     }
+
+    // Enhanced propagation: find naked pairs.
+    // If two variables in scope have the same domain of size 2,
+    // remove those two values from all other variables in scope.
+    // stack_frame();
+    // auto& scope = constraint.scope;
+    // for (int i = 0; i < scope.size(); ++i) {
+    //     int v1 = scope[i];
+    //     if (D[v1].size() == 2) {
+    //         for (int j = i + 1; j < scope.size(); ++j) {
+    //             int v2 = scope[j];
+    //             if (D[v2].size() == 2 && contains(D[v1], D[v2][0]) &&
+    //                 contains(D[v1], D[v2][1])) {
+    //                 // Naked pair (v1, v2) found.
+    //                 int val1 = D[v1][0];
+    //                 int val2 = D[v1][1];
+    //                 for (int k = 0; k < scope.size(); ++k) {
+    //                     int v_other = scope[k];
+    //                     if (v_other == v1 || v_other == v2) continue;
+
+    //                     auto& d_other = D[v_other];
+    //                     auto  d_new   = allocate<int>(d_other.size());
+    //                     d_new.resize(0);
+    //                     bool changed = false;
+    //                     for (int val : d_other) {
+    //                         if (val != val1 && val != val2) {
+    //                             d_new.push_back(val);
+    //                         } else {
+    //                             changed = true;
+    //                         }
+    //                     }
+
+    //                     if (changed) {
+    //                         if (d_new.size() == 0) return false;
+    //                         copy_to(d_new, d_other);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
     return true;
 }
 
@@ -255,28 +297,53 @@ inline bool propagate_binary(const Constraint& constraint, array<Domain>& D,
     stack_frame();
     int x0 = constraint.scope[0];
     int x1 = constraint.scope[1];
-    // Domain d0, d1;
-    auto d0 = allocate<int>(D[x0].size() * D[x1].size());
-    auto d1 = allocate<int>(D[x0].size() * D[x1].size());
-    d0.resize(0);
-    d1.resize(0);
-    // std::set d0, d1; // @Try with std::set, code will be simpler.
+
+    // Revise domain of x0 based on x1
+    auto d0_new = allocate<int>(D[x0].size());
+    d0_new.resize(0);
     for (int v0 : D[x0]) {
-        bool found = false;
+        bool found_support = false;
         for (int v1 : D[x1]) {
             stack_frame();
             auto xy = allocate({v0, v1});
             if (constraint.eval_custom(constraint, xy)) {
-                if (not contains(d1, v1)) d1.push_back(v1);
-                found = true;
+                found_support = true;
+                break;
             }
         }
-        if (found) d0.push_back(v0);
+        if (found_support) {
+            d0_new.push_back(v0);
+        }
     }
-    if (d0.size() == 0) return false;
-    if (d1.size() == 0) return false;
-    copy_to(d0, D[x0]);
-    copy_to(d1, D[x1]);
+
+    if (d0_new.size() < D[x0].size()) {
+        if (d0_new.size() == 0) return false;
+        copy_to(d0_new, D[x0]);
+    }
+
+    // Revise domain of x1 based on x0 (the potentially pruned one)
+    auto d1_new = allocate<int>(D[x1].size());
+    d1_new.resize(0);
+    for (int v1 : D[x1]) {
+        bool found_support = false;
+        for (int v0 : D[x0]) {
+            stack_frame();
+            auto xy = allocate({v0, v1});
+            if (constraint.eval_custom(constraint, xy)) {
+                found_support = true;
+                break;
+            }
+        }
+        if (found_support) {
+            d1_new.push_back(v1);
+        }
+    }
+
+    if (d1_new.size() < D[x1].size()) {
+        if (d1_new.size() == 0) return false;
+        copy_to(d1_new, D[x1]);
+    }
+
     return true;
 }
 
