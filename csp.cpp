@@ -384,8 +384,7 @@ Constraint all_different(const array<int>& scope,
     return result;
 }
 
-bool eval_all_different(const Constraint&    constraint,
-                        const array<Domain>& D) {
+bool eval_all_different(const Constraint& constraint, const array<Domain>& D) {
     for (int i = 0; i < constraint.scope.size() - 1; ++i) {
         int v = constraint.scope[i];
         if (D[v].size() != 1) continue;
@@ -398,9 +397,8 @@ bool eval_all_different(const Constraint&    constraint,
     return true;
 }
 
-bool propagate_all_different(const Constraint& constraint,
-                             array<Domain>&    D,
-                             array<bool>&      was_variable_updated) {
+bool propagate_all_different(const Constraint& constraint, array<Domain>& D,
+                             array<bool>& was_variable_updated) {
     for (int v : constraint.scope) {
         if (D[v].size() != 1) continue;
         for (int w : constraint.scope) {
@@ -420,8 +418,7 @@ bool propagate_all_different(const Constraint& constraint,
     return true;
 }
 
-bool eval_unary(const Constraint&    constraint,
-                const array<Domain>& domains) {
+bool eval_unary(const Constraint& constraint, const array<Domain>& domains) {
     int x = constraint.scope[0];
     if (domains[x].size() == 1) {
         stack_frame();
@@ -431,8 +428,7 @@ bool eval_unary(const Constraint&    constraint,
     return true;
 }
 
-bool eval_binary(const Constraint&    constraint,
-                 const array<Domain>& domains) {
+bool eval_binary(const Constraint& constraint, const array<Domain>& domains) {
     int x = constraint.scope[0];
     int y = constraint.scope[1];
     if (domains[x].size() == 1 and domains[y].size() == 1) {
@@ -469,48 +465,77 @@ bool propagate_unary(const Constraint& constraint, array<Domain>& D,
     return true;
 }
 
-bool propagate_binary(const Constraint& constraint, array<Domain>& D,
-                      array<bool>& was_variable_updated) {
+inline bool propagate_binary(const Constraint& constraint, array<Domain>& D,
+                             array<bool>& was_variable_updated) {
     int x0 = constraint.scope[0];
     int x1 = constraint.scope[1];
 
-    auto reduce_domain = [&](int variable_to_reduce, int other_variable) {
-        auto&       d0 = D[variable_to_reduce];
-        const auto& d1 = D[other_variable];
+    auto& d0 = D[x0];
+    auto& d1 = D[x1];
 
-        stack_frame();
-        auto d0_new = allocate<int>(d0.size());
-        d0_new.resize(0);
-        for (int v0 : d0) {
-            bool found_support = false;
-            for (int v1 : d1) {
-                stack_frame();
-                auto xy = allocate({v0, v1});
-                if (constraint.eval_custom(constraint, xy)) {
-                    found_support = true;
-                    break;
-                }
-            }
-            if (found_support) {
-                d0_new.push_back(v0);
+    stack_frame();
+    // auto d0_new      = allocate<int>(d0.size());
+    auto d0_has_pair = allocate<bool>(d0.size(), false);
+    auto d1_has_pair = allocate<bool>(d1.size(), false);
+
+    for (size_t i = 0; i < d0.size(); i++) {
+        auto v0 = d0[i];
+        for (size_t k = 0; k < d1.size(); k++) {
+            auto v1 = d1[k];
+            stack_frame();
+            auto xy = allocate({v0, v1});
+            if (constraint.eval_custom(constraint, xy)) {
+                d0_has_pair[i] = true;
+                d1_has_pair[k] = true;
+                break;
             }
         }
-        if (d0_new.size() < d0.size()) {
-            if (d0_new.size() == 0) return false;
-            was_variable_updated[variable_to_reduce] = true;
-            copy_to(d0_new, d0);
-        }
-        return true;
-    };
+    }
 
-    if (not reduce_domain(x0, x1)) return false;
-    if (not reduce_domain(x1, x0)) return false;
+    auto d0_new = allocate<int>(d0.size());
+    d0_new.resize(0);
+    for (size_t i = 0; i < d0.size(); i++) {
+        if (d0_has_pair[i]) {
+            d0_new.push_back(d0[i]);
+        }
+    }
+    if (d0_new.size() == 0) return false;
+    if (d0_new.size() < d0.size()) {
+        was_variable_updated[x0] = true;
+        copy_to(d0_new, d0);
+    }
+
+    for (size_t k = 0; k < d1.size(); k++) {
+        if (d1_has_pair[k]) continue;
+        auto v1 = d1[k];
+        for (size_t i = 0; i < d0.size(); i++) {
+            auto v0 = d0[i];
+            stack_frame();
+            auto xy = allocate({v0, v1});
+            if (constraint.eval_custom(constraint, xy)) {
+                d1_has_pair[k] = true;
+                break;
+            }
+        }
+    }
+
+    auto d1_new = allocate<int>(d1.size());
+    d1_new.resize(0);
+    for (size_t i = 0; i < d1.size(); i++) {
+        if (d1_has_pair[i]) {
+            d1_new.push_back(d1[i]);
+        }
+    }
+    if (d1_new.size() == 0) return false;
+    if (d1_new.size() < d1.size()) {
+        was_variable_updated[x1] = true;
+        copy_to(d1_new, d1);
+    }
 
     return true;
 }
 
-bool eval_nary(const Constraint&    constraint,
-               const array<Domain>& domains) {
+bool eval_nary(const Constraint& constraint, const array<Domain>& domains) {
     for (auto var : constraint.scope)
         if (domains[var].size() != 1) return true;
 
@@ -554,8 +579,7 @@ bool propagate(const Constraint& constraint, array<Domain>& domains,
     }
 }
 
-void print_unsatisfied(const array<Domain>&     D,
-                       const array<Constraint>& C) {
+void print_unsatisfied(const array<Domain>& D, const array<Constraint>& C) {
     printf("unsatisfied constraints: ");
     bool found = false;
     for (int i = 0; i < C.size(); ++i) {
