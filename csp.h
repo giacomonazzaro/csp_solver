@@ -294,55 +294,40 @@ inline bool propagate_unary(const Constraint& constraint, array<Domain>& D,
 
 inline bool propagate_binary(const Constraint& constraint, array<Domain>& D,
                              array<bool>& was_variable_updated) {
-    stack_frame();
     int x0 = constraint.scope[0];
     int x1 = constraint.scope[1];
 
-    // Revise domain of x0 based on x1
-    auto d0_new = allocate<int>(D[x0].size());
-    d0_new.resize(0);
-    for (int v0 : D[x0]) {
-        bool found_support = false;
-        for (int v1 : D[x1]) {
-            stack_frame();
-            auto xy = allocate({v0, v1});
-            if (constraint.eval_custom(constraint, xy)) {
-                found_support = true;
-                break;
+    auto reduce_domain = [&](int variable_to_reduce, int other_variable) {
+        auto&       d0 = D[variable_to_reduce];
+        const auto& d1 = D[other_variable];
+
+        stack_frame();
+        auto d0_new = allocate<int>(d0.size());
+        d0_new.resize(0);
+        for (int v0 : d0) {
+            bool found_support = false;
+            for (int v1 : d1) {
+                stack_frame();
+                auto xy = allocate({v0, v1});
+                if (constraint.eval_custom(constraint, xy)) {
+                    found_support = true;
+                    break;
+                }
+            }
+            if (found_support) {
+                d0_new.push_back(v0);
             }
         }
-        if (found_support) {
-            d0_new.push_back(v0);
+        if (d0_new.size() < d0.size()) {
+            if (d0_new.size() == 0) return false;
+            was_variable_updated[variable_to_reduce] = true;
+            copy_to(d0_new, d0);
         }
-    }
+        return true;
+    };
 
-    if (d0_new.size() < D[x0].size()) {
-        if (d0_new.size() == 0) return false;
-        copy_to(d0_new, D[x0]);
-    }
-
-    // Revise domain of x1 based on x0 (the potentially pruned one)
-    auto d1_new = allocate<int>(D[x1].size());
-    d1_new.resize(0);
-    for (int v1 : D[x1]) {
-        bool found_support = false;
-        for (int v0 : D[x0]) {
-            stack_frame();
-            auto xy = allocate({v0, v1});
-            if (constraint.eval_custom(constraint, xy)) {
-                found_support = true;
-                break;
-            }
-        }
-        if (found_support) {
-            d1_new.push_back(v1);
-        }
-    }
-
-    if (d1_new.size() < D[x1].size()) {
-        if (d1_new.size() == 0) return false;
-        copy_to(d1_new, D[x1]);
-    }
+    if (not reduce_domain(x0, x1)) return false;
+    if (not reduce_domain(x1, x0)) return false;
 
     return true;
 }
