@@ -11,7 +11,7 @@ The only data structures used are arrays, implemented in `utils/array.h`. Memory
 - Forward propagation
 
 ## Examples
-Demo applications can be compiled with `make`.
+Demo applications can be compiled with `cmake`.
 
 ### N-queens
 The goal is to find an arrangement of N queens on a N by N chessboard so that no two queens threaten each other. This is a [classic toy problem](https://en.wikipedia.org/wiki/Eight_queens_puzzle) in artificial intelligence.  
