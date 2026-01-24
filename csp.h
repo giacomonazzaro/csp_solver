@@ -1,5 +1,6 @@
 #pragma once
 #include "utils/allocator.h"
+#include "utils/copy_struct.h"
 #include "utils/hash_set.h"
 #include "utils/string.h"
 using namespace giacomo;

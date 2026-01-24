@@ -157,29 +157,27 @@ inline array<T> allocate(const std::initializer_list<T>& list) {
     return default_allocator()->allocate<T>(list);
 }
 
-template <typename T>
-inline array<T> copy(const array<T>& arr) {
-    return default_allocator()->copy<T>(arr);
-}
+// template <typename T>
+// inline array<T> copy(const array<T>& arr) {
+//     return default_allocator()->copy<T>(arr);
+// }
 
-// Deep copy for array of arrays
-template <typename T>
-inline array<array<T>> copy(const array<array<T>>& arr) {
-    auto result = allocate<array<T>>(arr.size());
-    for (size_t i = 0; i < arr.size(); i++) {
-        result[i] = copy(arr[i]);
-    }
-    return result;
-}
+// // Deep copy for array of arrays
+// template <typename T>
+// inline T copy(const T& arr) {
+//     auto result = allocate<array<T>>(arr.size());
+//     for (size_t i = 0; i < arr.size(); i++) {
+//         result[i] = copy(arr[i]);
+//     }
+//     return result;
+// }
 
 template <typename T>
 inline void resize(array<T>& arr, size_t count) {
     default_allocator()->resize<T>(arr, count);
 }
 
-inline void align(size_t size) {
-    default_allocator()->align(size);
-}
+inline void align(size_t size) { default_allocator()->align(size); }
 
 template <typename T>
 inline void align_for() {

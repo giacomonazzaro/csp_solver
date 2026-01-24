@@ -1,4 +1,5 @@
 #include "csp.h"
+
 void add_constraint(CSP& csp, const Constraint& constraint) {
     csp.constraints.push_back(constraint);
     for (auto var : constraint.scope) {
@@ -41,7 +42,8 @@ bool search(const array<Constraint>& C, array<Domain>& D, int depth,
         stats.expansions += 1;
 
         // Copying the domains to make a temp version.
-        auto D_attempt      = copy(D);
+        auto D_attempt = copy(D);
+
         D_attempt[variable] = {val};
 
         // Check if assignment satisfies constraints.
