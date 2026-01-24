@@ -24,6 +24,16 @@ struct Allocator {
 
     virtual inline void align(size_t size) {}
 
+    struct Frame;
+    virtual inline void end_frame(Frame*) {}
+
+    struct Frame {
+        Allocator* allocator;
+        size_t     start;
+        ~Frame() { allocator->end_frame(this); }
+    };
+    virtual inline Frame begin_frame() {};
+
     template <typename T>
     inline void align_for() {
         align(alignof(T));
@@ -123,23 +133,21 @@ struct Allocator_Linear : Allocator {
         }
     }
 
-    struct stack_frame {
-        Allocator_Linear* allocator;
-        size_t            start;
+    inline void end_frame(Frame* frame) override { this->head = frame->start; }
 
-        stack_frame(Allocator_Linear* s)
-            : allocator(s), start(allocator->head) {}
-        ~stack_frame() { allocator->head = start; }
-    };
+    inline Frame begin_frame() override {
+        auto frame      = Frame{};
+        frame.allocator = this;
+        frame.start     = this->head;
+        return frame;
+    }
 
     // allocate chosen amount of bytes
     byte* allocate_bytes(size_t bytes) override;
     byte* reallocate_bytes(byte* ptr, size_t bytes) override;
 };
 
-#define stack_frame()                            \
-    auto _frame = Allocator_Linear::stack_frame( \
-        (Allocator_Linear*)default_allocator());
+#define stack_frame() auto _frame = default_allocator()->begin_frame()
 
 // Wrapper functions using default_allocator
 template <typename T>
@@ -202,19 +210,18 @@ struct Allocator_Heap : Allocator {
     byte* allocate_bytes(size_t bytes) override;
     byte* reallocate_bytes(byte* ptr, size_t bytes) override;
 
-    struct heap_frame {
-        Allocator_Heap* allocator;
-        size_t          start;
-
-        heap_frame(Allocator_Heap* s)
-            : allocator(s), start(allocator->allocations.size()) {}
-
-        ~heap_frame() {
-            for (size_t i = start; i < allocator->allocations.size(); i++) {
-                free(allocator->allocations[i]);
-            }
-
-            allocator->allocations.resize(start);
+    inline void end_frame(Frame* frame) override {
+        for (size_t i = frame->start; i < this->allocations.size(); i++) {
+            free(this->allocations[i]);
         }
-    };
+
+        this->allocations.resize(frame->start);
+    }
+
+    inline Frame begin_frame() override {
+        auto frame      = Frame{};
+        frame.allocator = this;
+        frame.start     = this->allocations.size();
+        return frame;
+    }
 };
