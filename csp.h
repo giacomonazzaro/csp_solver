@@ -1,6 +1,6 @@
 #pragma once
+#include "utils/allocator.h"
 #include "utils/hash_set.h"
-#include "utils/stack_allocator.h"
 #include "utils/string.h"
 using namespace giacomo;
 

@@ -62,10 +62,6 @@ int main(int argc, char const* argv[]) {
     int N = 8;
     if (argc == 2) N = atoi(argv[1]);
 
-    auto arena = memory_arena(1e8);
-
-    default_allocator() = stack_allocator{&arena, 0};
-
     CSP          csp = make_nqueens(N);
     search_stats stats;
     auto         solution = search(csp, {}, stats);

@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Add the source files
 set(SOURCES
     csp.cpp
+    utils/allocator.cpp
 )
 
 # Add the header files

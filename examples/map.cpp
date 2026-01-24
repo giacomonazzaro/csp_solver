@@ -222,8 +222,8 @@ void save_random_graph(const CSP& csp, const char* filename) {
 }
 
 int main() {
-    auto arena          = memory_arena(1e8);
-    default_allocator() = stack_allocator{&arena, 0};
+    // auto arena          = memory_arena(1e8);
+    // default_allocator() = stack_allocator{&arena, 0};
 
     CSP csp = make_random_graph_coloring();
     save_random_graph(csp, "map_initial.dot");

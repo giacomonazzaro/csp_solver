@@ -259,9 +259,9 @@ int main(int argc, char const* argv[]) {
 
     srand(time(nullptr));
 
-    auto arena = memory_arena(1e8);
+    // auto arena = Memory(1e8);
 
-    default_allocator() = stack_allocator{&arena, 0};
+    // sedefault_allocator() = stack_allocator{&arena, 0};
 
     CSP csp = make_tiles(N, false);
 

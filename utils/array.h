@@ -5,12 +5,10 @@
 #include <cassert>
 #include <initializer_list>
 
-namespace giacomo {
-
 template <typename Type>
 struct array {
-    Type* data  = nullptr;
-    size_t   count = 0;
+    Type*  data  = nullptr;
+    size_t count = 0;
 
     inline const Type& operator[](size_t i) const { return data[i]; }
     inline Type&       operator[](size_t i) { return data[i]; }
@@ -18,7 +16,7 @@ struct array {
     inline Type&       back() { return data[count - 1]; }
     inline void        add(const Type& val) { data[count++] = val; }
 
-    inline int  size() const { return count; }
+    inline size_t size() const { return count; }
     inline void resize(size_t new_size) { count = new_size; }
     inline void push_back(const Type& val) { add(val); }
 
@@ -58,7 +56,7 @@ struct array {
     }
 
     void operator=(const std::initializer_list<Type>& list) {
-        count = list.size();
+        count    = list.size();
         size_t i = 0;
         for (auto& v : list) {
             data[i++] = v;
@@ -82,7 +80,7 @@ struct array {
     // iterators
     struct const_iterator {
         const Type* data;
-        size_t         i;
+        size_t      i;
 
         const_iterator& operator++() {
             i += 1;
@@ -97,8 +95,8 @@ struct array {
     inline const_iterator end() const { return const_iterator{data, count}; }
 
     struct mutable_iterator {
-        Type* data;
-        size_t   i;
+        Type*  data;
+        size_t i;
 
         mutable_iterator& operator++() {
             i += 1;
@@ -204,4 +202,3 @@ inline void shuffle(array<int>& arr) {
         arr[j]  = tmp;
     }
 }
-}  // namespace giacomo
