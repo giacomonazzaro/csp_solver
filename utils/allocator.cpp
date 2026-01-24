@@ -1,16 +1,17 @@
 #include "allocator.h"
 
-static Allocator_Linear* _allocator = nullptr;
+static Allocator* _allocator = nullptr;
 
-Allocator_Linear* default_allocator() {
+Allocator* default_allocator() {
     if (_allocator == nullptr) {
+        // _allocator    = new Allocator_Heap();
         auto capacity = (1024 * 1024 * 10);  // 10 MB
         _allocator    = new Allocator_Linear(capacity);
     }
     return _allocator;
 }
 
-void set_default_allocator(Allocator_Linear* allocator) {
+void set_default_allocator(Allocator* allocator) {
     if (_allocator != nullptr) {
         delete _allocator;
     }

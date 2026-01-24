@@ -106,8 +106,7 @@ struct Allocator {
     }
 };
 
-struct Allocator_Linear;
-Allocator_Linear* default_allocator();
+Allocator* default_allocator();
 
 /* Allocator_Linear handles memory allocation. It allows to allocate data
  * incrementally on a stack, which is a pre-allocated memory memory. By using
