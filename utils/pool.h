@@ -17,9 +17,12 @@ template <typename Type>
 struct Pool {
     array<Type> values;
     array<int>  generations;
-    array<int>  free_list;
     int         num_entries = 0;
     int         capacity    = 0;
+    int         first_free  = 0;
+
+    // In the memory of empty slots, we write the index to the next empty slot.
+    int& next_free(int index) { return *(int*)&values[index]; }
 
     bool contains(pool_key key) const {
         if (key.index < 0 or key.index >= capacity) return false;
@@ -38,16 +41,10 @@ struct Pool {
     }
 
     pool_key insert(const Type& value) {
-        int index;
-        if (free_list.count > 0) {
-            index = free_list.back();
-            free_list.count -= 1;
-            generations[index] = -generations[index];
-        } else {
-            index = capacity;
-            capacity += 1;
-            generations[index] = 0;
-        }
+        assert(first_free >= 0);
+        int index          = first_free;
+        first_free         = next_free(index);
+        generations[index] = -generations[index];
 
         values[index] = value;
         num_entries += 1;
@@ -58,7 +55,8 @@ struct Pool {
     void remove(pool_key key) {
         assert(contains(key));
         generations[key.index] = -(generations[key.index] + 1);
-        free_list.add(key.index);
+        next_free(key.index)   = first_free;
+        first_free             = key.index;
         num_entries -= 1;
     }
 
@@ -83,9 +81,7 @@ struct Pool {
         bool operator!=(const const_iterator& other) const {
             return i != other.i;
         }
-        entry operator*() const {
-            return {{i, generations[i]}, values[i]};
-        }
+        entry operator*() const { return {{i, generations[i]}, values[i]}; }
     };
 
     inline const_iterator begin() const {
@@ -129,18 +125,22 @@ struct Pool {
 };
 
 template <typename Type>
-inline Pool<Type> allocate_pool(Allocator& allocator, size_t max_capacity) {
+inline Pool<Type> allocate_pool(Allocator& allocator, size_t capacity) {
     Pool<Type> pool;
-    pool.values      = allocator.allocate<Type>(max_capacity);
-    pool.generations = allocator.allocate<int>(max_capacity, -1);
-    pool.free_list   = allocator.allocate<int>(max_capacity);
-    pool.free_list.count = 0;
-    pool.num_entries     = 0;
-    pool.capacity        = 0;
+    pool.values      = allocator.allocate<Type>(capacity);
+    pool.generations = allocator.allocate<int>(capacity, -1);
+    pool.num_entries = 0;
+    pool.capacity    = (int)capacity;
+    pool.first_free  = 0;
+    // Chain all slots: 0 -> 1 -> 2 -> ... -> -1
+    for (size_t i = 0; i < capacity - 1; i++) {
+        pool.next_free(i) = i + 1;
+    }
+    pool.next_free(capacity - 1) = -1;
     return pool;
 }
 
 template <typename Type>
-inline Pool<Type> allocate_pool(size_t max_capacity) {
-    return allocate_pool<Type>(*default_allocator(), max_capacity);
+inline Pool<Type> allocate_pool(size_t capacity) {
+    return allocate_pool<Type>(*default_allocator(), capacity);
 }
